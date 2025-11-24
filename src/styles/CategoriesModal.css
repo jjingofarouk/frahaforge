@@ -1,0 +1,266 @@
+/* src/renderer/src/styles/CategoriesModal.css */
+.categories-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.categories-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.categories-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.categories-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.categories-modal-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.categories-modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.categories-modal-body {
+  padding: 20px;
+}
+
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table-header th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.table-row td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.category-id {
+  font-weight: 600;
+  color: #6b7280;
+  width: 80px;
+}
+
+.category-name {
+  font-weight: 500;
+}
+
+.action-cell {
+  width: 200px;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.edit-btn {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.edit-btn:hover:not(:disabled) {
+  background-color: #bfdbfe;
+}
+
+.save-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.cancel-btn {
+  background-color: #6b7280;
+  color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #4b5563;
+}
+
+.delete-btn {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background-color: #fecaca;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .categories-modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .categories-modal-header {
+    padding: 15px;
+  }
+  
+  .categories-modal-body {
+    padding: 15px;
+  }
+  
+  .categories-table {
+    font-size: 12px;
+  }
+  
+  .table-header th,
+  .table-row td {
+    padding: 8px 12px;
+  }
+  
+  .action-buttons,
+  .edit-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

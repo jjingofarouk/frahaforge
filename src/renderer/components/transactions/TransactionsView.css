@@ -1,0 +1,556 @@
+/* src/renderer/src/components/transactions/TransactionsView.css */
+:root {
+  --primary-gray: #374151;
+  --primary-gray-dark: #1F2937;
+  --primary-gray-light: #6B7280;
+  --secondary-gray: #F9FAFB;
+  --secondary-gray-dark: #F3F4F6;
+  --bg-gray: #F9FAFB;
+  --bg-surface: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  --danger: #DC2626;
+  --success: #059669;
+  --warning: #D97706;
+  --sidebar-width: 220px;
+  --primary-teal: #0d9488;
+  --primary-teal-dark: #0f766e;
+}
+
+/* Modern Header Styles */
+.modern-header {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 16px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.modern-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modern-header-title {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.modern-header-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 4px 0 0 0;
+}
+
+.modern-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Search Bar */
+.modern-search-container {
+  margin-bottom: 16px;
+}
+
+.modern-search-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px 10px 40px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modern-search-input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.modern-search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.modern-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* Filters Section */
+.modern-filters-section {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.modern-filters-main {
+  flex: 2;
+}
+
+.modern-filters-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.modern-filter-group {
+  flex: 1;
+}
+
+.modern-filter-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.modern-date-range {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.modern-date-input {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.modern-date-input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.modern-date-separator {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modern-select {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.modern-select:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+/* Sort Controls */
+.modern-sort-controls {
+  flex: 1;
+}
+
+.modern-sort-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Quick Date Presets */
+.modern-quick-presets {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.modern-preset-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.modern-preset-button {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modern-preset-button:hover {
+  background: var(--secondary-gray);
+  border-color: var(--primary-gray-light);
+}
+
+.modern-preset-button.active {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+/* Active Filters */
+.modern-active-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.modern-filter-badge {
+  background: var(--secondary-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modern-clear-filters {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modern-clear-filters:hover {
+  background: var(--secondary-gray);
+  color: var(--text-primary);
+}
+
+/* Buttons */
+.modern-button {
+  background: var(--primary-teal);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.modern-button:hover {
+  background: var(--primary-teal-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
+.modern-button:active {
+  transform: translateY(0);
+}
+
+.modern-button-outline {
+  background: transparent;
+  color: var(--primary-teal);
+  border: 1px solid var(--primary-teal);
+}
+
+.modern-button-outline:hover {
+  background: var(--primary-teal);
+  color: white;
+}
+
+.modern-button:disabled {
+  background: var(--primary-gray-light);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Data Grid Overrides */
+.modern-data-grid-container {
+  height: 800px;
+  width: 100%;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-root {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-cell {
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-columnHeaders {
+  background-color: rgba(13, 148, 136, 0.08) !important;
+  border-bottom: 2px solid var(--primary-teal) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-columnHeader {
+  background-color: transparent !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-row {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-row:hover {
+  background-color: rgba(13, 148, 136, 0.04) !important;
+  cursor: pointer;
+}
+
+.modern-data-grid-container .MuiDataGrid-virtualScroller {
+  min-height: 400px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiDataGrid-toolbarContainer {
+  padding: 16px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid-container .MuiButton-root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Totals Summary */
+.modern-totals-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.modern-total-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-total-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.modern-total-value {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modern-total-sales {
+  color: var(--primary-teal) !important;
+}
+
+.modern-total-paid {
+  color: var(--success) !important;
+}
+
+.modern-total-due {
+  color: var(--danger) !important;
+}
+
+/* Status Badges */
+.modern-status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.modern-status-paid {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.modern-status-partial {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.modern-status-unpaid {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* Payment Badges */
+.modern-payment-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.modern-payment-cash {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+.modern-payment-card {
+  background-color: rgba(13, 148, 136, 0.1);
+  color: var(--primary-teal);
+  border-color: rgba(13, 148, 136, 0.3);
+}
+
+.modern-payment-credit {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.modern-payment-unknown {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .modern-filters-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .modern-filters-main {
+    width: 100%;
+  }
+  
+  .modern-sort-controls {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-header {
+    padding: 16px;
+  }
+  
+  .modern-header-top {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .modern-filters-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .modern-date-range {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modern-totals-summary {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .modern-quick-presets {
+    justify-content: flex-start;
+  }
+  
+  .modern-data-grid-container {
+    height: 600px;
+  }
+}
+
+/* Loading States */
+.modern-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Focus States */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary-teal);
+  outline-offset: 2px;
+}
+
+/* Scrollbar Styling */
+.modern-data-grid-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modern-data-grid-container ::-webkit-scrollbar-track {
+  background: var(--secondary-gray);
+  border-radius: 3px;
+}
+
+.modern-data-grid-container ::-webkit-scrollbar-thumb {
+  background: var(--primary-gray-light);
+  border-radius: 3px;
+}
+
+.modern-data-grid-container ::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gray);
+}

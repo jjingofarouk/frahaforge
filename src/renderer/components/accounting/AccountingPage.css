@@ -1,0 +1,249 @@
+/* src/renderer/src/components/accounting/AccountingPage.css */
+/* Monochromatic Modern Accounting Dashboard - November 2025 */
+/* Designed for: Tabs at the very top + Clean Header Logic */
+
+.accounting-dashboard {
+  min-height: 100vh;
+  background: var(--bg-gray);
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP STICKY TAB BAR - Primary Navigation */
+.accounting-tabs-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  background: rgba(249, 250, 251, 0.96);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.accounting-tabs-header .chakra-tabs__tablist {
+  padding: 0 1.5rem 0 1.5rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.accounting-tabs-header .chakra-tabs__tablist::-webkit-scrollbar {
+  display: none;
+}
+
+.accounting-tabs-header .chakra-tabs__tab {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  position: relative;
+}
+
+.accounting-tabs-header .chakra-tabs__tab:hover {
+  background: var(--secondary-gray);
+  color: var(--text-primary);
+}
+
+.accounting-tabs-header .chakra-tabs__tab[aria-selected="true"] {
+  background: var(--primary-teal);
+  color: white;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.accounting-tabs-header .chakra-tabs__tab[aria-selected="true"]:hover {
+  background: var(--primary-teal-dark);
+}
+
+/* MAIN CONTENT AREA */
+.accounting-content {
+  flex: 1;
+  padding: 0 1.5rem 2rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Parent Header - Only visible on Dashboard & Revenue tabs */
+.accounting-content > .chakra-stack > .chakra-box:first-child {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+/* TAB PANELS - Clean spacing */
+.chakra-tabs__tab-panels {
+  margin-top: 0 !important;
+}
+
+.chakra-tabs__tab-panel {
+  padding: 0 !important;
+}
+
+/* Dashboard & Revenue Tab - Add breathing room after header */
+.chakra-tabs__tab-panel:nth-child(1),
+.chakra-tabs__tab-panel:nth-child(2) {
+  padding-top: 2rem !important;
+}
+
+/* Expenses Tab - No top padding (ExpenseTracker has its own header) */
+.chakra-tabs__tab-panel:nth-child(3) {
+  padding-top: 0 !  important;
+}
+
+/* Financial Metrics Grid - Compact Cards */
+.financial-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-surface);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.metric-card:hover {
+  border-color: var(--primary-gray);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--text-secondary), transparent);
+  opacity: 0.15;
+}
+
+.metric-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--secondary-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0.25rem 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.card-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.metric-card__decoration {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--secondary-gray) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Monochromatic accent borders */
+.metric-card.profit { border-left: 4px solid var(--success); }
+.metric-card.revenue { border-left: 4px solid var(--primary-gray-dark); }
+.metric-card.expenses { border-left: 4px solid var(--danger); }
+.metric-card.gross-profit { border-left: 4px solid var(--warning); }
+.metric-card.net-profit.positive { border-left: 4px solid var(--success); }
+.metric-card.net-profit.negative { border-left: 4px solid var(--danger); }
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .financial-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .accounting-tabs-header .chakra-tabs__tablist {
+    padding: 0 1rem;
+    height: 56px;
+    gap: 1rem;
+  }
+
+  .accounting-tabs-header .chakra-tabs__tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .accounting-content {
+    padding: 0 1rem 2rem 1rem;
+  }
+
+  .chakra-tabs__tab-panel:nth-child(1),
+  .chakra-tabs__tab-panel:nth-child(2) {
+    padding-top: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .accounting-tabs-header .chakra-tabs__tablist {
+    gap: 0.5rem;
+  }
+
+  .accounting-tabs-header .chakra-tabs__tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .financial-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .amount {
+    font-size: 1.5rem;
+  }
+}
+
+/* Subtle scroll shadow under tab bar */
+.accounting-tabs-header::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05), transparent);
+  pointer-events: none;
+}

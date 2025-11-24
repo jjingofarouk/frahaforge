@@ -1,0 +1,315 @@
+/* src/renderer/src/components/accounting/DateFilter.css */
+.date-filter-header {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.date-filter-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.date-filter-header__title-section {
+  flex: 1;
+}
+
+.date-filter-header__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.date-filter-header__subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+.date-filter-header__actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.date-filter-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-gray);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-filter-export-btn:hover:not(:disabled) {
+  background: var(--primary-gray-dark);
+}
+
+.date-filter-export-btn:disabled {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.date-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.date-filter-preset {
+  position: relative;
+  display: inline-block;
+}
+
+.date-filter-preset__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  justify-content: space-between;
+}
+
+.date-filter-preset__trigger:hover {
+  border-color: var(--primary-gray-light);
+}
+
+.date-filter-preset__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.date-filter-preset__option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.date-filter-preset__option:hover {
+  background: var(--secondary-gray);
+}
+
+.date-filter-preset__option--active {
+  background: var(--secondary-gray-dark);
+  color: var(--primary-gray-dark);
+  font-weight: 500;
+}
+
+.date-filter-current-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--secondary-gray);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+
+.date-filter-count {
+  background: var(--primary-gray);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.25rem;
+}
+
+/* Custom Range Modal */
+.date-filter-custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.date-filter-custom-modal__content {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.date-filter-custom-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.date-filter-custom-modal__header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.date-filter-custom-modal__close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.date-filter-custom-modal__close:hover {
+  background: var(--secondary-gray);
+}
+
+.date-filter-custom-modal__inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.date-filter-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.date-filter-input-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.date-filter-input-group input {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease;
+}
+
+.date-filter-input-group input:focus {
+  outline: none;
+  border-color: var(--primary-gray);
+  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
+}
+
+.date-filter-custom-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.date-filter-custom-modal__cancel,
+.date-filter-custom-modal__apply {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.date-filter-custom-modal__cancel {
+  background: var(--secondary-gray);
+  color: var(--text-primary);
+}
+
+.date-filter-custom-modal__cancel:hover {
+  background: var(--secondary-gray-dark);
+}
+
+.date-filter-custom-modal__apply {
+  background: var(--primary-gray);
+  color: white;
+}
+
+.date-filter-custom-modal__apply:hover:not(:disabled) {
+  background: var(--primary-gray-dark);
+}
+
+.date-filter-custom-modal__apply:disabled {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .date-filter-header__top {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .date-filter-header__actions {
+    align-self: stretch;
+  }
+
+  .date-filter-export-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .date-filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filter-preset__trigger {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .date-filter-current-range {
+    justify-content: center;
+    text-align: center;
+  }
+}

@@ -1,0 +1,341 @@
+/* src/renderer/components/accounting/ModernHeader.css */
+
+.modern-accounting-header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem 2rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Main Header Section */
+.modern-header__main {
+  margin-bottom: 1.5rem;
+}
+
+.modern-header__title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.modern-header__subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Live Status Indicator */
+.modern-header__live-status {
+  padding: 0.5rem 0.75rem;
+  background: var(--secondary-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+}
+
+.live-status__indicator {
+  position: relative;
+  width: 20px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.live-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.live-dot.live {
+  background: var(--success);
+  opacity: 1;
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+.live-dot.pulse {
+  background: var(--success);
+  opacity: 0.4;
+  transform: scale(1.5);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.live-status__text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.live-status__icon {
+  color: var(--text-secondary);
+}
+
+.live-status__timestamp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.modern-header__refresh-btn {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.modern-header__refresh-btn:hover:not(:disabled) {
+  background: var(--secondary-gray);
+  border-color: var(--primary-teal);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.modern-header__export-btn {
+  background: var(--primary-teal);
+  font-weight: 500;
+}
+
+.modern-header__export-btn:hover:not(:disabled) {
+  background: var(--primary-teal-dark);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Date Controls Section */
+.modern-header__date-controls {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.date-controls__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Quick Date Presets */
+.date-preset-btn {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-preset-btn:hover:not(:disabled) {
+  background: var(--secondary-gray);
+  border-color: var(--primary-teal-light);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.date-preset-btn--active {
+  background: var(--primary-teal) !important;
+  border-color: var(--primary-teal) !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+/* Custom Date Range */
+.custom-range__container {
+  background: var(--secondary-gray-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.custom-range__container--active {
+  border-color: var(--primary-teal);
+  background: rgba(72, 187, 120, 0.05);
+  box-shadow: 0 0 0 1px var(--primary-teal);
+}
+
+.date-input__group {
+  position: relative;
+}
+
+.date-input__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.date-input {
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.date-input:hover:not(:disabled) {
+  border-color: var(--primary-teal-light);
+}
+
+.date-input:focus {
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px rgba(72, 187, 120, 0.1);
+}
+
+.date-apply-btn {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  align-self: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.date-apply-btn:hover:not(:disabled) {
+  background: var(--secondary-gray);
+  border-color: var(--primary-teal);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Selected Range Display */
+.selected-range-display {
+  padding: 0.75rem 1rem;
+  background: var(--secondary-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.selected-range__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-range__value {
+  color: var(--primary-teal);
+  font-weight: 700;
+  background: rgba(72, 187, 120, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(72, 187, 120, 0.2);
+}
+
+/* Animations */
+@keyframes pulse-live {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1.5);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.8);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .modern-accounting-header {
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .modern-header__date-controls .chakra-flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .custom-range__container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-accounting-header {
+    padding: 1rem;
+  }
+  
+  .modern-header__main {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .modern-header__live-status {
+    align-self: flex-start;
+  }
+  
+  .date-preset-btn,
+  .date-apply-btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .date-input {
+    font-size: 0.875rem;
+  }
+
+  .selected-range__label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-header__title {
+    font-size: 1.5rem;
+  }
+  
+  .modern-header__subtitle {
+    font-size: 0.8125rem;
+  }
+  
+  .date-controls__label {
+    font-size: 0.6875rem;
+  }
+
+  .date-preset-btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.7rem;
+  }
+}

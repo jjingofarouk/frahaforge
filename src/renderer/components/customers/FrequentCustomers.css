@@ -1,0 +1,338 @@
+/* src/renderer/src/components/customers/components/FrequentCustomers.css */
+.frequent-customers {
+  background: var(--bg-surface);
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.frequent-customers__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.frequent-customers__header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.frequent-customers__header svg {
+  color: var(--primary-gray);
+}
+
+.frequent-customers__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.frequent-customers__section h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.frequent-customers__section svg {
+  color: var(--text-secondary);
+}
+
+.frequent-customers__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.frequent-customer-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.frequent-customer-card:hover {
+  border-color: var(--primary-gray);
+  background: var(--secondary-gray);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.frequent-customer-card--vip:hover {
+  border-color: var(--primary-gray-dark);
+  background: var(--secondary-gray-dark);
+}
+
+.frequent-customer-card--spender:hover {
+  border-color: var(--primary-gray);
+  background: var(--secondary-gray-dark);
+}
+
+.frequent-customer-card__rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--secondary-gray);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__rank {
+  background: var(--primary-gray-light);
+  color: var(--bg-surface);
+}
+
+.frequent-customer-card__rank--vip {
+  background: var(--primary-gray-dark);
+  color: white;
+}
+
+.frequent-customer-card__rank--spender {
+  background: var(--primary-gray);
+  color: white;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__rank--vip {
+  background: var(--text-primary);
+}
+
+.frequent-customer-card:hover .frequent-customer-card__rank--spender {
+  background: var(--primary-gray-dark);
+}
+
+.frequent-customer-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.frequent-customer-card__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__name {
+  color: var(--primary-gray-dark);
+}
+
+.frequent-customer-card__details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__details {
+  color: var(--primary-gray);
+}
+
+.frequent-customer-card__details svg {
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__details svg {
+  color: var(--primary-gray);
+}
+
+.frequent-customer-card__points {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-gray);
+  background: var(--secondary-gray);
+  padding: 4px 8px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__points {
+  background: var(--primary-gray);
+  color: var(--bg-surface);
+}
+
+.frequent-customer-card__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--primary-gray);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.frequent-customer-card:hover .frequent-customer-card__badge {
+  color: var(--primary-gray-dark);
+}
+
+/* VIP Card Styling */
+.frequent-customer-card--vip {
+  background: var(--secondary-gray);
+  border-color: var(--primary-gray-dark);
+}
+
+.frequent-customer-card--vip .frequent-customer-card__name {
+  color: var(--primary-gray-dark);
+}
+
+.frequent-customer-card--vip .frequent-customer-card__details {
+  color: var(--primary-gray);
+}
+
+.frequent-customer-card--vip .frequent-customer-card__points {
+  background: var(--bg-surface);
+  color: var(--primary-gray-dark);
+}
+
+/* Spender Card Styling */
+.frequent-customer-card--spender {
+  background: var(--secondary-gray);
+  border-color: var(--primary-gray);
+}
+
+.frequent-customer-card--spender .frequent-customer-card__name {
+  color: var(--primary-gray);
+}
+
+.frequent-customer-card--spender .frequent-customer-card__details {
+  color: var(--primary-gray-light);
+}
+
+/* Empty State */
+.frequent-customers__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+
+.frequent-customers__empty svg {
+  color: var(--border-color);
+}
+
+.frequent-customers__empty p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .frequent-customers {
+    padding: 16px;
+    gap: 20px;
+  }
+  
+  .frequent-customer-card {
+    padding: 14px;
+    gap: 10px;
+  }
+  
+  .frequent-customer-card__name {
+    font-size: 13px;
+  }
+  
+  .frequent-customer-card__details {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .frequent-customers {
+    padding: 20px;
+  }
+  
+  .frequent-customers__header {
+    padding-bottom: 12px;
+  }
+  
+  .frequent-customers__section {
+    gap: 12px;
+  }
+  
+  .frequent-customers__list {
+    gap: 10px;
+  }
+  
+  .frequent-customer-card {
+    padding: 12px;
+  }
+  
+  .frequent-customer-card__rank {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+  
+  .frequent-customer-card__points {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .frequent-customers {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .frequent-customers__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .frequent-customer-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .frequent-customer-card__info {
+    width: 100%;
+  }
+  
+  .frequent-customer-card__points {
+    align-self: flex-end;
+  }
+  
+  .frequent-customers__empty {
+    padding: 40px 16px;
+  }
+}

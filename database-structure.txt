@@ -1,0 +1,638 @@
+DATABASE STRUCTURE REPORT
+Generated: 11/24/2025, 3:03:18 AM
+Database: /Users/mac/Library/Application Support/FrahaPharmacy/server/databases/pharmacy.db
+================================================================================
+
+TOTAL TABLES: 23
+
+TABLE: accounting
+------------------------------------------------------------
+COLUMNS:
+  id | TEXT PRIMARY KEY
+  date | DATETIME
+  description | TEXT
+  amount | DECIMAL(10,2)
+  category | TEXT
+  payment_method | TEXT
+  reference | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 185
+
+INDEXES:
+
+SAMPLE DATA (first 5 of 185 rows):
+  id | date | description | amount | category | payment_method | reference | created_at
+  -------------------------------------------------------------------------------------
+  1761591256 | 2025-10-27T18:54:16.546Z | Food | 20000 | Utilities | Cash |  | 2025-11-05 11:45:06
+  1761591436 | 2025-10-27T18:57:16.711Z | Workers' Transport | 50000 | Other | Bank Transfer |  | 2025-11-05 11:45:06
+  1761631489 | 2025-10-28T06:04:49.418Z | Please | 20000 | Marketing | Credit Card |  | 2025-11-05 11:45:06
+  1761928670 | 2025-10-31T16:37:50.475Z | Twins | 2000000 | Rent | Cash |  | 2025-11-05 11:45:06
+  1761928889 | 2025-10-31T16:41:29.113Z | Nana | 8999 | Salaries | Bank Transfer | Assalaam A'laykum Salaam Warahmatu Llahi Wabarakaatuh | 2025-11-05 11:45:06
+
+================================================================================
+
+TABLE: accounting_entries
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  entry_date | DATETIME NOT NULL
+  entry_type | TEXT NOT NULL
+  description | TEXT NOT NULL
+  amount | DECIMAL(10,2) NOT NULL
+  account_type | TEXT NOT NULL
+  category | TEXT NOT NULL
+  payment_method | TEXT
+  reference_id | INTEGER
+  reference_table | TEXT
+  status | TEXT DEFAULT 'completed'
+  created_by | INTEGER
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 37
+
+SAMPLE DATA (first 5 of 37 rows):
+  id | entry_date | entry_type | description | amount | account_type | category | payment_method | reference_id | reference_table | status | created_by | created_at | updated_at
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  21 | 2025-11-16 | expense | Salary for Pharmacy Manager | 600000 | expense | Salaries | Bank Transfer | 20 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
+  22 | 2025-11-16 | expense | Salary for Cleaner | 200000 | expense | Salaries | Bank Transfer | 21 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
+  23 | 2025-11-16 | expense | Salary for Dispenser 1 | 400000 | expense | Salaries | Bank Transfer | 22 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
+  24 | 2025-11-16 | expense | Salary for Dispenser 2 | 400000 | expense | Salaries | Bank Transfer | 23 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
+  25 | 2025-11-16 | expense | Salary for Dispenser 3 | 400000 | expense | Salaries | Bank Transfer | 24 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
+
+================================================================================
+
+TABLE: accounts_payable
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  vendor_name | TEXT NOT NULL
+  description | TEXT NOT NULL
+  amount_due | DECIMAL(10,2) NOT NULL
+  amount_paid | DECIMAL(10,2) DEFAULT 0.00
+  due_date | DATETIME NOT NULL
+  status | TEXT DEFAULT 'pending'
+  reference_number | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  paid_at | DATETIME
+
+ROW COUNT: 0
+
+
+================================================================================
+
+TABLE: accounts_receivable
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  transaction_id | INTEGER
+  customer_id | INTEGER
+  customer_name | TEXT NOT NULL
+  description | TEXT NOT NULL
+  amount_due | DECIMAL(10,2) NOT NULL
+  amount_paid | DECIMAL(10,2) DEFAULT 0.00
+  due_date | DATETIME NOT NULL
+  status | TEXT DEFAULT 'pending'
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  paid_at | DATETIME
+
+ROW COUNT: 0
+
+
+================================================================================
+
+TABLE: cash_flow
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  flow_date | DATETIME NOT NULL
+  description | TEXT NOT NULL
+  amount | DECIMAL(10,2) NOT NULL
+  flow_type | TEXT NOT NULL
+  category | TEXT NOT NULL
+  payment_method | TEXT
+  reference_id | INTEGER
+  balance_after | DECIMAL(10,2)
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 0
+
+
+================================================================================
+
+TABLE: categories
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  name | TEXT NOT NULL
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 183
+
+INDEXES:
+
+SAMPLE DATA (first 5 of 183 rows):
+  id | name | created_at
+  ----------------------
+  1 | General Wellbeing | 2025-11-05 11:45:06
+  2 | Gut Health | 2025-11-05 11:45:06
+  3 | Immunity Support | 2025-11-05 11:45:06
+  4 | Multivitamins & Wellness Supplements | 2025-11-05 11:45:06
+  5 | Joint and Bone Supplements | 2025-11-05 11:45:06
+
+================================================================================
+
+TABLE: chart_of_accounts
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  account_code | TEXT NOT NULL
+  account_name | TEXT NOT NULL
+  account_type | TEXT NOT NULL
+  parent_account_id | INTEGER
+  is_active | BOOLEAN DEFAULT TRUE
+  description | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 19
+
+INDEXES:
+
+SAMPLE DATA (first 5 of 19 rows):
+  id | account_code | account_name | account_type | parent_account_id | is_active | description | created_at
+  ----------------------------------------------------------------------------------------------------------
+  1 | 4001 | Pharmacy Sales | Revenue | NULL | 1 | NULL | 2025-11-12 06:27:48
+  2 | 4002 | Over-the-Counter Sales | Revenue | NULL | 1 | NULL | 2025-11-12 06:27:48
+  3 | 4003 | Prescription Sales | Revenue | NULL | 1 | NULL | 2025-11-12 06:27:48
+  4 | 5001 | Cost of Goods Sold | Expense | NULL | 1 | NULL | 2025-11-12 06:27:48
+  5 | 5002 | Rent Expense | Expense | NULL | 1 | NULL | 2025-11-12 06:27:48
+
+================================================================================
+
+TABLE: customers
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  name | TEXT NOT NULL
+  phone | TEXT
+  email | TEXT
+  address | TEXT
+  store | TEXT DEFAULT 'FrahaPharmacy'
+  loyalty_points | INTEGER DEFAULT 0
+  total_spent | DECIMAL(10,2) DEFAULT 0.00
+  total_orders | INTEGER DEFAULT 0
+  last_order_date | DATETIME
+  average_order_value | DECIMAL(10,2) DEFAULT 0.00
+  favorite_category | TEXT
+  segment | TEXT DEFAULT 'new'
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 68
+
+INDEXES:
+  INDEX: idx_customers_segment (segment)
+  INDEX: idx_customers_phone (phone)
+  INDEX: idx_customers_name (name)
+
+SAMPLE DATA (first 5 of 68 rows):
+  id | name | phone | email | address | store | loyalty_points | total_spent | total_orders | last_order_date | average_order_value | favorite_category | segment | created_at | updated_at
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  0 | mubiru Jolly  | 29828282 | nalongo@gmail.com | ahashsh | default | 0 | 0 | 0 | NULL | 0 | NULL | new | 2025-10-31T16:13:42.914Z | 2025-10-31T16:13:42.914Z
+  1 | James Ssenyonga | +256701234567 | james.ssenyonga@gmail.com | Kawempe, Kampala | FrahaPharmacy | 0 | 0 | 0 | NULL | 0 | NULL | new | 2025-11-05T11:45:06.090Z | 2025-11-05T11:45:06.096Z
+  2 | Sarah Namatovu | +256772345678 | sarah.namatovu@gmail.com | Nansana, Wakiso | FrahaPharmacy | 0 | 0 | 0 | NULL | 0 | NULL | new | 2025-11-05T11:45:06.096Z | 2025-11-05T11:45:06.096Z
+  3 | Moses Kato | +256784567890 | moses.kato@gmail.com | Mbarara Town, Mbarara District | FrahaPharmacy | 88 | 88000 | 2 | 2025-11-22 11:49:27 | 44000 | NULL | new | 2025-11-05T11:45:06.096Z | 2025-11-22 11:49:27
+  4 | Rebecca Nakibuuka | +256703112233 | rebecca.nakibuuka@gmail.com | Entebbe Road, Wakiso | FrahaPharmacy | 174 | 174000 | 3 | 2025-11-18 13:55:28 | 58000 | NULL | regular | 2025-11-05T11:45:06.096Z | 2025-11-18 13:55:28
+
+================================================================================
+
+TABLE: customers_backup
+------------------------------------------------------------
+COLUMNS:
+  id | TEXT
+  name | TEXT
+  phone | TEXT
+  email | TEXT
+  address | TEXT
+  store | TEXT
+  loyalty_points | INT
+  total_spent | NUM
+  total_orders | INT
+  customer_type | TEXT
+  created_at | NUM
+  updated_at | NUM
+  last_order_date | NUM
+  average_order_value | NUM
+  favorite_category | TEXT
+  segment | TEXT
+
+ROW COUNT: 59
+
+SAMPLE DATA (first 5 of 59 rows):
+  id | name | phone | email | address | store | loyalty_points | total_spent | total_orders | customer_type | created_at | updated_at | last_order_date | average_order_value | favorite_category | segment
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | James Ssenyonga | +256701234567 | james.ssenyonga@gmail.com | Kawempe, Kampala | FrahaPharmacy | 0 | 0 | 0 | regular | 2025-11-05T11:45:06.090Z | 2025-11-05T11:45:06.096Z | NULL | 0 | NULL | new
+  2 | Sarah Namatovu | +256772345678 | sarah.namatovu@gmail.com | Nansana, Wakiso | FrahaPharmacy | 0 | 0 | 0 | regular | 2025-11-05T11:45:06.096Z | 2025-11-05T11:45:06.096Z | NULL | 0 | NULL | new
+  3 | Moses Kato | +256784567890 | moses.kato@gmail.com | Mbarara Town, Mbarara District | FrahaPharmacy | 0 | 0 | 0 | regular | 2025-11-05T11:45:06.096Z | 2025-11-05T11:45:06.096Z | NULL | 0 | NULL | new
+  4 | Rebecca Nakibuuka | +256703112233 | rebecca.nakibuuka@gmail.com | Entebbe Road, Wakiso | FrahaPharmacy | 0 | 0 | 0 | regular | 2025-11-05T11:45:06.096Z | 2025-11-05T11:45:06.096Z | NULL | 0 | NULL | new
+  5 | John Mugisha | +256758901234 | john.mugisha@gmail.com | Mukono Town, Mukono | FrahaPharmacy | 0 | 0 | 0 | regular | 2025-11-05T11:45:06.096Z | 2025-11-05T11:45:06.096Z | NULL | 0 | NULL | new
+
+================================================================================
+
+TABLE: employees
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  name | TEXT NOT NULL
+  position | TEXT NOT NULL
+  department | TEXT NOT NULL
+  email | TEXT
+  phone | TEXT
+  hire_date | DATETIME NOT NULL
+  monthly_salary | DECIMAL(10,2) NOT NULL
+  bank_account | TEXT
+  bank_name | TEXT
+  nssf_number | TEXT
+  tin_number | TEXT
+  status | TEXT DEFAULT 'active'
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 7
+
+INDEXES:
+  INDEX: idx_employees_status (status)
+  INDEX: idx_employees_department (department)
+
+SAMPLE DATA (first 5 of 7 rows):
+  id | name | position | department | email | phone | hire_date | monthly_salary | bank_account | bank_name | nssf_number | tin_number | status | created_at | updated_at
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | Pharmacy Manager | Manager | Management | manager@frahapharmacy.com | +256701234500 | 2024-01-15 | 600000 | 1001001001 | Stanbic Bank | NSSF001001 | TIN001001001 | active | 2025-11-15 22:38:12 | 2025-11-15 22:54:43
+  2 | Cashier 1 | Cashier | Sales | cashier1@frahapharmacy.com | +256772345600 | 2024-02-01 | 450000 | 2002002002 | Centenary Bank | NSSF002002 | TIN002002002 | active | 2025-11-15 22:38:12 | 2025-11-15 22:55:49
+  3 | Dispenser 1 | Dispenser | Pharmacy | dispenser1@frahapharmacy.com | +256783456700 | 2024-02-15 | 400000 | 3003003003 | DFCU Bank | NSSF003003 | TIN003003003 | active | 2025-11-15 22:38:12 | 2025-11-15 22:55:13
+  4 | Dispenser 2 | Dispenser | Pharmacy | dispenser2@frahapharmacy.com | +256794567800 | 2024-03-01 | 400000 | 4004004004 | Absa Bank | NSSF004004 | TIN004004004 | active | 2025-11-15 22:38:12 | 2025-11-15 22:55:22
+  5 | Dispenser 3 | Dispenser | Pharmacy | dispenser3@frahapharmacy.com | +256705678900 | 2024-03-15 | 400000 | 5005005005 | Stanbic Bank | NSSF005005 | TIN005005005 | active | 2025-11-15 22:38:12 | 2025-11-15 22:55:31
+
+================================================================================
+
+TABLE: expenses
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  expense_date | DATETIME NOT NULL
+  description | TEXT NOT NULL
+  amount | DECIMAL(10,2) NOT NULL
+  category | TEXT NOT NULL
+  subcategory | TEXT
+  payment_method | TEXT NOT NULL
+  vendor_name | TEXT
+  reference_number | TEXT
+  receipt_image | TEXT
+  status | TEXT DEFAULT 'paid'
+  due_date | DATETIME
+  recurring | BOOLEAN DEFAULT FALSE
+  recurring_frequency | TEXT
+  created_by | INTEGER
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 37
+
+SAMPLE DATA (first 5 of 37 rows):
+  id | expense_date | description | amount | category | subcategory | payment_method | vendor_name | reference_number | receipt_image | status | due_date | recurring | recurring_frequency | created_by | created_at
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  20 | 2025-11-16 | Salary for Pharmacy Manager - Manager | 600000 | Salaries | Manager | Bank Transfer | Pharmacy Manager | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
+  21 | 2025-11-16 | Salary for Cleaner - Cleaner | 200000 | Salaries | Cleaner | Bank Transfer | Cleaner | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
+  22 | 2025-11-16 | Salary for Dispenser 1 - Dispenser | 400000 | Salaries | Dispenser | Bank Transfer | Dispenser 1 | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
+  23 | 2025-11-16 | Salary for Dispenser 2 - Dispenser | 400000 | Salaries | Dispenser | Bank Transfer | Dispenser 2 | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
+  24 | 2025-11-16 | Salary for Dispenser 3 - Dispenser | 400000 | Salaries | Dispenser | Bank Transfer | Dispenser 3 | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
+
+================================================================================
+
+TABLE: payroll_items
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  payroll_run_id | INTEGER
+  employee_id | INTEGER
+  employee_name | TEXT NOT NULL
+  position | TEXT NOT NULL
+  department | TEXT NOT NULL
+  basic_salary | DECIMAL(10,2) NOT NULL
+  allowances | DECIMAL(10,2) DEFAULT 0.00
+  deductions | DECIMAL(10,2) DEFAULT 0.00
+  net_pay | DECIMAL(10,2) NOT NULL
+  bank_name | TEXT
+  bank_account | TEXT
+  status | TEXT DEFAULT 'paid'
+  expense_id | INTEGER
+  accounting_entry_id | INTEGER
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 7
+
+INDEXES:
+  INDEX: idx_payroll_items_run (payroll_run_id)
+  INDEX: idx_payroll_items_employee (employee_id)
+
+FOREIGN KEYS:
+  employee_id → employees.id (ON UPDATE: NO ACTION, ON DELETE: NO ACTION)
+  payroll_run_id → payroll_runs.id (ON UPDATE: NO ACTION, ON DELETE: NO ACTION)
+
+SAMPLE DATA (first 5 of 7 rows):
+  id | payroll_run_id | employee_id | employee_name | position | department | basic_salary | allowances | deductions | net_pay | bank_name | bank_account | status | expense_id | accounting_entry_id | created_at
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  15 | 3 | 1 | Pharmacy Manager | Manager | Management | 600000 | 0 | 0 | 600000 | Stanbic Bank | 1001001001 | paid | 20 | 21 | 2025-11-16 09:18:58
+  16 | 3 | 7 | Cleaner | Cleaner | Operations | 200000 | 0 | 0 | 200000 | DFCU Bank | 7007007007 | paid | 21 | 22 | 2025-11-16 09:18:58
+  17 | 3 | 3 | Dispenser 1 | Dispenser | Pharmacy | 400000 | 0 | 0 | 400000 | DFCU Bank | 3003003003 | paid | 22 | 23 | 2025-11-16 09:18:58
+  18 | 3 | 4 | Dispenser 2 | Dispenser | Pharmacy | 400000 | 0 | 0 | 400000 | Absa Bank | 4004004004 | paid | 23 | 24 | 2025-11-16 09:18:58
+  19 | 3 | 5 | Dispenser 3 | Dispenser | Pharmacy | 400000 | 0 | 0 | 400000 | Stanbic Bank | 5005005005 | paid | 24 | 25 | 2025-11-16 09:18:58
+
+================================================================================
+
+TABLE: payroll_runs
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  run_date | DATETIME NOT NULL
+  period_start | DATE NOT NULL
+  period_end | DATE NOT NULL
+  total_amount | DECIMAL(10,2) NOT NULL
+  employee_count | INTEGER NOT NULL
+  status | TEXT DEFAULT 'completed'
+  processed_by | INTEGER
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 1
+
+INDEXES:
+  INDEX: idx_payroll_runs_date (run_date)
+
+SAMPLE DATA (first 5 of 1 rows):
+  id | run_date | period_start | period_end | total_amount | employee_count | status | processed_by | created_at
+  --------------------------------------------------------------------------------------------------------------
+  3 | 2025-11-16 | 2025-10-16 | 2025-11-15 | 2850000 | 7 | completed | NULL | 2025-11-16 09:18:58
+
+================================================================================
+
+TABLE: products
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  name | TEXT NOT NULL
+  barcode | TEXT
+  price | DECIMAL(10,2)
+  cost_price | DECIMAL(10,2)
+  category | TEXT
+  quantity | INTEGER DEFAULT 0
+  min_stock | INTEGER DEFAULT 0
+  stock | INTEGER DEFAULT 1
+  expiration_date | TEXT
+  img | TEXT
+  description | TEXT
+  prescription_required | INTEGER DEFAULT 0
+  is_controlled_substance | INTEGER DEFAULT 0
+  side_effects | TEXT
+  supplier | TEXT
+  last_restocked | DATETIME
+  manufacturer | TEXT
+  storage_conditions | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  supplier_id | INTEGER
+  sales_count | INTEGER DEFAULT 0
+  reorder_level | INTEGER DEFAULT 0
+
+ROW COUNT: 7877
+
+SAMPLE DATA (first 5 of 7877 rows):
+  id | name | barcode | price | cost_price | category | quantity | min_stock | stock | expiration_date | img | description | prescription_required | is_controlled_substance | side_effects | supplier | last_restocked | manufacturer | storage_conditions | created_at | updated_at | supplier_id | sales_count | reorder_level
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | A & E Plasters 20'S Wash Proof - UPDATED | 1.0 | 15000 | 14000 | First Aid & Sanitization | 3000 | 190 | 1 | 2026-07-22 | https://wholesaletradingsupplies.com/wp-content/uploads/2020/10/wash_proof_20.jpg | Updated description | 0 | 0 | Allergies | Moti Pharma (U) | 2025-11-04T16:05:21.501Z |  |  | 2025-11-05 11:45:06 | 2025-11-05 11:45:06 | NULL | 0 | 0
+  2 | ALCOHOL SWABS 100’S | 2.0 | 100000 | 90000 | First Aid & Sanitization | 399 | 0 | 1 | 2027-06-22 | https://firstaider.co.za/wp-content/uploads/2025/07/Alcohol-Swabs-100s.png |  | 0 | 0 |  | Joint Medical Stores (JMS) | 2025-11-03T11:29:26.747Z |  |  | 2025-11-05 11:45:06 | 2025-11-23 13:34:31 | NULL | 101 | 0
+  3 | Aloe Pura Organic Aloe Vera Body Wash 200ml | 3.0 | 28000 | 22000 | Body Skin Care Products | 75 | 0 | 1 | NULL | https://guardianhealthpharmacy.com/c/wp-content/uploads/2023/03/image237724181.jpg.webp | Made with Bio Active Aloe Vera Juice. Soothing and Refreshing body wash. Dermatologically Tested. Suitable for Vegetarians and Vegans. | 0 | 0 |  | B H L Healthcare | NULL |  |  | 2025-11-05 11:45:06 | 2025-11-05 11:45:06 | NULL | 0 | 0
+  4 | Alex Aspire Fine Fragrance Perfume Mist 120ml | 4.0 | 10000 | 8900 | Fragrances | 200 | 0 | 1 | NULL | https://guardianhealthpharmacy.com/c/wp-content/uploads/2023/05/WhatsApp-Image-2023-05-31-at-13.40.43.jpg | Fresh and cool scent for confidence and elegance. | 0 | 0 |  |  | NULL |  |  | 2025-11-05 11:45:06 | 2025-11-05 11:45:06 | NULL | 0 | 0
+  5 | 55H+ Paris Harmonie Reparateur Multi-Vitamin Lightening Lotion 500ml | 5.0 | 180000 | 170000 | Body Skin Care Products | 21 | 0 | 1 | NULL | https://cosmeticsafrolatino.es/cdn/shop/products/n1.jpg?v=1756752590&width=750 | Skin Lightening. Skin Bleaching. Dark Spot Remover. Even Skin Tone. | 0 | 0 |  | Abacus Pharma (A) Ltd - Johnson Street | NULL |  |  | 2025-11-05 11:45:06 | 2025-11-05 11:45:06 | NULL | 0 | 0
+
+================================================================================
+
+TABLE: profit_loss_summaries
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  period | TEXT NOT NULL
+  total_revenue | DECIMAL(10,2) DEFAULT 0.00
+  total_cogs | DECIMAL(10,2) DEFAULT 0.00
+  gross_profit | DECIMAL(10,2) DEFAULT 0.00
+  operating_expenses | DECIMAL(10,2) DEFAULT 0.00
+  net_profit | DECIMAL(10,2) DEFAULT 0.00
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 342
+
+SAMPLE DATA (first 5 of 342 rows):
+  id | period | total_revenue | total_cogs | gross_profit | operating_expenses | net_profit | created_at
+  ------------------------------------------------------------------------------------------------------
+  1 | 2025-11-05_to_2025-11-12 | 59677700 | 44023299.98 | 15654400.020000003 | 0 | 15654400.020000003 | 2025-11-12 08:56:31
+  2 | 2025-11-05_to_2025-11-12 | 59677700 | 44023299.98 | 15654400.020000003 | 0 | 15654400.020000003 | 2025-11-12 08:56:31
+  3 | 2025-11-05_to_2025-11-12 | 59677700 | 44023299.98 | 15654400.020000003 | 0 | 15654400.020000003 | 2025-11-12 08:56:31
+  4 | 2025-11-05_to_2025-11-12 | 59677700 | 44023299.98 | 15654400.020000003 | 0 | 15654400.020000003 | 2025-11-12 08:56:31
+  5 | 2025-11-05_to_2025-11-12 | 59677700 | 44023299.98 | 15654400.020000003 | 0 | 15654400.020000003 | 2025-11-12 08:56:31
+
+================================================================================
+
+TABLE: restock_history
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  product_id | INTEGER
+  product_name | TEXT
+  supplier_id | INTEGER
+  supplier_name | TEXT
+  cost_price | DECIMAL(10,2)
+  quantity | INTEGER
+  restock_date | DATETIME
+  batch_number | TEXT
+  previous_quantity | INTEGER
+  new_quantity | INTEGER
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 37
+
+SAMPLE DATA (first 5 of 37 rows):
+  id | product_id | product_name | supplier_id | supplier_name | cost_price | quantity | restock_date | batch_number | previous_quantity | new_quantity | created_at
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1762152625 | 1 | A & E Plasters 20'S Wash Proof - UPDATED | 1762126949 | Abacus Parenteral Drugs Ltd | 10000 | 50 | 2025-11-03T06:50:25.657Z |  | 1111 | 1161 | 2025-11-05 11:45:06
+  1762152734 | 1 | A & E Plasters 20'S Wash Proof - UPDATED | 1762126949 | Abacus Parenteral Drugs Ltd | 10000 | 500 | 2025-11-03T06:52:14.529Z |  | 1161 | 1661 | 2025-11-05 11:45:06
+  1762156132 | 1 | A & E Plasters 20'S Wash Proof - UPDATED | 1762126810 | Allyz Pharmacy | 7000 | 400 | 2025-11-03T07:48:52.349Z |  | 1161 | 1561 | 2025-11-05 11:45:06
+  1762156172 | 2 | ALCOHOL SWABS 100’S | 1762126812 | Alpha & Omega Enterprises | 8400 | 5000 | 2025-11-03T07:49:32.114Z |  | 199 | 5199 | 2025-11-05 11:45:06
+  1762169339 | 2 | ALCOHOL SWABS 100’S | 1762126812 | Alpha & Omega Enterprises | 8500 | 250 | 2025-11-03T11:28:59.663Z |  | 199 | 449 | 2025-11-05 11:45:06
+
+================================================================================
+
+TABLE: settings
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  store_name | TEXT DEFAULT 'Fraha Pharmacy'
+  address_one | TEXT DEFAULT 'Old Kampala, Uganda'
+  address_two | TEXT DEFAULT 'Kampala, Uganda'
+  contact | TEXT DEFAULT '0751360385'
+  tax_rate | DECIMAL(5,2) DEFAULT 10.00
+  currency_symbol | TEXT DEFAULT 'UGX'
+  charge_tax | INTEGER DEFAULT 0
+  footer_text | TEXT DEFAULT 'Fraha Pharmacy 2025'
+  logo_path | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  network_settings | TEXT
+
+ROW COUNT: 1
+
+SAMPLE DATA (first 5 of 1 rows):
+  id | store_name | address_one | address_two | contact | tax_rate | currency_symbol | charge_tax | footer_text | logo_path | created_at | network_settings
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | Fraha Pharmacy | Old Kampala, Uganda | Kampala, Uganda | 0751360385 | 10 | UGX | 0 | Fraha Pharmacy 2025 |  | 2025-11-05 11:45:06 | {"mode":"server","server_ip":"localhost","till_number":"1","terminal_id":"terminal_1763555844601","port":3000,"is_active":true,"last_sync":"2025-11-19T17:37:01.480Z"}
+
+================================================================================
+
+TABLE: suppliers
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  name | TEXT NOT NULL
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  seeded | INTEGER DEFAULT 0
+
+ROW COUNT: 161
+
+SAMPLE DATA (first 5 of 161 rows):
+  id | name | created_at | seeded
+  -------------------------------
+  1762126801 | Abacus Pharma (A) Ltd - Johnson Street | 2025-11-02T23:40:01.781Z | 1
+  1762126802 | Abacus Pharma (A) Ltd - Lugogo | 2025-11-02T23:40:01.783Z | 1
+  1762126803 | Abacus Pharma (A) Ltd - Mukwano | 2025-11-02T23:40:01.783Z | 1
+  1762126804 | Abacus Pharma (A) Ltd - William II | 2025-11-02T23:40:01.783Z | 1
+  1762126805 | Abacus Pharma (A) Ltd - William (Wholesale Only) | 2025-11-02T23:40:01.783Z | 1
+
+================================================================================
+
+TABLE: tax_records
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  period | TEXT NOT NULL
+  tax_type | TEXT NOT NULL
+  taxable_amount | DECIMAL(10,2) NOT NULL
+  tax_rate | DECIMAL(5,2) NOT NULL
+  tax_amount | DECIMAL(10,2) NOT NULL
+  due_date | DATETIME NOT NULL
+  status | TEXT DEFAULT 'pending'
+  payment_date | DATETIME
+  reference_number | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 0
+
+
+================================================================================
+
+TABLE: transaction_items
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  transaction_id | TEXT
+  product_id | INTEGER
+  product_name | TEXT
+  price | DECIMAL(10,2)
+  quantity | INTEGER
+  category | TEXT
+
+ROW COUNT: 411
+
+SAMPLE DATA (first 5 of 411 rows):
+  id | transaction_id | product_id | product_name | price | quantity | category
+  -----------------------------------------------------------------------------
+  1 | 1760450184 | 334 | Breathezy-L Montelukast/Levocetirizine Tablets 30’s | 30000 | 1 | 
+  2 | 1760450184 | 109 | Alerten Q 100 Coenzyme Q10 Capsules 30’s | 102000 | 1 | 
+  3 | 1760450184 | 130 | ALZENTAL  Albendazole 20mg/ml Syrup 20ml | 7000 | 1 | 
+  4 | 1760450184 | 1677 | Salbutamol Syrup 100ml | 4000 | 1 | 
+  5 | 1760450184 | 699 | Durex Thin Feel Classic Condoms 12’s | 75000 | 1 | 
+
+================================================================================
+
+TABLE: transactions
+------------------------------------------------------------
+COLUMNS:
+  id | TEXT PRIMARY KEY
+  order_number | INTEGER
+  ref_number | TEXT
+  discount | DECIMAL(10,2) DEFAULT 0.00
+  customer_id | TEXT
+  customer_name | TEXT DEFAULT 'walkin_customer'
+  status | INTEGER DEFAULT 1
+  subtotal | DECIMAL(10,2)
+  tax | DECIMAL(10,2)
+  order_type | INTEGER DEFAULT 1
+  total | DECIMAL(10,2)
+  paid | DECIMAL(10,2)
+  change_amount | DECIMAL(10,2)
+  payment_type | TEXT
+  payment_info | TEXT
+  till | INTEGER DEFAULT 1
+  user_id | INTEGER
+  user_name | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+
+ROW COUNT: 284
+
+INDEXES:
+
+SAMPLE DATA (first 5 of 284 rows):
+  id | order_number | ref_number | discount | customer_id | customer_name | status | subtotal | tax | order_type | total | paid | change_amount | payment_type | payment_info | till | user_id | user_name | created_at
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1760450184 | 1760450184 |  | 0 | NULL | walkin_customer | 1 | 218000 | 0 | 1 | 218000 | 218000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T13:56:24.259Z
+  1760452337 | 1760452337 |  | 0 | NULL | walkin_customer | 1 | 108000 | 0 | 1 | 108000 | 108000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T14:32:17.663Z
+  1760452356 | 1760452356 |  | 0 | NULL | walkin_customer | 1 | 472000 | 0 | 1 | 472000 | 472000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T14:32:36.279Z
+  1760452366 | 1760452366 |  | 0 | NULL | walkin_customer | 1 | 160000 | 0 | 1 | 160000 | 160000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T14:32:46.544Z
+  1760452382 | 1760452382 |  | 0 | NULL | walkin_customer | 1 | 175000 | 0 | 1 | 175000 | 175000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T14:33:02.398Z
+
+================================================================================
+
+TABLE: users
+------------------------------------------------------------
+COLUMNS:
+  id | INTEGER PRIMARY KEY
+  username | TEXT NOT NULL
+  fullname | TEXT NOT NULL
+  password | TEXT NOT NULL
+  perm_products | INTEGER DEFAULT 0
+  perm_categories | INTEGER DEFAULT 0
+  perm_transactions | INTEGER DEFAULT 0
+  perm_users | INTEGER DEFAULT 0
+  perm_settings | INTEGER DEFAULT 0
+  status | TEXT
+  created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
+  last_login | DATETIME
+  session_token | TEXT
+  session_expiry | DATETIME
+  is_logged_in | BOOLEAN DEFAULT FALSE
+
+ROW COUNT: 8
+
+INDEXES:
+
+SAMPLE DATA (first 5 of 8 rows):
+  id | username | fullname | password | perm_products | perm_categories | perm_transactions | perm_users | perm_settings | status | created_at | last_login | session_token | session_expiry | is_logged_in
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | admin | Shakirah | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged In_2025-11-23T15:51:06.713Z | 2025-11-08T23:10:35.332Z | 2025-11-23T15:51:06.713Z | 8ce87f70dab5d31ce095d7c53a25ff58644833c5130aeb0770c4d21908e4133f | 2025-12-09T03:16:54.341Z | 1
+  2 | manager1 | Manager Kizito | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 0 | 1 | Logged Out_2025-11-22T22:06:35.346Z | 2025-11-08T23:10:35.406Z | 2025-11-22T13:04:30.855Z | c838eb0a0b9a738b523d32ad9d0ee8e8fb74847fe0e8ee673f11485d374514d8 | 2025-12-09T02:44:40.383Z | 0
+  3 | manager2 | Admin Assistant | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged Out_2025-11-10T12:43:39.669Z | 2025-11-08T23:10:35.475Z | 2025-11-10T12:43:21.855Z | b39df85b2be91431341cd485114fb78154713fc888306636b78e18518d56f912 | 2025-12-09T02:54:40.298Z | 0
+  4 | cashier1 | Cashier | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 0 | 0 | 1 | 0 | 0 | Active | 2025-11-08T23:10:35.545Z | NULL | NULL | NULL | 0
+  5 | dispenser1 | Dispenser 1 | $2b$10$S/bD5IOPWqudQCEbbS9xau3rHMPpF9K5EcBIch4fjh8rs8z5AxBG. | 1 | 1 | 0 | 0 | 0 | Logged Out_2025-11-23T14:26:22.264Z | 2025-11-08T23:10:35.615Z | 2025-11-23T14:26:18.603Z | NULL | NULL | 0
+
+================================================================================
+
+DATABASE SUMMARY:
+- Total tables: 22
+- Total rows across all tables: 9724
+- File size: 3.86 MB

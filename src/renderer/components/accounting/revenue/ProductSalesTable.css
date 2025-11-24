@@ -1,0 +1,413 @@
+/* Product Sales Performance Table Styles */
+.psp-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  width: 100%;
+}
+
+/* Table Header */
+.psp-table-header {
+  background: var(--secondary-gray);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+}
+
+.psp-header-row {
+  display: flex;
+  min-height: 48px;
+  width: 100%;
+}
+
+.psp-header-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.psp-header-cell:hover {
+  background: var(--secondary-gray-dark);
+}
+
+.psp-header-cell:last-child {
+  border-right: none;
+}
+
+.psp-header-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.psp-sort-icon {
+  color: var(--primary-gray-light);
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.psp-sort-icon.active {
+  color: var(--primary-gray);
+}
+
+/* Table Body */
+.psp-table-body {
+  height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-surface);
+  width: 100%;
+}
+
+.psp-virtual-row {
+  display: flex;
+  min-height: 60px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s ease;
+  width: 100%;
+}
+
+.psp-virtual-row:hover {
+  background: var(--secondary-gray);
+}
+
+.psp-virtual-row-even {
+  background: var(--bg-surface);
+}
+
+.psp-virtual-row-odd {
+  background: var(--secondary-gray-dark);
+}
+
+.psp-virtual-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-right: 1px solid var(--border-color);
+  font-size: 13px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.psp-virtual-cell:last-child {
+  border-right: none;
+}
+
+/* Product Cell */
+.psp-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.psp-product-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--secondary-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--primary-gray);
+  flex-shrink: 0;
+}
+
+.psp-product-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.psp-product-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.psp-product-category {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* Category Tag */
+.psp-category-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: var(--secondary-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Quantity Cell */
+.psp-quantity-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.psp-quantity-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.psp-quantity-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.psp-quantity-fill {
+  height: 100%;
+  background: var(--primary-gray);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Revenue Cell */
+.psp-revenue-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.psp-revenue-icon {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.psp-revenue-value {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+/* Average Price */
+.psp-avg-price {
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Sales Cell */
+.psp-sales-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.psp-sales-icon {
+  color: var(--primary-gray);
+  flex-shrink: 0;
+}
+
+.psp-sales-count {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Performance Indicator */
+.psp-performance-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+  white-space: nowrap;
+  border: none;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.psp-performance-icon {
+  flex-shrink: 0;
+  color: white;
+}
+
+.psp-performance-label {
+  white-space: nowrap;
+  color: white;
+}
+
+/* Loading State */
+.psp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+
+.psp-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-gray);
+  border-radius: 50%;
+  animation: psp-spin 1s linear infinite;
+}
+
+@keyframes psp-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.psp-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.psp-empty-icon {
+  color: var(--border-color);
+  margin-bottom: 16px;
+}
+
+.psp-empty-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.psp-empty-subtext {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Pagination */
+.psp-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--secondary-gray);
+  font-size: 13px;
+}
+
+.psp-pagination-info {
+  color: var(--text-secondary);
+}
+
+.psp-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.psp-pagination-btn {
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.psp-pagination-btn:hover:not(:disabled) {
+  background: var(--secondary-gray-dark);
+  border-color: var(--primary-gray-light);
+}
+
+.psp-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.psp-page-info {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.psp-page-size-select {
+  padding: 6px 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.psp-page-size-select:focus {
+  outline: none;
+  border-color: var(--primary-gray);
+}
+
+/* Scrollbar Styling */
+.psp-table-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.psp-table-body::-webkit-scrollbar-track {
+  background: var(--secondary-gray);
+}
+
+.psp-table-body::-webkit-scrollbar-thumb {
+  background: var(--primary-gray-light);
+  border-radius: 3px;
+}
+
+.psp-table-body::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gray);
+}

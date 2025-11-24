@@ -1,0 +1,145 @@
+/* SupplierMetricsCard.css */
+.metrics-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.metrics-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #0D9488;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.metrics-card:hover {
+  border-color: #0D9488;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.metrics-card:hover::before {
+  transform: scaleX(1);
+}
+
+.metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.metrics-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+}
+
+.metrics-trend {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.metrics-card:hover .metrics-trend {
+  transform: scale(1.1);
+}
+
+.metrics-trend.up {
+  color: #10B981;
+}
+
+.metrics-trend.down {
+  color: #DC2626;
+}
+
+.metrics-trend.neutral {
+  color: #6B7280;
+}
+
+.metrics-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.metrics-value.up {
+  color: #10B981;
+}
+
+.metrics-value.down {
+  color: #DC2626;
+}
+
+.metrics-value.neutral {
+  color: #111827;
+}
+
+.metrics-description {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Focus states for accessibility */
+.metrics-card:focus {
+  outline: 2px solid #0D9488;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .metrics-card {
+    transition: none;
+  }
+  
+  .metrics-card:hover {
+    transform: none;
+  }
+  
+  .metrics-card::before {
+    display: none;
+  }
+  
+  .metrics-trend {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .metrics-card:hover {
+    border-width: 2px;
+  }
+  
+  .metrics-trend {
+    filter: brightness(0) contrast(100%);
+  }
+}
+
+/* Print styles */
+@media print {
+  .metrics-card {
+    break-inside: avoid;
+    border: 1px solid #111827;
+    box-shadow: none;
+  }
+  
+  .metrics-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

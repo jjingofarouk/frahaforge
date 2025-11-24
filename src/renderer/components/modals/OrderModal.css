@@ -1,0 +1,244 @@
+/* OrderModal.css */
+.order-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(31, 41, 55, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.order-modal-content {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+}
+
+.order-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--secondary-gray);
+}
+
+.print-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-gray);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.print-btn:hover {
+  background: var(--primary-gray-dark);
+}
+
+.order-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.order-close-btn:hover {
+  color: var(--text-primary);
+  background: var(--secondary-gray-dark);
+}
+
+.order-icon {
+  display: block;
+}
+
+.order-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.order-header {
+  margin-bottom: 1.5rem;
+}
+
+.order-info h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.order-info p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+  line-height: 1.4;
+}
+
+.order-items {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.order-items table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.order-items thead {
+  background: var(--secondary-gray);
+}
+
+.order-items th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-items td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.order-items tr:last-child td {
+  border-bottom: none;
+}
+
+.order-items tbody tr:hover {
+  background: var(--secondary-gray-dark);
+}
+
+.order-totals {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.total-row span:first-child {
+  color: var(--text-secondary);
+}
+
+.total-row span:last-child {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.grand-total {
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.grand-total span:last-child {
+  font-weight: 700;
+}
+
+.due {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.due span:last-child {
+  color: var(--danger);
+}
+
+.method-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.method-badge.cash {
+  background: var(--secondary-gray);
+  color: var(--text-primary);
+}
+
+.method-badge.card {
+  background: var(--primary-gray);
+  color: white;
+}
+
+.method-badge.due {
+  background: var(--danger);
+  color: white;
+}
+
+.order-warning {
+  padding: 1rem 1.5rem;
+  background: var(--warning);
+  color: white;
+  font-size: 0.75rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Print Styles */
+@media print {
+  .order-modal-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  
+  .order-modal-content {
+    box-shadow: none;
+    border: none;
+    max-width: none;
+    max-height: none;
+  }
+  
+  .order-modal-header,
+  .order-warning {
+    display: none;
+  }
+  
+  .order-modal-body {
+    padding: 0;
+  }
+}
+
+/* Loading and Error States */
+.order-modal-body:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

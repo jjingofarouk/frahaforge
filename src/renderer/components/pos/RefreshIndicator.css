@@ -1,0 +1,73 @@
+/* src/renderer/src/components/pos/RefreshIndicator.css */
+/* Monochromatic, subtle glass-morphism refresh indicator */
+.refresh-indicator {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1000;
+
+  /* Glass background – semi-transparent dark with blur */
+  background: rgba(30, 30, 30, 0.38);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* Border for extra definition */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #e5e5e5;
+  padding: 7px 11px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  /* Subtle inner shadow */
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  
+  /* Prevent text selection */
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Subtle spinner – smooth, thin, and modern */
+.refresh-icon {
+  animation: spin 0.9s linear infinite;
+  stroke: #d1d1d1;
+}
+
+/* Optional: add a tiny pulse to the text for extra liveliness */
+.refresh-text {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Keyframes */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Dark mode fallback (already monochromatic) – ensure consistency */
+@media (prefers-color-scheme: dark) {
+  .refresh-indicator {
+    background: rgba(28, 28, 30, 0.45);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}

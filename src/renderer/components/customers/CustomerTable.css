@@ -1,0 +1,340 @@
+/* src/renderer/src/components/customers/components/CustomerTable.css */
+.customer-table {
+  background: var(--bg-surface);
+  width: 100%;
+}
+
+.customer-table__container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.customer-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 700px;
+}
+
+.customer-table__table th {
+  background: var(--secondary-gray);
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.customer-table__table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.customer-table__row:last-child td {
+  border-bottom: none;
+}
+
+.customer-table__row:hover {
+  background: var(--secondary-gray);
+}
+
+/* ---------- Customer Info ---------- */
+.customer-table__customer-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.customer-table__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--secondary-gray-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-gray);
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+}
+
+.customer-table__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.customer-table__segment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customer-table__segment {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  width: fit-content;
+  color: white;
+}
+
+.customer-table__segment--vip      { background: var(--primary-gray-dark); }
+.customer-table__segment--loyal   { background: var(--primary-gray); }
+.customer-table__segment--regular { background: var(--primary-gray-light); }
+.customer-table__segment--new     { background: var(--text-secondary); }
+.customer-table__segment--inactive{ background: var(--border-color); color: var(--text-secondary); }
+
+.customer-table__store {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ---------- Contact Info ---------- */
+.customer-table__contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.customer-table__contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.customer-table__contact-item svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.customer-table__address {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Orders ---------- */
+.customer-table__orders {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 60px;
+}
+
+.customer-table__orders-count {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.customer-table__orders-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ---------- Amount ---------- */
+.customer-table__amount {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+  min-width: 90px;
+}
+
+/* ---------- Last Order ---------- */
+.customer-table__last-order {
+  font-size: 12px;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+/* ---------- ACTIONS – STRAIGHTFORWARD DESIGN ---------- */
+.customer-table__actions {
+  display: flex;
+  gap: 8px;
+  min-width: 80px;
+}
+
+.customer-table__action-btn {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+/* EDIT BUTTON - Teal */
+.customer-table__action-btn--edit {
+  background: var(--secondary-gray);
+  border-color: var(--primary-teal);
+}
+
+.customer-table__action-btn--edit svg {
+  color: var(--primary-teal);
+  stroke: var(--primary-teal);
+}
+
+.customer-table__action-btn--edit:hover {
+  background: var(--primary-teal);
+  border-color: var(--primary-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 148, 136, 0.2);
+}
+
+.customer-table__action-btn--edit:hover svg {
+  color: var(--bg-surface);
+  stroke: var(--bg-surface);
+}
+
+.customer-table__action-btn--edit:active {
+  transform: translateY(0);
+}
+
+/* DELETE BUTTON - Danger Red */
+.customer-table__action-btn--delete {
+  background: var(--secondary-gray);
+  border-color: var(--danger);
+}
+
+.customer-table__action-btn--delete svg {
+  color: var(--danger);
+  stroke: var(--danger);
+}
+
+.customer-table__action-btn--delete:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+}
+
+.customer-table__action-btn--delete:hover svg {
+  color: var(--bg-surface);
+  stroke: var(--bg-surface);
+}
+
+.customer-table__action-btn--delete:active {
+  transform: translateY(0);
+}
+
+/* Disabled State */
+.customer-table__action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--secondary-gray-dark);
+  border-color: var(--border-color);
+  transform: none;
+  box-shadow: none;
+}
+
+.customer-table__action-btn:disabled svg {
+  color: var(--text-secondary);
+  stroke: var(--text-secondary);
+}
+
+/* ---------- Loading State ---------- */
+.customers-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  gap: 16px;
+  width: 100%;
+}
+
+.customers-loading p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ---------- Empty State ---------- */
+.customers-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  width: 100%;
+}
+
+.customers-empty__icon {
+  margin-bottom: 16px;
+  color: var(--border-color);
+}
+
+.customers-empty h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.customers-empty p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  .customer-table__table { min-width: 600px; }
+  .customer-table__table th,
+  .customer-table__table td { padding: 14px 10px; }
+  .customer-table__customer-info { gap: 10px; min-width: 160px; }
+  .customer-table__avatar { width: 32px; height: 32px; }
+  .customer-table__contact-info { min-width: 140px; }
+  .customer-table__orders { min-width: 50px; }
+  .customer-table__amount { min-width: 80px; }
+  .customer-table__last-order { min-width: 70px; }
+  .customer-table__actions { min-width: 70px; gap: 6px; }
+  .customer-table__action-btn { width: 32px; height: 32px; }
+  .customer-table__action-btn svg { width: 16px; height: 16px; }
+}
+
+@media (max-width: 768px) {
+  .customer-table__table { min-width: 500px; }
+  .customer-table__table th { padding: 12px 8px; font-size: 12px; }
+  .customer-table__table td { padding: 12px 8px; }
+  .customer-table__contact-info { min-width: 120px; }
+  .customer-table__address { max-width: 100px; }
+  .customer-table__orders { min-width: 45px; }
+  .customer-table__amount { min-width: 70px; }
+  .customer-table__last-order { min-width: 60px; }
+}
+
+@media (max-width: 480px) {
+  .customer-table__table { min-width: 400px; }
+  .customer-table__customer-info { flex-direction: column; align-items: flex-start; gap: 8px; min-width: 140px; }
+  .customer-table__segment-container { gap: 2px; }
+  .customer-table__contact-item span { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .customer-table__actions { gap: 6px; min-width: 70px; }
+  .customer-table__action-btn { width: 30px; height: 30px; }
+  .customer-table__action-btn svg { width: 14px; height: 14px; }
+  .customer-table__orders { min-width: 40px; }
+  .customer-table__amount { min-width: 60px; font-size: 12px; }
+  .customer-table__last-order { min-width: 50px; font-size: 11px; }
+}

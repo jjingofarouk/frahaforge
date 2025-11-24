@@ -1,0 +1,369 @@
+.
+├── forge.config.ts
+├── forge.env.d.ts
+├── fraha-backend
+│   ├── build
+│   │   ├── fraha-backend-linux
+│   │   ├── fraha-backend-macos
+│   │   ├── fraha-backend-win.exe
+│   │   └── mac
+│   │       └── fraha-backend
+│   ├── dist
+│   │   ├── api
+│   │   │   ├── accounting.js
+│   │   │   ├── accounts.js
+│   │   │   ├── categories.js
+│   │   │   ├── customers.js
+│   │   │   ├── inventory.js
+│   │   │   ├── settings.js
+│   │   │   ├── suppliers.js
+│   │   │   ├── transactions.js
+│   │   │   └── users.js
+│   │   ├── database
+│   │   │   └── database.js
+│   │   ├── public
+│   │   │   └── index.html
+│   │   └── server.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── src
+│   │   ├── api
+│   │   │   ├── accounting.ts
+│   │   │   ├── accounts.ts
+│   │   │   ├── categories.ts
+│   │   │   ├── customers.ts
+│   │   │   ├── inventory.ts
+│   │   │   ├── settings.ts
+│   │   │   ├── suppliers.ts
+│   │   │   ├── transactions.ts
+│   │   │   └── users.ts
+│   │   ├── database
+│   │   │   ├── database.ts
+│   │   │   └── db.txt
+│   │   ├── public
+│   │   │   └── index.html
+│   │   └── server.ts
+│   └── tsconfig.json
+├── index.html
+├── package-lock.json
+├── package.json
+├── pharmacy-backup.db
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── __tests__
+│   │   └── App.test.tsx
+│   ├── global.d.ts
+│   ├── index.css
+│   ├── main
+│   │   ├── index.tsx
+│   │   ├── menu.ts
+│   │   ├── util.ts
+│   │   └── websocketServer.ts
+│   ├── main.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── preload.ts
+│   ├── renderer
+│   │   ├── components
+│   │   │   ├── Login.tsx
+│   │   │   ├── Navigation.css
+│   │   │   ├── Navigation.tsx
+│   │   │   ├── SplashScreen.tsx
+│   │   │   ├── accounting
+│   │   │   │   ├── AccountingPage.css
+│   │   │   │   ├── AccountingPage.tsx
+│   │   │   │   ├── ModernHeader.css
+│   │   │   │   ├── ModernHeader.tsx
+│   │   │   │   ├── dashboard
+│   │   │   │   │   ├── DashboardOverview.css
+│   │   │   │   │   ├── DashboardOverview.tsx
+│   │   │   │   │   └── dashboardMessages.ts
+│   │   │   │   ├── expenses
+│   │   │   │   │   ├── DateFilter.css
+│   │   │   │   │   ├── DateFilter.tsx
+│   │   │   │   │   ├── ExpenseAnalysis.css
+│   │   │   │   │   ├── ExpenseAnalysis.tsx
+│   │   │   │   │   ├── ExpenseForm.css
+│   │   │   │   │   ├── ExpenseForm.tsx
+│   │   │   │   │   ├── ExpenseTracker.css
+│   │   │   │   │   ├── ExpenseTracker.tsx
+│   │   │   │   │   └── expenseIntelligence.ts
+│   │   │   │   ├── headerIntelligence.ts
+│   │   │   │   ├── revenue
+│   │   │   │   │   ├── ProductSalesPerformance.css
+│   │   │   │   │   ├── ProductSalesPerformance.tsx
+│   │   │   │   │   ├── ProductSalesTable.css
+│   │   │   │   │   ├── ProductSalesTable.tsx
+│   │   │   │   │   ├── RevenueAnalysis.css
+│   │   │   │   │   ├── RevenueAnalysis.tsx
+│   │   │   │   │   └── productSalesMessages.ts
+│   │   │   │   ├── shared
+│   │   │   │   │   ├── DateRangeSelector.css
+│   │   │   │   │   └── DateRangeSelector.tsx
+│   │   │   │   └── utils
+│   │   │   │       └── dateUtils.ts
+│   │   │   ├── atom.json
+│   │   │   ├── cloud.json
+│   │   │   ├── customers
+│   │   │   │   ├── CustomerStats.css
+│   │   │   │   ├── CustomerStats.tsx
+│   │   │   │   ├── CustomerTable.css
+│   │   │   │   ├── CustomerTable.tsx
+│   │   │   │   ├── CustomersPage.css
+│   │   │   │   ├── CustomersPage.tsx
+│   │   │   │   ├── FrequentCustomers.css
+│   │   │   │   ├── FrequentCustomers.tsx
+│   │   │   │   ├── MarketingInsights.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── droplet.json
+│   │   │   ├── invoices
+│   │   │   │   └── InvoicesPage.tsx
+│   │   │   ├── medicine.json
+│   │   │   ├── modals
+│   │   │   │   ├── CategoriesModal.tsx
+│   │   │   │   ├── CustomerOrdersModal.tsx
+│   │   │   │   ├── DueModal.tsx
+│   │   │   │   ├── HoldOrdersModal.tsx
+│   │   │   │   ├── NewCategory.tsx
+│   │   │   │   ├── NewCustomer.css
+│   │   │   │   ├── NewCustomer.tsx
+│   │   │   │   ├── NewProduct.tsx
+│   │   │   │   ├── OrderModal.css
+│   │   │   │   ├── OrderModal.tsx
+│   │   │   │   ├── PaymentModal.css
+│   │   │   │   ├── PaymentModal.tsx
+│   │   │   │   ├── ProductModal.css
+│   │   │   │   ├── ProductModal.tsx
+│   │   │   │   ├── ProductsModal.tsx
+│   │   │   │   ├── Receipt.css
+│   │   │   │   ├── Receipts.tsx
+│   │   │   │   ├── SettingsModal.css
+│   │   │   │   ├── SettingsModal.tsx
+│   │   │   │   ├── UserModal.tsx
+│   │   │   │   ├── UsersModal.tsx
+│   │   │   │   └── logo.png
+│   │   │   ├── orders
+│   │   │   │   ├── HoldOrderForm.tsx
+│   │   │   │   ├── OrderDetails.css
+│   │   │   │   ├── OrderDetails.tsx
+│   │   │   │   ├── OrdersPage.css
+│   │   │   │   ├── OrdersPage.tsx
+│   │   │   │   ├── PendingOrders.tsx
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── styles
+│   │   │   │   └── types
+│   │   │   ├── pos
+│   │   │   │   ├── CartActions.css
+│   │   │   │   ├── CartActions.tsx
+│   │   │   │   ├── GlobalPosDataManager.tsx
+│   │   │   │   ├── PosCart
+│   │   │   │   │   ├── CartItemRow.css
+│   │   │   │   │   ├── CartItemRow.tsx
+│   │   │   │   │   ├── CartTotals.tsx
+│   │   │   │   │   ├── PosCart.css
+│   │   │   │   │   ├── PosCart.tsx
+│   │   │   │   │   ├── PosCartBadge.tsx
+│   │   │   │   │   ├── PosCartStatus.css
+│   │   │   │   │   ├── PosCartStatus.tsx
+│   │   │   │   │   ├── ReceiptGenerator.ts
+│   │   │   │   │   ├── cart.json
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── PosMessages
+│   │   │   │   │   ├── PosMessages.css
+│   │   │   │   │   └── PosMessages.tsx
+│   │   │   │   ├── PosProducts.css
+│   │   │   │   ├── PosProducts.tsx
+│   │   │   │   ├── PosSearch.css
+│   │   │   │   ├── PosSearch.tsx
+│   │   │   │   ├── PosView.css
+│   │   │   │   ├── PosView.tsx
+│   │   │   │   ├── ProductCard.css
+│   │   │   │   ├── ProductCard.tsx
+│   │   │   │   ├── ProductDetailsOverlay.css
+│   │   │   │   ├── ProductDetailsOverlay.tsx
+│   │   │   │   ├── ProductFilters.css
+│   │   │   │   ├── ProductFilters.tsx
+│   │   │   │   ├── RefreshIndicator.css
+│   │   │   │   ├── RefreshIndicator.tsx
+│   │   │   │   ├── VirtualizedProducts.tsx
+│   │   │   │   ├── currencyFormatter.ts
+│   │   │   │   ├── performance.ts
+│   │   │   │   ├── useDebounce.ts
+│   │   │   │   └── utils
+│   │   │   ├── prescription.json
+│   │   │   ├── products
+│   │   │   │   ├── ChakraProvider.tsx
+│   │   │   │   ├── ExpiryModal.css
+│   │   │   │   ├── ExpiryModal.tsx
+│   │   │   │   ├── LowStockMarquee.css
+│   │   │   │   ├── LowStockMarquee.tsx
+│   │   │   │   ├── LowStockModal.css
+│   │   │   │   ├── LowStockModal.tsx
+│   │   │   │   ├── ProductsFilters.css
+│   │   │   │   ├── ProductsFilters.tsx
+│   │   │   │   ├── ProductsPage.css
+│   │   │   │   ├── ProductsPage.tsx
+│   │   │   │   ├── ProductsSearch.css
+│   │   │   │   ├── ProductsSearch.tsx
+│   │   │   │   ├── ProductsStats.css
+│   │   │   │   ├── ProductsStats.tsx
+│   │   │   │   ├── ProductsTable.tsx
+│   │   │   │   ├── StockIntelligence.css
+│   │   │   │   ├── StockIntelligence.tsx
+│   │   │   │   ├── StockOverview.css
+│   │   │   │   ├── StockOverview.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── receipts
+│   │   │   │   └── ReceiptsPage.tsx
+│   │   │   ├── suppliers
+│   │   │   │   ├── SuppliersDashboard.css
+│   │   │   │   ├── SuppliersDashboard.tsx
+│   │   │   │   ├── components
+│   │   │   │   │   ├── ComparisonView.css
+│   │   │   │   │   ├── ComparisonView.tsx
+│   │   │   │   │   ├── ErrorBanner.tsx
+│   │   │   │   │   ├── LoadingSpinner.css
+│   │   │   │   │   ├── LoadingSpinner.tsx
+│   │   │   │   │   ├── RecentRestocksGrid.css
+│   │   │   │   │   ├── RecentRestocksGrid.tsx
+│   │   │   │   │   ├── ResultsList.css
+│   │   │   │   │   ├── ResultsList.tsx
+│   │   │   │   │   ├── SearchAndFilters.css
+│   │   │   │   │   ├── SearchAndFilters.tsx
+│   │   │   │   │   ├── SupplierMetricsCard.css
+│   │   │   │   │   ├── SupplierMetricsCard.tsx
+│   │   │   │   │   ├── SuppliesControls.css
+│   │   │   │   │   └── SuppliesHeader.css
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── products-suppliers.json
+│   │   │   │   ├── stores
+│   │   │   │   │   └── suppliersStore.ts
+│   │   │   │   └── utils
+│   │   │   │       └── formatters.ts
+│   │   │   ├── transactions
+│   │   │   │   ├── TransactionsView.css
+│   │   │   │   ├── TransactionsView.tsx
+│   │   │   │   ├── components
+│   │   │   │   │   ├── ModernCharts
+│   │   │   │   │   │   ├── CustomerSegmentsChart.tsx
+│   │   │   │   │   │   ├── ExpenseAnalysisChart.tsx
+│   │   │   │   │   │   ├── ExpensePaymentMethodsChart.tsx
+│   │   │   │   │   │   ├── ExpiryAlertChart.tsx
+│   │   │   │   │   │   ├── InventoryTurnoverChart.tsx
+│   │   │   │   │   │   ├── ModernCharts.css
+│   │   │   │   │   │   ├── ModernCharts.tsx
+│   │   │   │   │   │   ├── MonthlyExpenseTrendChart.tsx
+│   │   │   │   │   │   ├── PrescriptionOTCChart.tsx
+│   │   │   │   │   │   ├── ProfitMarginChart.tsx
+│   │   │   │   │   │   ├── StaffPerformanceChart.tsx
+│   │   │   │   │   │   └── index.ts
+│   │   │   │   │   ├── ModernHeader
+│   │   │   │   │   │   ├── ModernHeader.css
+│   │   │   │   │   │   └── ModernHeader.tsx
+│   │   │   │   │   ├── ModernTables
+│   │   │   │   │   │   ├── CustomerDuesTable.tsx
+│   │   │   │   │   │   ├── ModernPagination.tsx
+│   │   │   │   │   │   ├── ModernTransactionsTable.tsx
+│   │   │   │   │   │   ├── ProductsPerformanceTable.tsx
+│   │   │   │   │   │   ├── TransactionDetailsModal.tsx
+│   │   │   │   │   │   ├── TransactionsTable.css
+│   │   │   │   │   │   ├── index.ts
+│   │   │   │   │   │   └── transactions.types.ts
+│   │   │   │   │   └── StatsCards
+│   │   │   │   │       └── StatsCards.tsx
+│   │   │   │   ├── hooks
+│   │   │   │   │   ├── useExport.ts
+│   │   │   │   │   └── useTransactionsData.ts
+│   │   │   │   └── modern-dashboard
+│   │   │   │       ├── ChakraProvider.tsx
+│   │   │   │       └── ModernTransactionsView.css
+│   │   │   └── users
+│   │   │       ├── UserFormModal.css
+│   │   │       ├── UserFormModal.tsx
+│   │   │       ├── UsersPage.css
+│   │   │       └── UsersPage.tsx
+│   │   ├── constants
+│   │   │   └── colors.ts
+│   │   ├── electron.d.ts
+│   │   ├── index.ejs
+│   │   ├── index.html
+│   │   ├── preload.d.ts
+│   │   ├── services
+│   │   │   ├── accountsService.ts
+│   │   │   ├── api.ts
+│   │   │   ├── authService.ts
+│   │   │   ├── categoriesService.ts
+│   │   │   ├── customerService.ts
+│   │   │   ├── electronStoreService.ts
+│   │   │   ├── inventoryService.ts
+│   │   │   ├── stockService.ts
+│   │   │   ├── supplierService.ts
+│   │   │   └── transactionsService.ts
+│   │   ├── src
+│   │   │   ├── components
+│   │   │   │   ├── CacheManager.css
+│   │   │   │   ├── CacheManager.tsx
+│   │   │   │   ├── CachedImage.css
+│   │   │   │   ├── CachedImage.tsx
+│   │   │   │   └── receipt
+│   │   │   │       ├── Receipt.css
+│   │   │   │       ├── Receipt.tsx
+│   │   │   │       ├── ReceiptPDF.css
+│   │   │   │       └── ReceiptPDF.tsx
+│   │   │   ├── hooks
+│   │   │   │   ├── useAccountingRefresh.ts
+│   │   │   │   ├── useImagePreload.ts
+│   │   │   │   ├── useInstantTransactions.ts
+│   │   │   │   ├── useProductsData.ts
+│   │   │   │   └── useProductsTable.tsx
+│   │   │   ├── stores
+│   │   │   │   ├── globalPosStore.ts
+│   │   │   │   ├── ordersStore.ts
+│   │   │   │   ├── posStore.ts
+│   │   │   │   └── ultraFastAccountingStore.ts
+│   │   │   ├── styles
+│   │   │   │   ├── CacheManager.css
+│   │   │   │   └── CachedImage.css
+│   │   │   ├── types
+│   │   │   │   ├── pos.types.ts
+│   │   │   │   ├── suppliers.types.ts
+│   │   │   │   └── transactions.types.ts
+│   │   │   └── utils
+│   │   │       ├── cacheManager.ts
+│   │   │       ├── formatUGX.ts
+│   │   │       ├── imageCache.ts
+│   │   │       ├── jwt.ts
+│   │   │       └── ugandaTime.ts
+│   │   └── types
+│   │       ├── orders.types.ts
+│   │       ├── products.types.ts
+│   │       ├── suppliers.types.ts
+│   │       └── user.types.ts
+│   ├── renderer.tsx
+│   └── styles
+│       ├── CategoriesModal.css
+│       ├── CustomerOrdersModal.css
+│       ├── DueModal.css
+│       ├── HoldOrdersModal.css
+│       ├── Login.css
+│       ├── NewCategory.css
+│       ├── NewProduct.css
+│       ├── OrderModal.css
+│       ├── PaymentModal.css
+│       ├── PosView.css
+│       ├── ProductsModal.css
+│       ├── UserModal.css
+│       └── UsersModal.css
+├── src-backup-new-template
+│   ├── index.css
+│   ├── main.ts
+│   ├── preload.ts
+│   └── renderer.ts
+├── structure.txt
+├── tsconfig.json
+├── vite.main.config.ts
+├── vite.preload.config.ts
+└── vite.renderer.config.ts
+
+61 directories, 306 files

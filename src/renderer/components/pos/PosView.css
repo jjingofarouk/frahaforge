@@ -1,0 +1,199 @@
+/* src/renderer/src/components/pos/PosView.css */
+
+/* Main Container */
+.pos-view-container {
+  display: flex;
+  height: 100vh;
+  padding: 1.5rem;
+  background-color: var(--bg-gray);
+  position: relative;
+}
+
+/* Grid Layout - Clean two-column layout */
+.pos-grid {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: 1fr 600px; /* Products: flexible, Cart: fixed 600px */
+}
+
+/* Section Containers */
+.pos-section {
+  background-color: var(--bg-surface);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pos-cart-section {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.pos-product-section {
+  overflow: hidden;
+}
+
+/* Product Grid Container */
+.pos-products-container {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.pos-products-grid-wrapper {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Product Card & Actions */
+.pos-product-card {
+  position: relative;
+}
+
+.pos-card-actions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.pos-product-card:hover .pos-card-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pos-action-btn {
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin: 0;
+}
+
+.pos-action-btn:hover {
+  background-color: var(--primary-teal-dark);
+  border-color: var(--primary-teal-dark);
+  transform: scale(1.1);
+}
+
+.pos-action-btn svg {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  stroke: var(--text-primary);
+  width: 20px;
+  height: 20px;
+}
+
+.pos-action-btn:hover svg {
+  stroke: white;
+}
+
+/* Error Alert */
+.pos-error-alert {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--danger);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Remove resize handle completely */
+.pos-resize-handle {
+  display: none;
+}
+
+/* Scrollbar Styling */
+.pos-products-grid-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pos-products-grid-wrapper::-webkit-scrollbar-track {
+  background: var(--secondary-gray);
+  border-radius: 3px;
+}
+
+.pos-products-grid-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.pos-products-grid-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 1024px) {
+  .pos-grid {
+    grid-template-columns: 1fr 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pos-view-container {
+    padding: 1rem;
+  }
+
+  .pos-section {
+    padding: 1rem;
+  }
+
+  .pos-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 350px;
+  }
+
+  .pos-cart-section {
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+
+  .pos-product-section {
+    border-radius: 0 0 0.75rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pos-action-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pos-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .pos-card-actions,
+  .pos-error-alert {
+    display: none !important;
+  }
+}

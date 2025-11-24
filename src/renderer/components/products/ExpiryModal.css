@@ -1,0 +1,238 @@
+/* ExpiryModal.css */
+.expiry-modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.expiry-modal-container {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.expiry-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-title-section h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.modal-title-section p {
+  margin: 2px 0 0 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #f1f5f9;
+  color: #1f2937;
+}
+
+.expiry-modal-content {
+  padding: 0;
+}
+
+.no-products-message {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 40px;
+}
+
+.products-table {
+  width: 100%;
+}
+
+.products-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th,
+.products-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.products-table th {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f8fafc;
+}
+
+.product-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.product-row:hover {
+  background: #f8fafc;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.product-category {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.product-stock {
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.expiry-date {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.expiry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.expiry-badge-icon {
+  display: flex;
+  align-items: center;
+}
+
+.expiry-expired {
+  background: #fecaca;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.expiry-critical {
+  background: #fed7aa;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+
+.expiry-warning {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fef3c7;
+}
+
+.expiry-safe {
+  background: #d1fae5;
+  color: #059669;
+  border: 1px solid #d1fae5;
+}
+
+.expiry-no-date {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #f3f4f6;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .expiry-modal-container {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .expiry-modal-header {
+    padding: 20px;
+  }
+  
+  .products-table th,
+  .products-table td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .expiry-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .expiry-modal-backdrop {
+    padding: 10px;
+  }
+  
+  .expiry-modal-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .modal-title-section {
+    justify-content: center;
+  }
+  
+  .products-table {
+    overflow-x: auto;
+  }
+}

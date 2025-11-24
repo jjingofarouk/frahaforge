@@ -1,0 +1,355 @@
+/* src/renderer/src/components/pos/ProductCard.css */
+
+/* Product Card Base - Enhanced Apple-style Rounded Corners */
+.pos-product-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px; /* Increased from 12px for more rounded look */
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother easing */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Softer shadow */
+  backdrop-filter: blur(10px); /* Apple-like glass effect */
+}
+
+.pos-product-card:hover {
+  box-shadow: 0 12px 32px rgba(15, 118, 110, 0.15);
+  border-color: var(--primary-teal);
+  transform: translateY(-6px) scale(1.02); /* More pronounced lift */
+}
+
+.pos-product-card:active {
+  transform: translateY(-3px) scale(1.01);
+  transition-duration: 0.1s;
+}
+
+/* Image Wrapper - Rounded top corners only */
+.pos-product-image-wrapper {
+  position: relative;
+  background-color: var(--secondary-beige);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 160px;
+  border-radius: 16px 16px 0 0; /* Rounded top corners only */
+  border-bottom: 1px solid var(--border-color); /* Subtle separation */
+}
+
+.pos-product-img {
+  width: auto;
+  height: auto;
+  max-width: 85%; /* Slightly smaller for better framing */
+  max-height: 85%;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pos-product-card:hover .pos-product-img {
+  transform: scale(1.08); /* More subtle scale */
+}
+
+/* Placeholder */
+.pos-product-img-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text-secondary);
+  gap: 0.5rem;
+  border-radius: 16px 16px 0 0; /* Match wrapper */
+}
+
+.pos-product-img-placeholder svg {
+  opacity: 0.4; /* More subtle */
+}
+
+.pos-product-img-placeholder span {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Product Info */
+.pos-product-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem; /* Increased padding */
+  gap: 0.75rem; /* Increased gap */
+}
+
+.pos-product-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8rem;
+}
+
+.pos-product-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-teal);
+  margin-top: auto;
+}
+
+/* Stock Quantity - Enhanced rounded corners */
+.pos-stock-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0 0; /* Adjusted padding */
+  border-top: 1px solid var(--border-color);
+}
+
+.pos-stock-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.pos-stock-value {
+  font-size: 0.875rem;
+  font-weight: 800;
+  padding: 0.5rem 0.9rem; /* Slightly more padding */
+  border-radius: 12px; /* More rounded */
+  min-width: 60px;
+  text-align: center;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  transition: all 0.3s ease; /* Smooth state transitions */
+}
+
+/* SOLID OPAQUE COLORS - Uganda Pharmacy Standard */
+.pos-stock-value.high-stock {
+  background-color: #16a34a;
+  box-shadow: 0 3px 8px rgba(22, 163, 74, 0.25);
+}
+
+.pos-stock-value.medium-stock {
+  background-color: #ea580c;
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.25);
+}
+
+.pos-stock-value.low-stock {
+  background-color: #dc2626;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.25);
+  animation: pulse 2s infinite;
+}
+
+.pos-stock-value.out-of-stock {
+  background-color: #991b1b;
+  box-shadow: 0 3px 8px rgba(153, 27, 27, 0.3);
+  font-weight: 900;
+  border-radius: 14px; /* Slightly more rounded for emphasis */
+}
+
+/* Pulse animation for low stock */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); } /* More subtle pulse */
+  100% { transform: scale(1); }
+}
+
+/* Out of Stock Overlay */
+.pos-out-of-stock-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(153, 27, 27, 0.92); /* Slightly less opaque */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  z-index: 5;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border-radius: 16px; /* Match card radius */
+}
+
+/* Low Stock Badge */
+.pos-low-stock-badge {
+  position: absolute;
+  top: 0.75rem; /* Adjusted positioning */
+  left: 0.75rem;
+  background-color: #dc2626;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px; /* More rounded */
+  font-size: 0.75rem;
+  font-weight: 800;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.9); /* Softer border */
+}
+
+/* Hover Action Buttons - Enhanced rounded corners */
+.pos-card-actions {
+  position: absolute;
+  top: 0.75rem; /* Adjusted positioning */
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 20;
+}
+
+.pos-product-card:hover .pos-card-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.pos-action-btn {
+  background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+  border: 1.5px solid #374151;
+  border-radius: 12px; /* More rounded */
+  width: 44px; /* Slightly larger */
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); /* Softer shadow */
+  backdrop-filter: blur(8px); /* Glass effect */
+}
+
+.pos-action-btn:hover {
+  background-color: #111827;
+  border-color: #111827;
+  transform: scale(1.15); /* More pronounced scale */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.pos-action-btn:hover svg {
+  stroke: white;
+}
+
+.pos-action-btn svg {
+  stroke: #374151;
+  width: 22px;
+  height: 22px;
+  transition: stroke 0.3s ease;
+}
+
+/* Out of Stock State */
+.pos-product-card.out-of-stock {
+  opacity: 0.65; /* Slightly more visible */
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.pos-product-card.out-of-stock:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.pos-product-card.out-of-stock .pos-card-actions {
+  display: none;
+}
+
+.pos-product-card.low-stock {
+  border-left: 4px solid #dc2626;
+  border-radius: 16px 4px 4px 16px; /* Rounded corners with accent */
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .pos-product-card {
+    min-height: 220px;
+    border-radius: 14px; /* Slightly smaller on mobile */
+  }
+  .pos-product-image-wrapper { 
+    height: 140px;
+    border-radius: 14px 14px 0 0;
+  }
+  .pos-product-name { font-size: 0.85rem; }
+  .pos-product-price { font-size: 0.95rem; }
+  .pos-stock-value { 
+    font-size: 0.8rem; 
+    padding: 0.4rem 0.7rem;
+    border-radius: 10px;
+  }
+  .pos-card-actions { 
+    opacity: 1; 
+    transform: translateX(0);
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .pos-action-btn { 
+    width: 40px; 
+    height: 40px;
+    border-radius: 10px;
+  }
+  .pos-low-stock-badge {
+    border-radius: 10px;
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pos-product-card { 
+    min-height: 200px;
+    border-radius: 12px;
+  }
+  .pos-product-image-wrapper { 
+    height: 120px;
+    border-radius: 12px 12px 0 0;
+  }
+  .pos-product-info { padding: 0.75rem; }
+  .pos-product-name { font-size: 0.8rem; }
+  .pos-stock-value { 
+    font-size: 0.75rem; 
+    min-width: 50px;
+    border-radius: 8px;
+  }
+  .pos-action-btn { 
+    width: 38px; 
+    height: 38px;
+    border-radius: 8px;
+  }
+}
+
+/* High contrast & reduced motion */
+@media (prefers-contrast: high) {
+  .pos-stock-value { 
+    border: 2px solid white;
+    border-radius: 14px; /* Maintain rounded look */
+  }
+  .pos-action-btn { 
+    border-width: 2px;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { 
+    transition: none !important; 
+    animation: none !important; 
+    transform: none !important;
+  }
+  
+  .pos-product-card:hover {
+    transform: none !important;
+  }
+}

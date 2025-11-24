@@ -1,0 +1,309 @@
+/* ExpenseAnalysis.css - Light Theme Apple-inspired Design */
+
+:root {
+  --primary-gray: #8B8B8D;
+  --primary-gray-dark: #6D6D6F;
+  --primary-gray-light: #AEAEB2;
+  --secondary-gray: #FBFBFD;
+  --secondary-gray-dark: #F5F5F7;
+  --bg-gray: #FBFBFD;
+  --bg-surface: #FFFFFF;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --border-color: #D2D2D7;
+  --danger: #FF3B30;
+  --success: #34C759;
+  --warning: #FF9500;
+  --sidebar-width: 220px;
+  --primary-teal: #007A7E;
+  --primary-teal-dark: #00696D;
+}
+
+.expense-analysis {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expense-analysis:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Section Title */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Summary Stats */
+.summary-stat {
+  padding: 20px;
+  background: var(--secondary-gray);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.summary-stat:hover {
+  background: var(--secondary-gray-dark);
+  transform: translateY(-2px);
+  border-color: var(--border-color);
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Breakdown Sections */
+.breakdown-section {
+  padding: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.breakdown-section:hover {
+  border-color: var(--primary-gray-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.breakdown-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+/* Breakdown Items */
+.breakdown-item {
+  padding: 16px;
+  background: var(--secondary-gray);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.breakdown-item:hover {
+  background: var(--secondary-gray-dark);
+  transform: translateX(4px);
+  border-color: var(--border-color);
+}
+
+.breakdown-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.breakdown-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown-amount {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Color Indicator */
+.color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar Styling */
+.breakdown-item .chakra-progress {
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.breakdown-item .chakra-progress__track {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Top Expenses */
+.expense-description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.expense-category {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.expense-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--warning);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Payment Method & Status Items */
+.breakdown-section .chakra-stack > .chakra-stack {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.breakdown-section .chakra-stack > .chakra-stack:last-child {
+  border-bottom: none;
+}
+
+.breakdown-section .chakra-stack > .chakra-stack:hover {
+  padding-left: 8px;
+  background: var(--secondary-gray);
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-right: 8px;
+  border-radius: 6px;
+}
+
+/* Error State */
+.expense-analysis.error {
+  border-color: var(--danger);
+  background: rgba(255, 59, 48, 0.02);
+}
+
+.error-message {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--danger);
+  padding: 32px;
+  text-align: center;
+}
+
+/* Loading Skeleton */
+.expense-analysis .chakra-skeleton {
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--secondary-gray) 0%,
+    var(--secondary-gray-dark) 50%,
+    var(--secondary-gray) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 18px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .summary-stat {
+    padding: 16px;
+  }
+
+  .breakdown-section {
+    padding: 20px;
+  }
+
+  .breakdown-item {
+    padding: 14px;
+  }
+}
+
+/* Dark Mode Support (reversed for light theme) */
+@media (prefers-color-scheme: dark) {
+  .expense-analysis {
+    background: var(--bg-surface);
+    border-color: var(--border-color);
+  }
+
+  .summary-stat {
+    background: var(--secondary-gray);
+  }
+
+  .summary-stat:hover {
+    background: var(--secondary-gray-dark);
+  }
+
+  .breakdown-section {
+    background: var(--bg-surface);
+    border-color: var(--border-color);
+  }
+
+  .breakdown-item {
+    background: var(--secondary-gray);
+  }
+
+  .breakdown-item:hover {
+    background: var(--secondary-gray-dark);
+  }
+}
+
+/* Accessibility */
+.expense-analysis *:focus-visible {
+  outline: 2px solid var(--primary-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Print Styles */
+@media print {
+  .expense-analysis {
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+  }
+
+  .breakdown-item:hover,
+  .summary-stat:hover,
+  .breakdown-section:hover {
+    transform: none;
+    background: inherit;
+  }
+}

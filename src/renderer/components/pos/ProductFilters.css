@@ -1,0 +1,419 @@
+/* src/renderer/src/components/pos/ProductFilters.css */
+
+/* Modal Backdrop */
+.pos-filters-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* Modal Container - FIXED CENTER POSITIONING */
+.pos-filters-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* Remove transform from here - let framer-motion handle it */
+  background: var(--bg-surface);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  /* Use margin to center instead of transform */
+  margin-left: -45%; /* Half of width (90% / 2) */
+  margin-top: -45vh; /* Half of max-height (90vh / 2) */
+}
+
+/* Header */
+.pos-filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-gray);
+  flex-shrink: 0;
+}
+
+.pos-filters-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pos-filters-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pos-filters-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pos-filters-close-btn:hover {
+  background: var(--secondary-beige);
+  color: var(--text-primary);
+}
+
+/* Content */
+.pos-filters-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pos-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pos-filter-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Quick Price Filters */
+.pos-quick-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.pos-quick-filter-btn {
+  padding: 0.75rem 0.5rem;
+  background: var(--secondary-beige);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.pos-quick-filter-btn:hover {
+  background: var(--bg-gray);
+  border-color: var(--primary-teal);
+  transform: translateY(-1px);
+}
+
+.pos-quick-filter-btn.active {
+  background: var(--primary-teal);
+  color: white;
+  border-color: var(--primary-teal);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+}
+
+/* Price Range Inputs */
+.pos-price-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pos-price-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.pos-price-input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.1);
+}
+
+.pos-price-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.pos-price-range-separator {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Select Styles */
+.pos-filter-select {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23475569' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.65rem;
+}
+
+.pos-filter-select:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.1);
+}
+
+/* Radio and Toggle Styles */
+.pos-radio-group,
+.pos-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pos-radio-label,
+.pos-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.pos-radio-label:hover,
+.pos-toggle-label:hover {
+  background: var(--bg-gray);
+}
+
+.pos-radio-label input,
+.pos-toggle-label input {
+  display: none;
+}
+
+.pos-radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pos-radio-label input:checked + .pos-radio-custom {
+  border-color: var(--primary-teal);
+  background: var(--primary-teal);
+}
+
+.pos-radio-label input:checked + .pos-radio-custom::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pos-toggle-custom {
+  width: 36px;
+  height: 20px;
+  background: var(--border-color);
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pos-toggle-label input:checked + .pos-toggle-custom {
+  background: var(--primary-teal);
+}
+
+.pos-toggle-custom::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pos-toggle-label input:checked + .pos-toggle-custom::after {
+  left: 18px;
+}
+
+/* Footer */
+.pos-filters-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-gray);
+  flex-shrink: 0;
+}
+
+.pos-filters-reset-btn,
+.pos-filters-apply-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pos-filters-reset-btn {
+  background: var(--secondary-beige);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.pos-filters-reset-btn:hover {
+  background: var(--bg-gray);
+  border-color: var(--text-secondary);
+}
+
+.pos-filters-apply-btn {
+  background: var(--primary-teal);
+  color: white;
+  border: 1px solid var(--primary-teal);
+}
+
+.pos-filters-apply-btn:hover {
+  background: var(--primary-teal-dark);
+  border-color: var(--primary-teal-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+}
+
+.pos-filters-apply-btn:active {
+  transform: translateY(0);
+}
+
+/* Scrollbar Styling */
+.pos-filters-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pos-filters-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pos-filters-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.pos-filters-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pos-filters-modal {
+    width: 95%;
+    max-height: 85vh;
+    margin-left: -47.5%; /* Half of 95% */
+    margin-top: -42.5vh; /* Half of 85vh */
+  }
+  
+  .pos-filters-header {
+    padding: 1.25rem;
+  }
+  
+  .pos-filters-content {
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+  
+  .pos-quick-filters-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pos-price-range-inputs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .pos-price-range-separator {
+    text-align: center;
+  }
+  
+  .pos-filters-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+  
+  .pos-filter-section-title {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pos-filters-modal {
+    width: 98%;
+    max-height: 92vh;
+    margin-left: -49%; /* Half of 98% */
+    margin-top: -46vh; /* Half of 92vh */
+  }
+  
+  .pos-filters-header {
+    padding: 1rem;
+  }
+  
+  .pos-filters-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .pos-quick-filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pos-filter-select,
+  .pos-price-input {
+    font-size: 0.85rem;
+  }
+}

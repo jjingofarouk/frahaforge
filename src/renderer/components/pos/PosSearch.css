@@ -1,0 +1,175 @@
+/* src/renderer/src/components/pos/PosSearch.css */
+/* Search Header */
+.pos-search-header {
+  margin-bottom: 1rem;
+}
+
+.pos-search-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Search Input */
+.pos-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.pos-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.pos-search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.pos-search-input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.1);
+}
+
+/* Category Select */
+.pos-category-select {
+  padding: 0.75rem 2rem 0.75rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23475569' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.65rem;
+  min-width: 150px;
+}
+
+.pos-category-select:hover {
+  border-color: var(--primary-teal);
+}
+
+.pos-category-select:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.1);
+}
+
+/* Filter Button */
+.pos-filter-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.pos-filter-button:hover {
+  border-color: var(--primary-teal);
+  background: var(--secondary-beige);
+}
+
+.pos-filter-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--primary-teal);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Barcode Input */
+.pos-barcode-form {
+  display: contents;
+}
+
+.pos-barcode-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pos-barcode-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.pos-scanning-indicator {
+  position: absolute;
+  right: 0.75rem;
+  width: 8px;
+  height: 8px;
+  background: var(--primary-teal);
+  border-radius: 50%;
+  animation: pos-pulse 1.5s infinite;
+}
+
+@keyframes pos-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .pos-search-grid {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .pos-search-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .pos-filter-button span {
+    display: none;
+  }
+  
+  .pos-filter-button {
+    padding: 0.75rem;
+  }
+  
+  .pos-search-input {
+    min-width: unset;
+  }
+  
+  .pos-category-select {
+    min-width: unset;
+  }
+}

@@ -1,0 +1,373 @@
+/* src/renderer/src/components/transactions/components/ModernTables/ModernTransactionsTable.css */
+:root {
+  --primary-gray: #374151;
+  --primary-gray-dark: #1F2937;
+  --primary-gray-light: #6B7280;
+  --secondary-gray: #F9FAFB;
+  --secondary-gray-dark: #F3F4F6;
+  --bg-gray: #F9FAFB;
+  --bg-surface: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  --danger: #DC2626;
+  --success: #059669;
+  --warning: #D97706;
+  --sidebar-width: 220px;
+  --primary-teal: #0d9488;
+  --primary-teal-dark: #0f766e;
+}
+
+.modern-transactions-container {
+  height: 800px;
+  width: 100%;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Totals Summary */
+.modern-totals-summary {
+  display: flex;
+  gap: 24px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}
+
+.modern-total-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-total-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.modern-total-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.modern-total-sales {
+  color: var(--primary-teal);
+}
+
+.modern-total-paid {
+  color: var(--success);
+}
+
+.modern-total-due {
+  color: var(--danger);
+}
+
+/* Data Grid Overrides */
+.modern-data-grid {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.modern-data-grid .MuiDataGrid-root {
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: inherit !important;
+}
+
+.modern-data-grid .MuiDataGrid-main {
+  font-family: inherit !important;
+}
+
+.modern-data-grid .MuiDataGrid-cell {
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.modern-data-grid .MuiDataGrid-columnHeaders {
+  background-color: rgba(13, 148, 136, 0.08) !important;
+  border-bottom: 2px solid var(--primary-teal) !important;
+  font-family: inherit !important;
+}
+
+.modern-data-grid .MuiDataGrid-columnHeader {
+  background-color: transparent !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+  padding: 16px !important;
+}
+
+.modern-data-grid .MuiDataGrid-columnHeaderTitle {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.modern-data-grid .MuiDataGrid-row {
+  font-family: inherit !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.modern-data-grid .MuiDataGrid-row:hover {
+  background-color: rgba(13, 148, 136, 0.04) !important;
+  cursor: pointer;
+}
+
+.modern-data-grid .MuiDataGrid-virtualScroller {
+  min-height: 400px !important;
+  font-family: inherit !important;
+}
+
+.modern-data-grid .MuiDataGrid-toolbarContainer {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-family: inherit !important;
+  background: var(--bg-surface);
+}
+
+.modern-data-grid .MuiButton-root {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+}
+
+.modern-data-grid .MuiButton-root:hover {
+  background-color: var(--secondary-gray) !important;
+}
+
+.modern-data-grid .MuiIconButton-root {
+  color: var(--text-secondary) !important;
+}
+
+.modern-data-grid .MuiIconButton-root:hover {
+  background-color: var(--secondary-gray) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Custom Cell Styles */
+.modern-cell-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.modern-cell-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.modern-cell-text-strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modern-cell-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* Status Badges */
+.modern-status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+  border: none;
+}
+
+.modern-status-paid {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+}
+
+.modern-status-partial {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+}
+
+.modern-status-unpaid {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: var(--danger);
+}
+
+/* Payment Badges */
+.modern-payment-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  font-family: inherit;
+  background: transparent;
+}
+
+.modern-payment-cash {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+.modern-payment-card {
+  background-color: rgba(13, 148, 136, 0.1);
+  color: var(--primary-teal);
+  border-color: rgba(13, 148, 136, 0.3);
+}
+
+.modern-payment-credit {
+  background-color: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.modern-payment-unknown {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+/* Amount Styles */
+.modern-amount-positive {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.modern-amount-negative {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.modern-amount-neutral {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Loading Overlay */
+.modern-loading-overlay {
+  width: 100%;
+  padding-top: 16px;
+}
+
+/* No Rows Overlay */
+.modern-no-rows-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.modern-no-rows-icon {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 48px;
+}
+
+.modern-no-rows-text {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Pagination */
+.modern-data-grid .MuiTablePagination-root {
+  font-family: inherit !important;
+  color: var(--text-primary) !important;
+}
+
+.modern-data-grid .MuiTablePagination-selectLabel,
+.modern-data-grid .MuiTablePagination-displayedRows {
+  font-size: 14px !important;
+  font-family: inherit !important;
+  color: var(--text-primary) !important;
+}
+
+.modern-data-grid .MuiSelect-select {
+  font-family: inherit !important;
+  font-size: 14px !important;
+}
+
+/* Scrollbar Styling */
+.modern-data-grid ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modern-data-grid ::-webkit-scrollbar-track {
+  background: var(--secondary-gray);
+  border-radius: 3px;
+}
+
+.modern-data-grid ::-webkit-scrollbar-thumb {
+  background: var(--primary-gray-light);
+  border-radius: 3px;
+}
+
+.modern-data-grid ::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gray);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .modern-transactions-container {
+    height: 600px;
+  }
+  
+  .modern-totals-summary {
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .modern-total-value {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-transactions-container {
+    height: 500px;
+  }
+  
+  .modern-totals-summary {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .modern-data-grid .MuiDataGrid-cell {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+  
+  .modern-data-grid .MuiDataGrid-columnHeader {
+    padding: 12px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .modern-transactions-container {
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+  }
+  
+  .modern-data-grid .MuiDataGrid-toolbarContainer {
+    display: none !important;
+  }
+}

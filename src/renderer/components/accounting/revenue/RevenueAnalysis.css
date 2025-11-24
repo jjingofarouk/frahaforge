@@ -1,0 +1,124 @@
+/* src/renderer/components/accounting/revenue/RevenueAnalysis.css */
+
+.revenue-analysis {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+/* Revenue Stats */
+.revenue-stat {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stat-help {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Stat Color Variants */
+.revenue-stat.total-revenue {
+  border-left: 4px solid var(--success);
+}
+
+.revenue-stat.avg-transaction {
+  border-left: 4px solid var(--primary-teal);
+}
+
+.revenue-stat.total-tax {
+  border-left: 4px solid var(--warning);
+}
+
+.revenue-stat.total-discount {
+  border-left: 4px solid var(--danger);
+}
+
+/* Loading Skeleton */
+.revenue-stat-skeleton {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-label {
+  height: 14px;
+  width: 80px;
+  border-radius: 4px;
+  background: var(--secondary-gray);
+  animation: pulse 2s infinite;
+}
+
+.skeleton-value {
+  height: 24px;
+  width: 120px;
+  border-radius: 6px;
+  background: var(--secondary-gray);
+  animation: pulse 2s infinite;
+}
+
+.skeleton-help {
+  height: 12px;
+  width: 60px;
+  border-radius: 4px;
+  background: var(--secondary-gray);
+  animation: pulse 2s infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .revenue-analysis {
+    padding: 16px;
+  }
+  
+  .stat-value {
+    font-size: 18px;
+  }
+  
+  .revenue-stat {
+    padding: 12px;
+  }
+}

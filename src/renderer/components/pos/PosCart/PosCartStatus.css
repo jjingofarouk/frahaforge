@@ -1,0 +1,95 @@
+/* src/renderer/src/components/pos/PosCart/PosCartStatus.css */
+.pos-cart-status-container {
+  margin-bottom: 8px;
+}
+
+.pos-cart-status {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.status-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+}
+
+.status-text {
+  flex: 1;
+}
+
+.daily-stats {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stat-value {
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Badge styles */
+.pos-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-text {
+  line-height: 1;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .pos-cart-status {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .daily-stats {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .stat-label {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .stat-value {
+  color: #f3f4f6;
+}

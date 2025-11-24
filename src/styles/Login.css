@@ -1,0 +1,249 @@
+/* Login.css - Scoped Styles */
+:root {
+  --pharm-primary-teal: #0F766E;
+  --pharm-primary-teal-dark: #0C5C52;
+  --pharm-primary-teal-light: #5EEAD4;
+  --pharm-secondary-beige: #F0F4F8;
+  --pharm-bg-gray: #F8FAFC;
+  --pharm-bg-surface: #FFFFFF;
+  --pharm-text-primary: #1E293B;
+  --pharm-text-secondary: #475569;
+  --pharm-border-color: #E2E8F0;
+  --pharm-danger: #B91C1C;
+  --pharm-success: #15803D;
+  --pharm-warning: #D97706;
+}
+
+.pharm-login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--pharm-bg-gray);
+  padding: 1.5rem;
+}
+
+.pharm-login-box {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--pharm-bg-surface);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.pharm-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.pharm-login-logo {
+  max-width: 140px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.pharm-login-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--pharm-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.pharm-login-subtitle {
+  font-size: 0.875rem;
+  color: var(--pharm-text-secondary);
+}
+
+.pharm-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pharm-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pharm-form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--pharm-text-primary);
+}
+
+.pharm-input-wrapper {
+  position: relative;
+}
+
+.pharm-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pharm-text-secondary);
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pharm-form-control {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  font-size: 0.875rem;
+  color: var(--pharm-text-primary);
+  background-color: var(--pharm-secondary-beige);
+  border: 1px solid var(--pharm-border-color);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.pharm-form-control:focus {
+  outline: none;
+  border-color: var(--pharm-primary-teal);
+  background-color: var(--pharm-bg-surface);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.pharm-form-control:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pharm-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.pharm-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--pharm-text-secondary);
+  cursor: pointer;
+}
+
+.pharm-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--pharm-primary-teal);
+  cursor: pointer;
+}
+
+.pharm-forgot-password {
+  color: var(--pharm-primary-teal);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.pharm-forgot-password:hover {
+  color: var(--pharm-primary-teal-dark);
+}
+
+.pharm-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pharm-bg-surface);
+  background-color: var(--pharm-primary-teal);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pharm-login-btn:hover:not(:disabled) {
+  background-color: var(--pharm-primary-teal-dark);
+}
+
+.pharm-login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.pharm-btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pharm-login-error {
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: var(--pharm-danger);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.pharm-login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--pharm-text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .pharm-login-container {
+    padding: 1rem;
+  }
+
+  .pharm-login-box {
+    padding: 1.5rem;
+  }
+
+  .pharm-login-logo {
+    max-width: 120px;
+  }
+
+  .pharm-login-title {
+    font-size: 1.25rem;
+  }
+
+  .pharm-form-control {
+    padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+    font-size: 0.875rem;
+  }
+
+  .pharm-login-btn {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .pharm-form-options {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .pharm-login-box {
+    border: 2px solid var(--pharm-text-primary);
+  }
+  
+  .pharm-form-control {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .pharm-form-control,
+  .pharm-login-btn {
+    transition: none;
+  }
+}
