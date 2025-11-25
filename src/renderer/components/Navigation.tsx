@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Package, Users, Settings, LogOut, User as UserIcon,
   Home, CreditCard, FileText, Layers, UserCheck, BarChart3, Truck,
-  WifiOff, Shield, ChevronLeft, ChevronRight, Moon, Sun
+  WifiOff, Shield, ChevronLeft, ChevronRight, Info
 } from 'lucide-react';
 import { User } from '../types/user.types';
 import logo from '../assets/images/logo.png';
@@ -18,7 +18,8 @@ type AppView =
   | 'customers'
   | 'accounting'
   | 'users'
-  | 'suppliers';
+  | 'suppliers'
+  | 'about';
 
 interface NavigationProps {
   user: User | null;
@@ -31,8 +32,6 @@ interface NavigationProps {
   isOffline?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
-  isDarkMode?: boolean;
-  onToggleDarkMode?: () => void;
 }
 
 interface NavItem {
@@ -55,8 +54,6 @@ const Navigation: React.FC<NavigationProps> = ({
   isOffline = false,
   isCollapsed = true,
   onToggleCollapse,
-  isDarkMode = false,
-  onToggleDarkMode,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -95,7 +92,8 @@ const Navigation: React.FC<NavigationProps> = ({
         (id === 'customers') ||
         (id === 'suppliers' && hasPermission('perm_products')) ||
         (id === 'users' && hasPermission('perm_users')) ||
-        (id === 'accounting' && hasPermission('perm_transactions'))
+        (id === 'accounting' && hasPermission('perm_transactions')) ||
+        (id === 'about') // About page is accessible to all
       );
       if (canAccess) {
         items.push({
@@ -117,6 +115,7 @@ const Navigation: React.FC<NavigationProps> = ({
     add('suppliers', 'Supplier Analytics', <Truck size={18} />, true);
     add('users', 'Staff Accounts', <Users size={18} />, true);
     add('accounting', 'Business Analytics', <BarChart3 size={18} />, true);
+    add('about', 'About', <Info size={18} />);
     return items;
   }, [hasPermission, outOfStockCount, onSwitchView]);
 
@@ -158,6 +157,15 @@ const Navigation: React.FC<NavigationProps> = ({
           )}
         </div>
         
+        {onToggleCollapse && (
+          <button
+            className="nav-toggle-btn"
+            onClick={onToggleCollapse}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        )}
         
         {isOffline && shouldShowLabels && (
           <div className="offline-indicator" title="You are offline">
@@ -207,25 +215,6 @@ const Navigation: React.FC<NavigationProps> = ({
             </div>
           );
         })}
-
-        {/* Theme Toggle */}
-        {onToggleDarkMode && (
-          <div
-            className="nav-item"
-            onClick={onToggleDarkMode}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="nav-item-content">
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-              {shouldShowLabels && (
-                <span className="nav-label">
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Settings */}
         {hasPermission('perm_settings') && (

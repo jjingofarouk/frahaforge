@@ -1,6 +1,6 @@
 // src/renderer/src/App.tsx
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, User as UserIcon, Database, Clock, Shield, Moon, Sun } from 'lucide-react';
+import { CheckCircle, User as UserIcon, Database, Clock, Shield } from 'lucide-react';
 import SplashScreen from './renderer/components/SplashScreen';
 import Login from './renderer/components/Login';
 import Navigation from './renderer/components/Navigation';
@@ -11,6 +11,7 @@ import OrdersPage from './renderer/components/orders/OrdersPage';
 import CustomersPage from './renderer/components/customers/CustomersPage';
 import AccountingPage from './renderer/components/accounting/AccountingPage';
 import UsersPage from './renderer/components/users/UsersPage';
+import AboutPage from './renderer/components/about/AboutPage';
 import PaymentModal from './renderer/components/modals/PaymentModal';
 import { ProductModal } from './renderer/components/modals/ProductModal';
 import NewCustomer from './renderer/components/modals/NewCustomer';
@@ -47,7 +48,7 @@ interface CartData {
   customerData?: Customer;
 }
 
-// UPDATED AppView type - removed 'invoices' and 'receipts'
+// UPDATED AppView type - added 'about'
 type AppView =
   | 'pos'
   | 'transactions'
@@ -56,7 +57,8 @@ type AppView =
   | 'customers'
   | 'accounting'
   | 'users'
-  | 'suppliers';
+  | 'suppliers'
+  | 'about';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<'splash' | 'login' | 'main'>('splash');
@@ -91,38 +93,9 @@ const App: React.FC = () => {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [showSystemStatus, setShowSystemStatus] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // POS Store for cart operations
   const { setCart, setSelectedCustomer } = usePosStore();
-
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('fraha-theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    
-    if (newDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('fraha-theme', 'dark');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-      localStorage.setItem('fraha-theme', 'light');
-    }
-  };
 
   // Cache management
   useEffect(() => {
@@ -445,8 +418,7 @@ const App: React.FC = () => {
               outOfStockCount={outOfStockCount}
               isOffline={false}
               isCollapsed={isSidebarCollapsed}
-              isDarkMode={isDarkMode}
-              onToggleDarkMode={toggleDarkMode}
+              onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             />
             <div
               className="content-container"
@@ -500,6 +472,8 @@ const App: React.FC = () => {
                     return <AccountingPage user={user} />;
                   case 'users': 
                     return <UsersPage />;
+                  case 'about': 
+                    return <AboutPage />;
                   default: 
                     return null;
                 }

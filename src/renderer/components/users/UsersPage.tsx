@@ -1,5 +1,3 @@
-// Enhanced UsersPage.tsx with real-time status tracking
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -106,19 +104,23 @@ const checkUserOnlineStatus = (user: User): { isOnline: boolean; sessionExpired:
     }
   }
 
-  // Check last_login or status to determine recent activity
-  let lastActivityDate: Date | null = null;
-  
-  if (user.status && user.status.includes('Logged In_')) {
-    const timestamp = user.status.split('Logged In_')[1];
-    lastActivityDate = new Date(timestamp);
-  } else if (user.last_login) {
-    lastActivityDate = new Date(user.last_login);
+  // Use last_login field for activity check (more reliable than status)
+  if (user.last_login) {
+    const lastLoginDate = new Date(user.last_login);
+    const minutesSinceActivity = differenceInMinutes(new Date(), lastLoginDate);
+    
+    // Consider user offline if last activity was more than 30 minutes ago
+    if (minutesSinceActivity > 30) {
+      return { isOnline: false, sessionExpired: false };
+    }
   }
 
-  // Consider user offline if last activity was more than 30 minutes ago
-  if (lastActivityDate) {
+  // Also check status as fallback
+  if (user.status && user.status.includes('Logged In_')) {
+    const timestamp = user.status.split('Logged In_')[1];
+    const lastActivityDate = new Date(timestamp);
     const minutesSinceActivity = differenceInMinutes(new Date(), lastActivityDate);
+    
     if (minutesSinceActivity > 30) {
       return { isOnline: false, sessionExpired: false };
     }
@@ -127,10 +129,23 @@ const checkUserOnlineStatus = (user: User): { isOnline: boolean; sessionExpired:
   return { isOnline: true, sessionExpired: false };
 };
 
-const formatLastLogin = (dateStr?: string): string => {
-  if (!dateStr || !dateStr.includes('Logged In_')) return 'Never';
-  const timestamp = dateStr.split('Logged In_')[1];
+// Enhanced last login formatting
+const formatLastLogin = (user: User): string => {
+  // Prefer last_login field as it's more reliable
+  if (user.last_login) {
+    const date = new Date(user.last_login);
+    if (isNaN(date.getTime())) return 'Never';
+    if (isToday(date)) return `Today at ${format(date, 'h:mm a')}`;
+    if (isYesterday(date)) return `Yesterday at ${format(date, 'h:mm a')}`;
+    return formatDistanceToNow(date, { addSuffix: true });
+  }
+  
+  // Fallback to status field
+  if (!user.status || !user.status.includes('Logged In_')) return 'Never';
+  
+  const timestamp = user.status.split('Logged In_')[1];
   if (!timestamp) return 'Never';
+  
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) return 'Never';
   if (isToday(date)) return `Today at ${format(date, 'h:mm a')}`;
@@ -246,12 +261,9 @@ const UsersPage: React.FC = () => {
       console.log('✅ Users fetched successfully:', response.data);
       
       const enriched: UserWithStatus[] = response.data.map((u: User) => {
-        const status = u.status || '';
         const { isOnline, sessionExpired } = checkUserOnlineStatus(u);
-        const lastActivity = status || 'Never logged in';
-        const lastLoginDate = status.includes('Logged In_')
-          ? new Date(status.split('Logged In_')[1])
-          : undefined;
+        const lastActivity = u.status || 'Never logged in';
+        const lastLoginDate = u.last_login ? new Date(u.last_login) : undefined;
         
         return { 
           ...u, 
@@ -451,17 +463,17 @@ const UsersPage: React.FC = () => {
         },
       }),
 
-      columnHelper.accessor('lastActivity', {
+      columnHelper.accessor('last_login', {
         header: 'Last Login',
         cell: ({ row }) => {
-          const date = row.original.lastLoginDate;
-          const text = formatLastLogin(row.original.lastActivity);
+          const text = formatLastLogin(row.original);
+          const lastLoginDate = row.original.lastLoginDate;
           return (
             <div className="last-login">
               <span>{text}</span>
-              {date && (
+              {lastLoginDate && (
                 <span className="last-login-full">
-                  {format(date, 'PPPp')}
+                  {format(lastLoginDate, 'PPPp')}
                 </span>
               )}
             </div>

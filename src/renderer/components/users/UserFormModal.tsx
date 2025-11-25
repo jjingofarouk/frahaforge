@@ -1,14 +1,14 @@
-// src/renderer/src/components/users/UserFormModal.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Eye, EyeOff, Key } from 'lucide-react';
-import { User } from '../../types/user.types';
+import { X, Save, Eye, EyeOff, Key, Shield, User } from 'lucide-react';
+import { User as UserType } from '../../types/user.types';
 import { createUser, updateUser } from '../../services/api';
+import authService from '../../services/authService'; // Changed from named import to default import
 import './UserFormModal.css';
 
 interface UserFormModalProps {
   isOpen: boolean;
-  user: User | null;
+  user: UserType | null;
   onClose: () => void;
   onSave: (userData: any) => void;
 }
@@ -20,7 +20,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   onSave,
 }) => {
   const [formData, setFormData] = useState({
-    full_name: '',
+    fullname: '',
     username: '',
     password: '',
     perm_products: 0,
@@ -33,11 +33,15 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Get current user from authService instance
+  const currentUser = authService.getCurrentUser();
+  const isAdmin = currentUser?.perm_users && currentUser?.perm_settings;
 
   useEffect(() => {
     if (user) {
       setFormData({
-        full_name: user.full_name || '',
+        fullname: user.fullname || '',
         username: user.username || '',
         password: '', // Don't show existing password
         perm_products: Number(user.perm_products) || 0,
@@ -48,7 +52,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
       });
     } else {
       setFormData({
-        full_name: '',
+        fullname: '',
         username: '',
         password: '',
         perm_products: 0,
@@ -66,8 +70,13 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.full_name.trim()) newErrors.full_name = 'Full name is required';
+    if (!formData.fullname.trim()) newErrors.fullname = 'Full name is required';
     if (!formData.username.trim()) newErrors.username = 'Username is required';
+    
+    // Username validation
+    if (formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    }
     
     // For new users, password is required
     if (!user && !formData.password) {
@@ -75,8 +84,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
     }
     
     // If password is provided, validate it
-    if (formData.password && formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    if (formData.password && formData.password.length < 4) {
+      newErrors.password = 'Password must be at least 4 characters';
     }
 
     setErrors(newErrors);
@@ -92,17 +101,21 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
     try {
       const payload: any = {
-        fullname: formData.full_name.trim(), // Backend expects 'fullname' but we use 'full_name' in frontend
+        fullname: formData.fullname.trim(),
         username: formData.username.trim(),
-        perm_products: Number(formData.perm_products),
-        perm_categories: Number(formData.perm_categories),
-        perm_transactions: Number(formData.perm_transactions),
-        perm_users: Number(formData.perm_users),
-        perm_settings: Number(formData.perm_settings),
       };
 
-      // Only include password if provided
-      if (formData.password) {
+      // Only include permissions if admin is editing
+      if (isAdmin) {
+        payload.perm_products = Number(formData.perm_products);
+        payload.perm_categories = Number(formData.perm_categories);
+        payload.perm_transactions = Number(formData.perm_transactions);
+        payload.perm_users = Number(formData.perm_users);
+        payload.perm_settings = Number(formData.perm_settings);
+      }
+
+      // Only include password if provided and admin is editing or creating new user
+      if (formData.password && (isAdmin || !user)) {
         payload.password = formData.password;
       }
 
@@ -111,7 +124,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         payload.id = user.id;
         await updateUser(user.id, payload);
       } else {
-        // Create new user
+        // Create new user - admin only
+        if (!isAdmin) {
+          throw new Error('Only administrators can create new users');
+        }
         await createUser(payload);
       }
 
@@ -127,58 +143,152 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   };
 
   const handlePermissionChange = (perm: string, value: number) => {
+    if (!isAdmin) return; // Only admin can change permissions
     setFormData((prev) => ({ ...prev, [perm]: value }));
   };
 
-  const presetRoles = {
-    administrator: { 
-      perm_products: 1, 
-      perm_categories: 1, 
-      perm_transactions: 1, 
-      perm_users: 1, 
-      perm_settings: 1 
-    },
-    manager: { 
-      perm_products: 1, 
-      perm_categories: 1, 
-      perm_transactions: 1, 
-      perm_users: 0, 
-      perm_settings: 0 
-    },
-    dispenser: { 
-      perm_products: 1, 
-      perm_categories: 1, 
-      perm_transactions: 0, 
-      perm_users: 0, 
-      perm_settings: 0 
-    },
-    cashier: { 
-      perm_products: 0, 
-      perm_categories: 0, 
-      perm_transactions: 1, 
-      perm_users: 0, 
-      perm_settings: 0 
-    },
-    limited: { 
-      perm_products: 0, 
-      perm_categories: 0, 
-      perm_transactions: 0, 
-      perm_users: 0, 
-      perm_settings: 0 
-    },
+  // Only show permissions section for admin users
+  const renderPermissionsSection = () => {
+    if (!isAdmin) return null;
+
+    const presetRoles = {
+      administrator: { 
+        perm_products: 1, 
+        perm_categories: 1, 
+        perm_transactions: 1, 
+        perm_users: 1, 
+        perm_settings: 1 
+      },
+      manager: { 
+        perm_products: 1, 
+        perm_categories: 1, 
+        perm_transactions: 1, 
+        perm_users: 0, 
+        perm_settings: 0 
+      },
+      dispenser: { 
+        perm_products: 1, 
+        perm_categories: 1, 
+        perm_transactions: 0, 
+        perm_users: 0, 
+        perm_settings: 0 
+      },
+      cashier: { 
+        perm_products: 0, 
+        perm_categories: 0, 
+        perm_transactions: 1, 
+        perm_users: 0, 
+        perm_settings: 0 
+      },
+      limited: { 
+        perm_products: 0, 
+        perm_categories: 0, 
+        perm_transactions: 0, 
+        perm_users: 0, 
+        perm_settings: 0 
+      },
+    };
+
+    const applyPresetRole = (role: keyof typeof presetRoles) => {
+      setFormData((prev) => ({ ...prev, ...presetRoles[role] }));
+    };
+
+    const getCurrentRole = (): string => {
+      const perms = formData;
+      if (perms.perm_users && perms.perm_settings) return 'administrator';
+      if (perms.perm_products && perms.perm_transactions && !perms.perm_users) return 'manager';
+      if (perms.perm_products && !perms.perm_transactions && !perms.perm_users) return 'dispenser';
+      if (!perms.perm_products && perms.perm_transactions && !perms.perm_users) return 'cashier';
+      return 'limited';
+    };
+
+    return (
+      <>
+        <div className="form-section">
+          <h3>Quick Role Presets</h3>
+          <div className="role-presets">
+            {Object.entries(presetRoles).map(([role, perms]) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => applyPresetRole(role as keyof typeof presetRoles)}
+                className={`preset-btn ${role} ${getCurrentRole() === role ? 'active' : ''}`}
+                disabled={loading}
+              >
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h3>Detailed Permissions</h3>
+          <div className="permissions-grid">
+            {[
+              { key: 'perm_products', label: 'Products Management' },
+              { key: 'perm_categories', label: 'Categories Management' },
+              { key: 'perm_transactions', label: 'Transactions & Sales' },
+              { key: 'perm_users', label: 'User Management' },
+              { key: 'perm_settings', label: 'System Settings' },
+            ].map((p) => (
+              <div key={p.key} className="permission-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={!!formData[p.key as keyof typeof formData]}
+                    onChange={(e) =>
+                      handlePermissionChange(p.key, e.target.checked ? 1 : 0)
+                    }
+                    disabled={loading}
+                  />
+                  {p.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    );
   };
 
-  const applyPresetRole = (role: keyof typeof presetRoles) => {
-    setFormData((prev) => ({ ...prev, ...presetRoles[role] }));
-  };
+  // Render password field based on user type
+  const renderPasswordField = () => {
+    if (user && !isAdmin) {
+      return (
+        <div className="password-info">
+          <Key size={16} />
+          <span>Contact administrator to change your password</span>
+        </div>
+      );
+    }
 
-  const getCurrentRole = (): string => {
-    const perms = formData;
-    if (perms.perm_users && perms.perm_settings) return 'administrator';
-    if (perms.perm_products && perms.perm_transactions && !perms.perm_users) return 'manager';
-    if (perms.perm_products && !perms.perm_transactions && !perms.perm_users) return 'dispenser';
-    if (!perms.perm_products && perms.perm_transactions && !perms.perm_users) return 'cashier';
-    return 'limited';
+    return (
+      <div className="form-group">
+        <label>
+          Password {!user && '*'}
+          {user && <span className="optional">(leave blank to keep current)</span>}
+        </label>
+        <div className="password-input">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
+            className={errors.password ? 'error' : ''}
+            placeholder={user ? "Enter new password" : "Enter password"}
+            disabled={loading}
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            disabled={loading}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+        {errors.password && <span className="error-text">{errors.password}</span>}
+      </div>
+    );
   };
 
   return (
@@ -199,7 +309,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="user-form-header">
-              <h2>{user ? 'Edit User' : 'Create New User'}</h2>
+              <h2>
+                {user ? 'Edit User' : 'Create New User'}
+                {!isAdmin && <span className="user-mode"> (User Mode)</span>}
+              </h2>
               <button className="close-btn" onClick={onClose} disabled={loading}>
                 <X size={24} />
               </button>
@@ -210,13 +323,13 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 <label>Full Name *</label>
                 <input
                   type="text"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData((p) => ({ ...p, full_name: e.target.value }))}
-                  className={errors.full_name ? 'error' : ''}
+                  value={formData.fullname}
+                  onChange={(e) => setFormData((p) => ({ ...p, fullname: e.target.value }))}
+                  className={errors.fullname ? 'error' : ''}
                   placeholder="Enter full name"
                   disabled={loading}
                 />
-                {errors.full_name && <span className="error-text">{errors.full_name}</span>}
+                {errors.fullname && <span className="error-text">{errors.fullname}</span>}
               </div>
 
               <div className="form-group">
@@ -232,75 +345,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 {errors.username && <span className="error-text">{errors.username}</span>}
               </div>
 
-              <div className="form-group">
-                <label>
-                  Password {!user && '*'}
-                  {user && <span className="optional">(leave blank to keep current)</span>}
-                </label>
-                <div className="password-input">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                    className={errors.password ? 'error' : ''}
-                    placeholder={user ? "Enter new password" : "Enter password"}
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={loading}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {errors.password && <span className="error-text">{errors.password}</span>}
-              </div>
+              {renderPasswordField()}
 
-              <div className="form-section">
-                <h3>Quick Role Presets</h3>
-                <div className="role-presets">
-                  {Object.entries(presetRoles).map(([role, perms]) => (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => applyPresetRole(role as keyof typeof presetRoles)}
-                      className={`preset-btn ${role} ${getCurrentRole() === role ? 'active' : ''}`}
-                      disabled={loading}
-                    >
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3>Detailed Permissions</h3>
-                <div className="permissions-grid">
-                  {[
-                    { key: 'perm_products', label: 'Products Management' },
-                    { key: 'perm_categories', label: 'Categories Management' },
-                    { key: 'perm_transactions', label: 'Transactions & Sales' },
-                    { key: 'perm_users', label: 'User Management' },
-                    { key: 'perm_settings', label: 'System Settings' },
-                  ].map((p) => (
-                    <div key={p.key} className="permission-item">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={!!formData[p.key as keyof typeof formData]}
-                          onChange={(e) =>
-                            handlePermissionChange(p.key, e.target.checked ? 1 : 0)
-                          }
-                          disabled={loading}
-                        />
-                        {p.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {renderPermissionsSection()}
 
               {errors.submit && (
                 <div className="form-error">

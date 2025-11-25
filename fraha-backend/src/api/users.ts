@@ -52,6 +52,8 @@ interface User {
     last_login?: string;
     is_logged_in: number;
     created_at: string;
+    session_token?: string;
+    session_expiry?: string;
 }
 
 // ===== PUBLIC ROUTES (Matching former system) =====
@@ -129,17 +131,18 @@ router.post('/login', async (req: Request, res: Response) => {
             });
         }
 
-        // Update user status with timestamp
+        // Update user status with timestamp and set last_login
         const now = new Date().toISOString();
         await dbRun(`
             UPDATE users SET 
                 status = ?,
                 last_login = ?,
-                is_logged_in = 1
+                is_logged_in = 1,
+                session_expiry = datetime('now', '+1 day')
             WHERE id = ?
         `, [
             `Logged In_${now}`,
-            now,
+            now, // Set last_login to current time
             user.id
         ]);
 
@@ -163,7 +166,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 });
 
-// Logout endpoint - matching former system
+// Enhanced logout to preserve last_login
 router.get('/logout/:userId', async (req: Request, res: Response) => {
     try {
         const userId = parseInt(req.params.userId);
@@ -171,10 +174,13 @@ router.get('/logout/:userId', async (req: Request, res: Response) => {
         
         console.log('🚪 Logging out user:', userId);
 
+        // Get current user to preserve last_login (it's already set from login)
         await dbRun(`
             UPDATE users SET 
                 is_logged_in = 0,
-                status = ?
+                status = ?,
+                session_token = NULL,
+                session_expiry = NULL
             WHERE id = ?
         `, [
             `Logged Out_${now}`,
@@ -200,7 +206,7 @@ router.get('/all', async (req: Request, res: Response) => {
         const users = await dbAll(`
             SELECT id, username, fullname, perm_products, perm_categories, 
                    perm_transactions, perm_users, perm_settings, status, 
-                   last_login, is_logged_in, created_at
+                   last_login, is_logged_in, created_at, session_expiry
             FROM users
         `) as User[];
 
@@ -245,10 +251,10 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
     }
 });
 
-// Create or update user - NO AUTHENTICATION REQUIRED
+// Enhanced user update to handle username changes properly
 router.post('/user', async (req: Request, res: Response) => {
     try {
-        console.log('🔄 Creating/updating user (no auth required)');
+        console.log('🔄 Creating/updating user');
         
         const { id, username, fullname, password, ...permissions } = req.body;
 
@@ -257,6 +263,31 @@ router.post('/user', async (req: Request, res: Response) => {
                 error: 'Bad Request', 
                 message: 'Username and fullname are required' 
             });
+        }
+
+        // Check if username already exists (for new users or username changes)
+        if (id) {
+            const existingUser = await dbGet(
+                'SELECT id FROM users WHERE username = ? AND id != ?', 
+                [username, parseInt(id)]
+            );
+            if (existingUser) {
+                return res.status(400).json({
+                    error: 'Bad Request',
+                    message: 'Username already exists'
+                });
+            }
+        } else {
+            const existingUser = await dbGet(
+                'SELECT id FROM users WHERE username = ?', 
+                [username]
+            );
+            if (existingUser) {
+                return res.status(400).json({
+                    error: 'Bad Request',
+                    message: 'Username already exists'
+                });
+            }
         }
 
         // Validate permissions

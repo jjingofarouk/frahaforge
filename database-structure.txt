@@ -1,5 +1,5 @@
 DATABASE STRUCTURE REPORT
-Generated: 11/24/2025, 3:03:18 AM
+Generated: 11/26/2025, 12:40:51 AM
 Database: /Users/mac/Library/Application Support/FrahaPharmacy/server/databases/pharmacy.db
 ================================================================================
 
@@ -17,11 +17,11 @@ COLUMNS:
   reference | TEXT
   created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
 
-ROW COUNT: 185
+ROW COUNT: 193
 
 INDEXES:
 
-SAMPLE DATA (first 5 of 185 rows):
+SAMPLE DATA (first 5 of 193 rows):
   id | date | description | amount | category | payment_method | reference | created_at
   -------------------------------------------------------------------------------------
   1761591256 | 2025-10-27T18:54:16.546Z | Food | 20000 | Utilities | Cash |  | 2025-11-05 11:45:06
@@ -50,9 +50,9 @@ COLUMNS:
   created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
   updated_at | DATETIME DEFAULT CURRENT_TIMESTAMP
 
-ROW COUNT: 37
+ROW COUNT: 38
 
-SAMPLE DATA (first 5 of 37 rows):
+SAMPLE DATA (first 5 of 38 rows):
   id | entry_date | entry_type | description | amount | account_type | category | payment_method | reference_id | reference_table | status | created_by | created_at | updated_at
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   21 | 2025-11-16 | expense | Salary for Pharmacy Manager | 600000 | expense | Salaries | Bank Transfer | 20 | expenses | completed | NULL | 2025-11-16 09:18:58 | 2025-11-16 09:18:58
@@ -296,9 +296,9 @@ COLUMNS:
   created_by | INTEGER
   created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
 
-ROW COUNT: 37
+ROW COUNT: 38
 
-SAMPLE DATA (first 5 of 37 rows):
+SAMPLE DATA (first 5 of 38 rows):
   id | expense_date | description | amount | category | subcategory | payment_method | vendor_name | reference_number | receipt_image | status | due_date | recurring | recurring_frequency | created_by | created_at
   -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   20 | 2025-11-16 | Salary for Pharmacy Manager - Manager | 600000 | Salaries | Manager | Bank Transfer | Pharmacy Manager | NULL | NULL | paid | NULL | 0 | NULL | NULL | 2025-11-16 09:18:58
@@ -457,9 +457,9 @@ COLUMNS:
   new_quantity | INTEGER
   created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
 
-ROW COUNT: 37
+ROW COUNT: 59
 
-SAMPLE DATA (first 5 of 37 rows):
+SAMPLE DATA (first 5 of 59 rows):
   id | product_id | product_name | supplier_id | supplier_name | cost_price | quantity | restock_date | batch_number | previous_quantity | new_quantity | created_at
   ------------------------------------------------------------------------------------------------------------------------------------------------------------------
   1762152625 | 1 | A & E Plasters 20'S Wash Proof - UPDATED | 1762126949 | Abacus Parenteral Drugs Ltd | 10000 | 50 | 2025-11-03T06:50:25.657Z |  | 1111 | 1161 | 2025-11-05 11:45:06
@@ -547,9 +547,9 @@ COLUMNS:
   quantity | INTEGER
   category | TEXT
 
-ROW COUNT: 411
+ROW COUNT: 423
 
-SAMPLE DATA (first 5 of 411 rows):
+SAMPLE DATA (first 5 of 423 rows):
   id | transaction_id | product_id | product_name | price | quantity | category
   -----------------------------------------------------------------------------
   1 | 1760450184 | 334 | Breathezy-L Montelukast/Levocetirizine Tablets 30’s | 30000 | 1 | 
@@ -583,11 +583,11 @@ COLUMNS:
   user_name | TEXT
   created_at | DATETIME DEFAULT CURRENT_TIMESTAMP
 
-ROW COUNT: 284
+ROW COUNT: 292
 
 INDEXES:
 
-SAMPLE DATA (first 5 of 284 rows):
+SAMPLE DATA (first 5 of 292 rows):
   id | order_number | ref_number | discount | customer_id | customer_name | status | subtotal | tax | order_type | total | paid | change_amount | payment_type | payment_info | till | user_id | user_name | created_at
   ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   1760450184 | 1760450184 |  | 0 | NULL | walkin_customer | 1 | 218000 | 0 | 1 | 218000 | 218000 | 0 | Cash |  | 1 | 1 | Administrator | 2025-10-14T13:56:24.259Z
@@ -624,15 +624,15 @@ INDEXES:
 SAMPLE DATA (first 5 of 8 rows):
   id | username | fullname | password | perm_products | perm_categories | perm_transactions | perm_users | perm_settings | status | created_at | last_login | session_token | session_expiry | is_logged_in
   ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  1 | admin | Shakirah | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged In_2025-11-23T15:51:06.713Z | 2025-11-08T23:10:35.332Z | 2025-11-23T15:51:06.713Z | 8ce87f70dab5d31ce095d7c53a25ff58644833c5130aeb0770c4d21908e4133f | 2025-12-09T03:16:54.341Z | 1
-  2 | manager1 | Manager Kizito | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 0 | 1 | Logged Out_2025-11-22T22:06:35.346Z | 2025-11-08T23:10:35.406Z | 2025-11-22T13:04:30.855Z | c838eb0a0b9a738b523d32ad9d0ee8e8fb74847fe0e8ee673f11485d374514d8 | 2025-12-09T02:44:40.383Z | 0
-  3 | manager2 | Admin Assistant | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged Out_2025-11-10T12:43:39.669Z | 2025-11-08T23:10:35.475Z | 2025-11-10T12:43:21.855Z | b39df85b2be91431341cd485114fb78154713fc888306636b78e18518d56f912 | 2025-12-09T02:54:40.298Z | 0
-  4 | cashier1 | Cashier | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 0 | 0 | 1 | 0 | 0 | Active | 2025-11-08T23:10:35.545Z | NULL | NULL | NULL | 0
+  1 | admin | Shakirah | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged In_2025-11-25T21:24:31.217Z | 2025-11-08T23:10:35.332Z | 2025-11-25T21:24:31.217Z | 8ce87f70dab5d31ce095d7c53a25ff58644833c5130aeb0770c4d21908e4133f | 2025-11-26 11:56:53 | 1
+  2 | manager1 | Kizito | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 0 | 1 | Logged Out_2025-11-25T21:24:27.348Z | 2025-11-08T23:10:35.406Z | 2025-11-25T21:23:25.633Z | c838eb0a0b9a738b523d32ad9d0ee8e8fb74847fe0e8ee673f11485d374514d8 | 2025-11-26 12:02:10 | 0
+  3 | manager2 | Admin Assistant | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 1 | 1 | 1 | 1 | 1 | Logged Out_2025-11-25T21:23:15.197Z | 2025-11-08T23:10:35.475Z | 2025-11-25T21:22:30.697Z | b39df85b2be91431341cd485114fb78154713fc888306636b78e18518d56f912 | 2025-12-09T02:54:40.298Z | 0
+  4 | cashier1 | Cashier | $2b$10$DfoLw11n61zYAQvl9pdGIODJlWLGoc47ITjhdh0rGqPdzaZHwymSm | 0 | 0 | 1 | 0 | 0 | Logged Out_2025-11-25T10:36:04.662Z | 2025-11-08T23:10:35.545Z | 2025-11-25T10:35:42.499Z | NULL | NULL | 0
   5 | dispenser1 | Dispenser 1 | $2b$10$S/bD5IOPWqudQCEbbS9xau3rHMPpF9K5EcBIch4fjh8rs8z5AxBG. | 1 | 1 | 0 | 0 | 0 | Logged Out_2025-11-23T14:26:22.264Z | 2025-11-08T23:10:35.615Z | 2025-11-23T14:26:18.603Z | NULL | NULL | 0
 
 ================================================================================
 
 DATABASE SUMMARY:
 - Total tables: 22
-- Total rows across all tables: 9724
+- Total rows across all tables: 9776
 - File size: 3.86 MB

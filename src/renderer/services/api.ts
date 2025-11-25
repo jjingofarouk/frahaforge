@@ -1,4 +1,3 @@
-// src/renderer/src/services/api.ts
 import axios from 'axios';
 import authService from './authService';
 
@@ -86,7 +85,7 @@ api.interceptors.response.use(
 
     let userMessage = 'Operation failed';
     
-if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
       userMessage = `Cannot connect to server at ${API_BASE_URL}. Please ensure the backend server is running.`;
     } else if (error.response?.status === 404) {
       userMessage = 'Resource not found. Please check the ID and try again.';
