@@ -44,7 +44,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, transactionId 
         setLoading(true);
         setError(null);
         try {
-          const response = await axios.get(`http://192.168.1.3:3000/api/${transactionId}`);
+          const response = await axios.get(`http://192.168.1.3:3001/api/${transactionId}`);
           setTransaction(response.data);
         } catch (err) {
           setError('Failed to load transaction');

@@ -68,7 +68,7 @@ const hasProductImage = (product: Product): boolean => {
     .substring(0, 50);
   
   // Check if we have a backend URL stored, otherwise use localhost
-  const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3000';
+  const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3001';
   const imageUrl = `${backendUrl}/assets/product-images/${productId}_${sanitizedName}.jpg`;
   
   // For now, we'll assume products with valid IDs and names have images

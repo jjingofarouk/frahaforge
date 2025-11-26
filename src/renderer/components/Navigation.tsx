@@ -156,16 +156,7 @@ const Navigation: React.FC<NavigationProps> = ({
             </div>
           )}
         </div>
-        
-        {onToggleCollapse && (
-          <button
-            className="nav-toggle-btn"
-            onClick={onToggleCollapse}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
-        )}
+
         
         {isOffline && shouldShowLabels && (
           <div className="offline-indicator" title="You are offline">

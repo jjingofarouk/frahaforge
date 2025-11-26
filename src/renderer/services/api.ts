@@ -2,7 +2,7 @@ import axios from 'axios';
 import authService from './authService';
 
 // SIMPLE: Direct server connection - replace with your actual server IP
-const API_BASE_URL = 'http://192.168.1.3:3000/api';
+const API_BASE_URL = 'http://192.168.1.3:3001/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

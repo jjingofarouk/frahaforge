@@ -1,223 +1,254 @@
 // src/renderer/src/services/inventoryService.ts
 import { withErrorHandling } from './api';
 
-// Interfaces matching the database schema from inventory.ts
+// Interfaces matching the database schema and new features
 export interface Product {
   id: number;
-  barcode: number | null;
-  expirationDate: string | null;
-  price: string | number | null;
-  category: string;
-  category_id?: number;
-  quantity: number;
   name: string;
+  barcode: string;
+  price: number;
+  cost_price: number;
+  category: string;
+  quantity: number;
+  min_stock: number;
   stock: number;
-  minStock: string | null;
-  img: string | null;
-  description?: string;
-  costPrice?: string | number;
-  supplier?: string;
-  lastRestocked?: string;
-  reorderLevel?: number;
-  profitMargin?: string;
-  batchNumber?: string;
-  manufacturer?: string;
-  drugClass?: string;
-  prescriptionRequired?: boolean;
-  sideEffects?: string;
-  storageConditions?: string;
-  activeIngredients?: string;
-  dosageForm?: string;
-  strength?: string;
-  packageSize?: string;
-  isControlledSubstance?: boolean;
-  requiresRefrigeration?: boolean;
-  wholesalePrice?: string;
-  lastPriceUpdate?: string;
-  salesCount?: number;
-  profitAmount?: string;
-  primarySupplierId?: number;
-  suppliers?: any[];
+  expiration_date: string;
+  img: string;
+  description: string;
+  prescription_required: number;
+  is_controlled_substance: number;
+  side_effects: string;
+  supplier: string;
+  last_restocked: string;
+  manufacturer: string;
+  storage_conditions: string;
+  created_at: string;
+  updated_at: string;
+  supplier_id: number;
+  sales_count: number;
+  reorder_level: number;
+}
+
+export interface LowStockAlert {
+  product_id: number;
+  product_name: string;
+  current_quantity: number;
+  min_stock: number;
+  reorder_level: number;
+  last_sold_date: string | null;
+  days_since_last_sale: number | null;
+  category: string;
+  supplier_name: string;
+  supplier_id: number;
+  urgency: 'critical' | 'high' | 'medium';
+}
+
+export interface ExpiringProduct {
+  product_id: number;
+  product_name: string;
+  expiration_date: string;
+  days_until_expiry: number;
+  current_quantity: number;
+  category: string;
+  cost_price: number;
+  price: number;
+  urgency: 'critical' | 'high' | 'medium';
+}
+
+export interface StockMovement {
+  product_id: number;
+  product_name: string;
+  category: string;
+  sales_count: number;
+  total_quantity_sold: number;
+  total_revenue: number;
+  total_cost: number;
+  total_profit: number;
+  profit_margin_percent: number;
+  last_sold_date: string | null;
+  movement_type: 'fast' | 'medium' | 'slow' | 'dead';
+}
+
+export interface ProfitableCategory {
+  category: string;
+  product_count: number;
+  total_quantity_sold: number;
+  total_revenue: number;
+  total_cost: number;
+  total_profit: number;
+  profit_margin_percent: number;
+  transaction_count: number;
+}
+
+export interface RestockSuggestion {
+  product_id: number;
+  product_name: string;
+  current_quantity: number;
+  min_stock: number;
+  reorder_level: number;
+  category: string;
+  supplier_id: number;
+  current_supplier_name: string;
+  sold_last_30_days: number;
+  last_sold_date: string | null;
+  days_since_last_sale: number;
+  last_supplier_name: string;
+  last_supplier_id: number;
+  last_cost_price: number;
+  last_restock_date: string;
+  suggested_quantity: number;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  suggested_supplier: string;
+  suggested_supplier_id: number;
+  suggested_cost_price: number;
+}
+
+export interface SupplierPerformance {
+  supplier_id: number;
+  supplier_name: string;
+  unique_products_supplied: number;
+  total_restocks: number;
+  total_units_supplied: number;
+  average_cost_price: number;
+  min_cost_price: number;
+  max_cost_price: number;
+  last_restock_date: string;
+  current_products: number;
+  current_inventory_value: number;
+  current_avg_cost: number;
+}
+
+export interface PriceHistory {
+  date: string;
+  cost_price: number;
+  supplier_name: string;
+  quantity: number;
+  selling_price_at_time: number;
+  profit_margin_at_time: number;
+  previous_cost_price: number;
+  cost_change_percent: number;
 }
 
 export interface RestockRequest {
   productId: number;
   quantity: number;
-  costPrice: string;
+  costPrice: number;
   supplierId: number;
   batchNumber?: string;
 }
 
-export interface RestockHistory {
-  id: number;
-  product_id: number;
-  product_name: string;
-  supplier_id: number;
-  supplier_name: string;
-  cost_price: string;
+export interface CreateProductRequest {
+  name: string;
+  barcode?: string;
+  price: number;
+  cost_price: number;
+  category: string;
   quantity: number;
-  restock_date: string;
-  batch_number?: string;
-  previous_quantity: number;
-  new_quantity: number;
+  min_stock?: number;
+  expiration_date?: string;
+  description?: string;
+  supplier?: string;
+  supplier_id?: number;
+  manufacturer?: string;
+  prescription_required?: boolean;
+  is_controlled_substance?: boolean;
+  storage_conditions?: string;
+  reorder_level?: number;
 }
 
-export interface TransactionProduct {
-  id: string;
-  quantity: string;
-}
-
-export interface ProductSearchResult {
-  products: Product[];
-  total: number;
-  hasMore: boolean;
-}
-
-export interface StockChange {
-  changed: boolean;
-  increased: boolean;
-  decreased: boolean;
-  difference: number;
-  recorded: boolean;
-  previousQuantity: number;
-  newQuantity: number;
-}
-
-export interface CriticalProductData {
-  basicProducts: Product[];
-  lowStockCount: number;
-  outOfStockCount: number;
-  totalProducts: number;
+export interface UpdateProductRequest {
+  id: number;
+  name?: string;
+  barcode?: string;
+  price?: number;
+  cost_price?: number;
+  category?: string;
+  quantity?: number;
+  min_stock?: number;
+  expiration_date?: string;
+  description?: string;
+  supplier?: string;
+  supplier_id?: number;
+  manufacturer?: string;
+  prescription_required?: boolean;
+  is_controlled_substance?: boolean;
+  storage_conditions?: string;
+  reorder_level?: number;
 }
 
 class InventoryService {
   private baseURL: string;
-  private productsCache: Product[] | null = null;
-  private cacheTimestamp: number | null = null;
-  private readonly CACHE_DURATION = 30000; // 30 seconds
 
   constructor() {
-    this.baseURL = 'http://192.168.1.3:3000/api/inventory';
+    this.baseURL = 'http://192.168.1.3:3001/api';
     console.log('🚀 InventoryService using:', this.baseURL);
   }
 
   // ===== CORE PRODUCT OPERATIONS =====
 
   /**
-   * Get all products with caching
+   * Get all products
    */
-  async getProducts(forceRefresh = false): Promise<Product[]> {
+  async getProducts() {
     return withErrorHandling(async () => {
-      // Return cached data if available and not expired
-      if (!forceRefresh && this.productsCache && this.cacheTimestamp && 
-          Date.now() - this.cacheTimestamp < this.CACHE_DURATION) {
-        console.log('📦 Returning cached products');
-        return this.productsCache;
-      }
+      const response = await fetch(`${this.baseURL}/inventory/products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      console.log('🔄 Fetching products from API...');
-      const response = await fetch(`${this.baseURL}/products`);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const backendProducts = await response.json();
-      
-      // Transform backend data to match frontend interface
-      const products = backendProducts.map(this.transformBackendProduct);
-      
-      // Update cache
-      this.productsCache = products;
-      this.cacheTimestamp = Date.now();
-      
-      console.log(`✅ Loaded ${products.length} products from API`);
-      return products;
+      const data = await response.json();
+      console.log(`✅ InventoryService - Found ${data.length} products`);
+      return data;
     }, 'Failed to fetch products');
   }
 
   /**
-   * Force refresh products (bypass cache)
+   * Get a single product by ID
    */
-  async forceRefresh(): Promise<Product[]> {
-    return this.getProducts(true);
-  }
-
-  /**
-   * Get critical product data for immediate display
-   */
-  async getCriticalProductData(): Promise<CriticalProductData> {
+  async getProduct(productId: number) {
     return withErrorHandling(async () => {
-      console.log('🚀 Loading critical product data for immediate display...');
-      
-      try {
-        // Try to get full products first (they might be cached)
-        const products = await this.getProducts();
-        
-        // Calculate critical counts
-        const lowStockCount = products.filter(p => {
-          const minStockValue = p.minStock ? this.safeParseNumber(p.minStock) : 10;
-          return p.quantity <= minStockValue && p.quantity > 0;
-        }).length;
-        
-        const outOfStockCount = products.filter(p => p.quantity === 0).length;
+      const response = await fetch(`${this.baseURL}/inventory/product/${productId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-        console.log(`✅ Critical data loaded: ${products.length} products`);
-        
-        return {
-          basicProducts: products,
-          lowStockCount,
-          outOfStockCount,
-          totalProducts: products.length
-        };
-      } catch (error) {
-        console.error('Failed to load critical data:', error);
-        throw error;
-      }
-    }, 'Failed to fetch critical product data');
-  }
-
-  /**
-   * Get single product by ID - with cache fallback
-   */
-  async getProduct(productId: number): Promise<Product> {
-    return withErrorHandling(async () => {
-      // Try cache first
-      if (this.productsCache) {
-        const cachedProduct = this.productsCache.find(p => p.id === productId);
-        if (cachedProduct) {
-          return cachedProduct;
-        }
-      }
-
-      const response = await fetch(`${this.baseURL}/product/${productId}`);
-      
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Product not found');
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const backendProduct = await response.json();
-      return this.transformBackendProduct(backendProduct);
+      return response.json();
     }, 'Failed to fetch product');
   }
 
   /**
    * Create a new product
    */
-  async createProduct(productData: Partial<Product>): Promise<{ success: boolean; productId: number }> {
+  async createProduct(productData: CreateProductRequest) {
     return withErrorHandling(async () => {
-      // Transform frontend data to backend format
-      const backendData = this.transformToBackendFormat(productData);
-      
-      const response = await fetch(`${this.baseURL}/product`, {
+      // Validate required fields
+      if (!productData.name || !productData.price || !productData.cost_price || !productData.category) {
+        throw new Error('Missing required product fields: name, price, cost_price, category');
+      }
+
+      console.log(`🔄 Creating new product: ${productData.name}`);
+
+      const response = await fetch(`${this.baseURL}/inventory/product`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(backendData),
+        body: JSON.stringify({
+          ...productData,
+          id: Math.floor(Date.now() / 1000) // Generate timestamp ID like backend expects
+        }),
       });
 
       if (!response.ok) {
@@ -226,30 +257,28 @@ class InventoryService {
       }
 
       const result = await response.json();
-      
-      // Clear cache to force refresh on next load
-      this.clearCache();
-      
+      console.log('✅ Product created successfully:', result);
       return result;
     }, 'Failed to create product');
   }
 
   /**
-   * Update product - replaces direct axios calls in ProductsPage
+   * Update an existing product
    */
-  async updateProduct(productData: any): Promise<{ success: boolean; productId: number }> {
+  async updateProduct(productData: UpdateProductRequest) {
     return withErrorHandling(async () => {
-      console.log('🔄 Updating product via inventory service:', { id: productData.id, name: productData.name });
+      if (!productData.id) {
+        throw new Error('Product ID is required for update');
+      }
 
-      // Transform frontend data to backend format
-      const backendData = this.transformToBackendFormat(productData);
+      console.log(`🔄 Updating product ID: ${productData.id}`);
 
-      const response = await fetch(`${this.baseURL}/product`, {
+      const response = await fetch(`${this.baseURL}/inventory/product`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(backendData),
+        body: JSON.stringify(productData),
       });
 
       if (!response.ok) {
@@ -258,115 +287,17 @@ class InventoryService {
       }
 
       const result = await response.json();
-      
-      // Update cache if exists
-      if (this.productsCache) {
-        const updatedProduct = this.transformBackendProduct(backendData);
-        this.productsCache = this.productsCache.map(p => 
-          p.id === productData.id ? { ...p, ...updatedProduct } : p
-        );
-      }
-      
-      console.log('✅ Product updated successfully via service');
+      console.log('✅ Product updated successfully:', result);
       return result;
     }, 'Failed to update product');
   }
 
   /**
-   * Update product with automatic restock history tracking for stock increases
+   * Delete a product
    */
-  async updateProductWithStockTracking(productData: any): Promise<{ 
-    success: boolean; 
-    productId: number;
-    stockChange?: StockChange;
-  }> {
+  async deleteProduct(productId: number) {
     return withErrorHandling(async () => {
-      console.log('🔄 Updating product with stock tracking:', { 
-        id: productData.id, 
-        name: productData.name,
-        quantity: productData.quantity 
-      });
-
-      // Get current product data to compare quantities
-      const currentProduct = await this.getProduct(productData.id);
-      const previousQuantity = currentProduct.quantity || 0;
-      const newQuantity = productData.quantity || previousQuantity;
-      
-      // Check if stock increased
-      const quantityIncreased = newQuantity > previousQuantity;
-      const quantityAdded = quantityIncreased ? newQuantity - previousQuantity : 0;
-
-      // Transform and send update
-      const backendData = this.transformToBackendFormat(productData);
-      
-      const response = await fetch(`${this.baseURL}/product`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(backendData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      let recorded = false;
-      
-      // If stock increased, create a restock history record
-      if (quantityIncreased && quantityAdded > 0) {
-        try {
-          await this.recordStockAdjustment({
-            productId: productData.id,
-            productName: productData.name,
-            quantity: quantityAdded,
-            costPrice: productData.costPrice?.toString() || currentProduct.costPrice?.toString() || '0',
-            supplierId: productData.primarySupplierId || currentProduct.primarySupplierId || 0,
-            batchNumber: productData.batchNumber || currentProduct.batchNumber || `STOCK-ADJUST-${Date.now()}`,
-            reason: 'Manual stock adjustment'
-          });
-          recorded = true;
-          console.log(`📦 Auto-recorded stock increase: +${quantityAdded} units for product ${productData.name}`);
-        } catch (historyError) {
-          console.error('Failed to record restock history for stock adjustment:', historyError);
-          // Don't fail the main update if history recording fails
-        }
-      }
-
-      // Update cache
-      if (this.productsCache) {
-        const updatedProduct = this.transformBackendProduct(backendData);
-        this.productsCache = this.productsCache.map(p => 
-          p.id === productData.id ? { ...p, ...updatedProduct } : p
-        );
-      }
-      
-      console.log('✅ Product updated successfully with stock tracking');
-      
-      return {
-        ...result,
-        stockChange: {
-          changed: quantityAdded !== 0,
-          increased: quantityIncreased,
-          decreased: false,
-          difference: quantityAdded,
-          recorded,
-          previousQuantity,
-          newQuantity
-        }
-      };
-    }, 'Failed to update product with stock tracking');
-  }
-
-  /**
-   * Delete product
-   */
-  async deleteProduct(productId: number): Promise<{ success: boolean }> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/product/${productId}`, {
+      const response = await fetch(`${this.baseURL}/inventory/product/${productId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -376,26 +307,24 @@ class InventoryService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
-      // Remove from cache
-      if (this.productsCache) {
-        this.productsCache = this.productsCache.filter(p => p.id !== productId);
-      }
-      
-      return { success: true };
+
+      console.log('✅ Product deleted successfully');
+      return { success: true, message: 'Product deleted successfully' };
     }, 'Failed to delete product');
   }
 
-  // ===== RESTOCK OPERATIONS =====
-
   /**
-   * Restock product with supplier integration
+   * Restock a product
    */
-  async restockProduct(restockData: RestockRequest): Promise<any> {
+  async restockProduct(restockData: RestockRequest) {
     return withErrorHandling(async () => {
-      console.log('🔄 Restocking product via inventory service:', restockData);
+      if (!restockData.productId || !restockData.quantity || !restockData.costPrice || !restockData.supplierId) {
+        throw new Error('Missing required restock fields: productId, quantity, costPrice, supplierId');
+      }
 
-      const response = await fetch(`${this.baseURL}/product/restock`, {
+      console.log(`🔄 Restocking product ID: ${restockData.productId}`);
+
+      const response = await fetch(`${this.baseURL}/inventory/product/restock`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -409,105 +338,263 @@ class InventoryService {
       }
 
       const result = await response.json();
-      
-      // Clear cache to force refresh
-      this.clearCache();
-      
-      console.log('✅ Product restocked successfully via service');
+      console.log('✅ Product restocked successfully:', result);
       return result;
     }, 'Failed to restock product');
   }
 
-  /**
-   * Record stock adjustment in restock history
-   */
-  private async recordStockAdjustment(adjustmentData: {
-    productId: number;
-    productName: string;
-    quantity: number;
-    costPrice: string;
-    supplierId: number;
-    batchNumber?: string;
-    reason?: string;
-  }): Promise<void> {
-    return withErrorHandling(async () => {
-      // Use the restock endpoint to record the adjustment
-      const restockData = {
-        productId: adjustmentData.productId,
-        quantity: adjustmentData.quantity,
-        costPrice: adjustmentData.costPrice,
-        supplierId: adjustmentData.supplierId,
-        batchNumber: adjustmentData.batchNumber || `ADJUST-${Date.now()}`
-      };
-
-      await this.restockProduct(restockData);
-    }, 'Failed to record stock adjustment');
-  }
+  // ===== NEW FEATURE: INVENTORY ALERTS =====
 
   /**
-   * Get restock history for a product
+   * Get low stock alerts
    */
-  async getRestockHistory(productId?: number): Promise<RestockHistory[]> {
+  async getLowStockAlerts(params?: { threshold_days?: number }): Promise<LowStockAlert[]> {
     return withErrorHandling(async () => {
-      const url = productId 
-        ? `${this.baseURL}/restock-history?productId=${productId}`
-        : `${this.baseURL}/restock-history`;
-      
-      const response = await fetch(url);
-      
+      const queryParams = new URLSearchParams();
+      if (params?.threshold_days) {
+        queryParams.append('threshold_days', params.threshold_days.toString());
+      }
+
+      const response = await fetch(`${this.baseURL}/inventory/alerts/low-stock?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return response.json();
-    }, 'Failed to fetch restock history');
+      const data = await response.json();
+      console.log(`✅ Found ${data.length} low stock alerts`);
+      return data;
+    }, 'Failed to fetch low stock alerts');
   }
 
   /**
-   * Get stock adjustment history
+   * Get expiring products alerts
    */
-  async getStockAdjustmentHistory(productId?: number): Promise<RestockHistory[]> {
+  async getExpiringProducts(params?: { days?: number }): Promise<ExpiringProduct[]> {
     return withErrorHandling(async () => {
-      const history = await this.getRestockHistory(productId);
-      
-      // Filter for stock adjustments (batch numbers starting with ADJUST- or STOCK-ADJUST-)
-      return history.filter(record => 
-        record.batch_number?.includes('ADJUST-') || 
-        record.batch_number?.includes('STOCK-ADJUST-')
-      );
-    }, 'Failed to fetch stock adjustment history');
-  }
+      const queryParams = new URLSearchParams();
+      if (params?.days) {
+        queryParams.append('days', params.days.toString());
+      }
 
-  // ===== SEARCH OPERATIONS =====
+      const response = await fetch(`${this.baseURL}/inventory/alerts/expiring?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-  /**
-   * Search products
-   */
-  async searchProducts(query: string): Promise<ProductSearchResult> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/products/search?query=${encodeURIComponent(query)}`);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const backendProducts = await response.json();
-      const products = backendProducts.map(this.transformBackendProduct);
-      
-      return {
-        products,
-        total: products.length,
-        hasMore: false
-      };
+      const data = await response.json();
+      console.log(`✅ Found ${data.length} expiring products`);
+      return data;
+    }, 'Failed to fetch expiring products');
+  }
+
+  // ===== NEW FEATURE: STOCK ANALYTICS =====
+
+  /**
+   * Get stock movement analysis
+   */
+  async getStockMovementAnalysis(params?: { period_days?: number }): Promise<StockMovement[]> {
+    return withErrorHandling(async () => {
+      const queryParams = new URLSearchParams();
+      if (params?.period_days) {
+        queryParams.append('period_days', params.period_days.toString());
+      }
+
+      const response = await fetch(`${this.baseURL}/inventory/analytics/movement?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Stock movement analysis for ${data.length} products`);
+      return data;
+    }, 'Failed to fetch stock movement analysis');
+  }
+
+  /**
+   * Get profitable categories
+   */
+  async getProfitableCategories(params?: { period_days?: number }): Promise<ProfitableCategory[]> {
+    return withErrorHandling(async () => {
+      const queryParams = new URLSearchParams();
+      if (params?.period_days) {
+        queryParams.append('period_days', params.period_days.toString());
+      }
+
+      const response = await fetch(`${this.baseURL}/inventory/analytics/profitable-categories?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Profitability data for ${data.length} categories`);
+      return data;
+    }, 'Failed to fetch profitable categories');
+  }
+
+  /**
+   * Get supplier performance
+   */
+  async getSupplierPerformance(): Promise<SupplierPerformance[]> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/inventory/analytics/supplier-performance`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Performance data for ${data.length} suppliers`);
+      return data;
+    }, 'Failed to fetch supplier performance');
+  }
+
+  // ===== NEW FEATURE: RESTOCK SUGGESTIONS =====
+
+  /**
+   * Get smart restock suggestions
+   */
+  async getRestockSuggestions(params?: { include_dead_stock?: boolean }): Promise<RestockSuggestion[]> {
+    return withErrorHandling(async () => {
+      const queryParams = new URLSearchParams();
+      if (params?.include_dead_stock !== undefined) {
+        queryParams.append('include_dead_stock', params.include_dead_stock.toString());
+      }
+
+      const response = await fetch(`${this.baseURL}/inventory/restock-suggestions?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ ${data.length} restock suggestions generated`);
+      return data;
+    }, 'Failed to fetch restock suggestions');
+  }
+
+  // ===== NEW FEATURE: ENHANCED SEARCH =====
+
+  /**
+   * Enhanced product search with supplier history
+   */
+  async searchProductsEnhanced(query: string, includeSuppliers: boolean = true): Promise<any[]> {
+    return withErrorHandling(async () => {
+      if (!query || typeof query !== 'string') {
+        throw new Error('Search query is required');
+      }
+
+      const queryParams = new URLSearchParams({
+        query: query,
+        include_suppliers: includeSuppliers.toString()
+      });
+
+      const response = await fetch(`${this.baseURL}/inventory/products/search-enhanced?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Enhanced search found ${data.length} products for "${query}"`);
+      return data;
     }, 'Failed to search products');
   }
 
   /**
-   * SKU/barcode lookup
+   * Get price history for a product
    */
-  async lookupBySKU(skuCode: string): Promise<Product | null> {
+  async getProductPriceHistory(productId: number): Promise<PriceHistory[]> {
     return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/product/sku`, {
+      const response = await fetch(`${this.baseURL}/inventory/products/${productId}/price-history`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Price history for product ${productId} with ${data.length} entries`);
+      return data;
+    }, 'Failed to fetch price history');
+  }
+
+  // ===== UTILITY METHODS =====
+
+  /**
+   * Search products (basic search)
+   */
+  async searchProducts(query: string) {
+    return withErrorHandling(async () => {
+      if (!query || typeof query !== 'string') {
+        throw new Error('Search query is required');
+      }
+
+      const response = await fetch(`${this.baseURL}/inventory/products/search?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Basic search found ${data.length} products for "${query}"`);
+      return data;
+    }, 'Failed to search products');
+  }
+
+  /**
+   * SKU lookup by barcode
+   */
+  async lookupBySKU(skuCode: string) {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/inventory/product/sku`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -516,269 +603,69 @@ class InventoryService {
       });
 
       if (!response.ok) {
-        if (response.status === 404) {
-          return null;
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const backendProduct = await response.json();
-      return this.transformBackendProduct(backendProduct);
+      return response.json();
     }, 'Failed to lookup product by SKU');
   }
 
-  // ===== INVENTORY MANAGEMENT =====
-
   /**
-   * Decrement inventory (for sales/transactions)
+   * Calculate product statistics
    */
-  async decrementInventory(products: TransactionProduct[]): Promise<void> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/decrement`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ products }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      // Clear cache to force refresh
-      this.clearCache();
-    }, 'Failed to decrement inventory');
-  }
-
-  /**
-   * Get low stock products
-   */
-  async getLowStockProducts(threshold?: number): Promise<Product[]> {
-    const allProducts = await this.getProducts();
-    const minStockThreshold = threshold || 10;
-    
-    return allProducts.filter(product => {
-      const minStockValue = product.minStock ? this.safeParseNumber(product.minStock) : minStockThreshold;
-      return product.quantity <= minStockValue && product.quantity > 0;
-    });
-  }
-
-  /**
-   * Get expired products
-   */
-  async getExpiredProducts(): Promise<Product[]> {
-    const allProducts = await this.getProducts();
-    const today = new Date();
-    
-    return allProducts.filter(product => {
-      if (!product.expirationDate) return false;
-      const expDate = new Date(product.expirationDate);
-      return expDate < today;
-    });
-  }
-
-  /**
-   * Get expiring soon products
-   */
-  async getExpiringSoonProducts(days = 30): Promise<Product[]> {
-    const allProducts = await this.getProducts();
-    const today = new Date();
-    const thresholdDate = new Date();
-    thresholdDate.setDate(today.getDate() + days);
-    
-    return allProducts.filter(product => {
-      if (!product.expirationDate) return false;
-      const expDate = new Date(product.expirationDate);
-      return expDate > today && expDate <= thresholdDate;
-    });
-  }
-
-  // ===== DATA TRANSFORMATION METHODS =====
-
-  /**
-   * Transform backend product data to frontend format
-   */
-  private transformBackendProduct(backendProduct: any): Product {
-    return {
-      id: backendProduct.id,
-      barcode: backendProduct.barcode,
-      expirationDate: backendProduct.expiration_date || backendProduct.expirationDate,
-      price: backendProduct.price,
-      category: backendProduct.category,
-      category_id: backendProduct.category_id,
-      quantity: backendProduct.quantity,
-      name: backendProduct.name,
-      stock: backendProduct.stock,
-      minStock: backendProduct.min_stock || backendProduct.minStock,
-      img: backendProduct.img,
-      description: backendProduct.description,
-      costPrice: backendProduct.cost_price || backendProduct.costPrice,
-      supplier: backendProduct.supplier,
-      lastRestocked: backendProduct.last_restocked || backendProduct.lastRestocked,
-      reorderLevel: backendProduct.reorder_level || backendProduct.reorderLevel,
-      profitMargin: backendProduct.profit_margin || backendProduct.profitMargin,
-      batchNumber: backendProduct.batch_number || backendProduct.batchNumber,
-      manufacturer: backendProduct.manufacturer,
-      drugClass: backendProduct.drug_class || backendProduct.drugClass,
-      prescriptionRequired: backendProduct.prescription_required || backendProduct.prescriptionRequired,
-      sideEffects: backendProduct.side_effects || backendProduct.sideEffects,
-      storageConditions: backendProduct.storage_conditions || backendProduct.storageConditions,
-      activeIngredients: backendProduct.active_ingredients || backendProduct.activeIngredients,
-      dosageForm: backendProduct.dosage_form || backendProduct.dosageForm,
-      strength: backendProduct.strength,
-      packageSize: backendProduct.package_size || backendProduct.packageSize,
-      isControlledSubstance: backendProduct.is_controlled_substance || backendProduct.isControlledSubstance,
-      requiresRefrigeration: backendProduct.requires_refrigeration || backendProduct.requiresRefrigeration,
-      wholesalePrice: backendProduct.wholesale_price || backendProduct.wholesalePrice,
-      lastPriceUpdate: backendProduct.last_price_update || backendProduct.lastPriceUpdate,
-      salesCount: backendProduct.sales_count || backendProduct.salesCount,
-      profitAmount: backendProduct.profit_amount || backendProduct.profitAmount,
-      primarySupplierId: backendProduct.primarySupplierId || backendProduct.primary_supplier_id,
-      suppliers: backendProduct.suppliers
-    };
-  }
-
-  /**
-   * Transform frontend product data to backend format
-   */
-  private transformToBackendFormat(productData: any): any {
-    return {
-      id: productData.id,
-      name: productData.name,
-      barcode: productData.barcode,
-      price: productData.price,
-      quantity: productData.quantity,
-      category: productData.category,
-      expiration_date: productData.expirationDate,
-      min_stock: productData.minStock,
-      description: productData.description,
-      img: productData.img,
-      cost_price: productData.costPrice,
-      supplier: productData.supplier,
-      supplier_id: productData.supplierId,
-      primary_supplier_id: productData.primarySupplierId,
-      manufacturer: productData.manufacturer,
-      batch_number: productData.batchNumber,
-      drug_class: productData.drugClass,
-      dosage_form: productData.dosageForm,
-      strength: productData.strength,
-      active_ingredients: productData.activeIngredients,
-      side_effects: productData.sideEffects,
-      storage_conditions: productData.storageConditions,
-      reorder_level: productData.reorderLevel,
-      sales_count: productData.salesCount,
-      prescription_required: productData.prescriptionRequired,
-      is_controlled_substance: productData.isControlledSubstance,
-      requires_refrigeration: productData.requiresRefrigeration,
-      wholesale_price: productData.wholesalePrice,
-      last_price_update: productData.lastPriceUpdate,
-      profit_amount: productData.profitAmount,
-      profit_margin: productData.profitMargin,
-      last_restocked: productData.lastRestocked,
-      primarySupplierId: productData.primarySupplierId,
-      suppliers: productData.suppliers
-    };
-  }
-
-  /**
-   * Safe number parsing for string or number values
-   */
-  private safeParseNumber(value: string | number | null | undefined): number {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'number') return value;
-    
-    const num = parseFloat(value.toString().replace(/,/g, '').trim());
-    return isNaN(num) ? 0 : num;
-  }
-
-  // ===== STATISTICS AND ANALYTICS =====
-
-  /**
-   * Get inventory statistics
-   */
-  async getInventoryStats(): Promise<{
-    totalProducts: number;
-    lowStockCount: number;
-    outOfStockCount: number;
-    expiredCount: number;
-    expiringSoonCount: number;
-    totalInventoryValue: number;
-  }> {
-    const products = await this.getProducts();
-    
-    const lowStockCount = products.filter(p => {
-      const minStockValue = p.minStock ? this.safeParseNumber(p.minStock) : 10;
-      return p.quantity <= minStockValue && p.quantity > 0;
-    }).length;
-    
-    const outOfStockCount = products.filter(p => p.quantity === 0).length;
-    const expiredCount = (await this.getExpiredProducts()).length;
-    const expiringSoonCount = (await this.getExpiringSoonProducts()).length;
-    
-    const totalInventoryValue = products.reduce((total, product) => {
-      const cost = product.costPrice ? this.safeParseNumber(product.costPrice) : 0;
-      return total + (cost * product.quantity);
-    }, 0);
-
-    return {
+  calculateProductStats(products: Product[]) {
+    const stats = {
       totalProducts: products.length,
-      lowStockCount,
-      outOfStockCount,
-      expiredCount,
-      expiringSoonCount,
-      totalInventoryValue
+      totalValue: 0,
+      lowStockCount: 0,
+      outOfStockCount: 0,
+      categoryBreakdown: {} as Record<string, number>,
+      averagePrice: 0,
+      averageCost: 0
     };
-  }
 
-  // ===== BULK OPERATIONS =====
-
-  /**
-   * Update multiple products at once
-   */
-  async updateProductsBulk(products: Product[]): Promise<{ success: boolean; updated: number }> {
-    return withErrorHandling(async () => {
-      const backendData = products.map(product => this.transformToBackendFormat(product));
+    products.forEach((product) => {
+      stats.totalValue += product.quantity * product.cost_price;
       
-      const response = await fetch(`${this.baseURL}/products/bulk`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ products: backendData }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (product.quantity <= 0) {
+        stats.outOfStockCount++;
+      } else if (product.quantity <= product.min_stock) {
+        stats.lowStockCount++;
       }
 
-      const result = await response.json();
-      
-      // Clear cache to force refresh
-      this.clearCache();
-      
-      return result;
-    }, 'Failed to update products in bulk');
+      stats.categoryBreakdown[product.category] = (stats.categoryBreakdown[product.category] || 0) + 1;
+    });
+
+    stats.averagePrice = products.length > 0 ? products.reduce((sum, p) => sum + p.price, 0) / products.length : 0;
+    stats.averageCost = products.length > 0 ? products.reduce((sum, p) => sum + p.cost_price, 0) / products.length : 0;
+
+    return stats;
   }
 
-  // ===== UTILITY METHODS =====
-
   /**
-   * Validate product data
+   * Validate product data before submission
    */
-  validateProduct(product: Partial<Product>): { isValid: boolean; errors: string[] } {
+  validateProduct(data: CreateProductRequest | UpdateProductRequest): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (!product.name || product.name.trim().length === 0) {
+    if (!data.name || data.name.trim().length === 0) {
       errors.push('Product name is required');
     }
 
-    if (product.quantity === undefined || product.quantity < 0) {
-      errors.push('Quantity must be a non-negative number');
+    if (!data.price || data.price <= 0) {
+      errors.push('Price must be greater than 0');
     }
 
-    if (product.price && this.safeParseNumber(product.price) < 0) {
-      errors.push('Price must be a non-negative number');
+    if (!data.cost_price || data.cost_price <= 0) {
+      errors.push('Cost price must be greater than 0');
+    }
+
+    if (!data.category || data.category.trim().length === 0) {
+      errors.push('Category is required');
+    }
+
+    if (data.quantity !== undefined && data.quantity < 0) {
+      errors.push('Quantity cannot be negative');
     }
 
     return {
@@ -788,29 +675,23 @@ class InventoryService {
   }
 
   /**
-   * Generate next product ID (timestamp-based to match your backend pattern)
+   * Generate urgency level for stock alerts
    */
-  generateProductId(): number {
-    return Math.floor(Date.now() / 1000);
+  getStockUrgency(currentQuantity: number, minStock: number, reorderLevel: number): 'critical' | 'high' | 'medium' | 'low' {
+    if (currentQuantity <= 0) return 'critical';
+    if (currentQuantity <= minStock) return 'high';
+    if (currentQuantity <= reorderLevel) return 'medium';
+    return 'low';
   }
 
   /**
-   * Clear the products cache
+   * Generate expiry urgency
    */
-  clearCache(): void {
-    this.productsCache = null;
-    this.cacheTimestamp = null;
-    console.log('🗑️ Products cache cleared');
-  }
-
-  /**
-   * Get cache status
-   */
-  getCacheStatus(): { hasCache: boolean; age: number | null } {
-    return {
-      hasCache: this.productsCache !== null,
-      age: this.cacheTimestamp ? Date.now() - this.cacheTimestamp : null
-    };
+  getExpiryUrgency(daysUntilExpiry: number): 'critical' | 'high' | 'medium' | 'safe' {
+    if (daysUntilExpiry <= 30) return 'critical';
+    if (daysUntilExpiry <= 60) return 'high';
+    if (daysUntilExpiry <= 90) return 'medium';
+    return 'safe';
   }
 }
 

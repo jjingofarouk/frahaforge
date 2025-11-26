@@ -56,7 +56,7 @@ const getProductId = (product: Product): string => {
 const getLocalImagePath = (product: Product): string => {
   const productId = getProductId(product);
   if (productId === 'unknown') {
-    const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3000';
+    const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3001';
     return `${backendUrl}/assets/product-images/default-product.jpg`;
   }
 
@@ -65,7 +65,7 @@ const getLocalImagePath = (product: Product): string => {
     .replace(/\s+/g, '_')
     .substring(0, 50);
 
-  const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3000';
+  const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3001';
   return `${backendUrl}/assets/product-images/${productId}_${sanitizedName}.jpg`;
 };
 

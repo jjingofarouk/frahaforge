@@ -12,7 +12,7 @@ class CategoriesService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://192.168.1.3:3000/api/categories';
+    this.baseURL = 'http://192.168.1.3:3001/api/categories';
     console.log('🚀 CategoriesService using:', this.baseURL);
   }
 

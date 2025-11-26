@@ -1,0 +1,449 @@
+PHARMACY DATABASE STRUCTURE
+Generated: 2025-11-25T22:56:50.251Z
+Database: /Users/mac/Library/Application Support/FrahaPharmacy/server/databases/pharmacy.db
+
+========================================
+
+TABLE: accounting
+----------------------------------------
+Rows: 193
+
+Columns:
+  id TEXT PRIMARY KEY
+  date DATETIME
+  description TEXT
+  amount DECIMAL(10,2)
+  category TEXT
+  payment_method TEXT
+  reference TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: accounting_entries
+----------------------------------------
+Rows: 38
+
+Columns:
+  id INTEGER PRIMARY KEY
+  entry_date DATETIME NOT NULL
+  entry_type TEXT NOT NULL
+  description TEXT NOT NULL
+  amount DECIMAL(10,2) NOT NULL
+  account_type TEXT NOT NULL
+  category TEXT NOT NULL
+  payment_method TEXT
+  reference_id INTEGER
+  reference_table TEXT
+  status TEXT DEFAULT 'completed'
+  created_by INTEGER
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: accounts_payable
+----------------------------------------
+Rows: 0
+
+Columns:
+  id INTEGER PRIMARY KEY
+  vendor_name TEXT NOT NULL
+  description TEXT NOT NULL
+  amount_due DECIMAL(10,2) NOT NULL
+  amount_paid DECIMAL(10,2) DEFAULT 0.00
+  due_date DATETIME NOT NULL
+  status TEXT DEFAULT 'pending'
+  reference_number TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  paid_at DATETIME
+
+========================================
+
+TABLE: accounts_receivable
+----------------------------------------
+Rows: 0
+
+Columns:
+  id INTEGER PRIMARY KEY
+  transaction_id INTEGER
+  customer_id INTEGER
+  customer_name TEXT NOT NULL
+  description TEXT NOT NULL
+  amount_due DECIMAL(10,2) NOT NULL
+  amount_paid DECIMAL(10,2) DEFAULT 0.00
+  due_date DATETIME NOT NULL
+  status TEXT DEFAULT 'pending'
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  paid_at DATETIME
+
+========================================
+
+TABLE: cash_flow
+----------------------------------------
+Rows: 0
+
+Columns:
+  id INTEGER PRIMARY KEY
+  flow_date DATETIME NOT NULL
+  description TEXT NOT NULL
+  amount DECIMAL(10,2) NOT NULL
+  flow_type TEXT NOT NULL
+  category TEXT NOT NULL
+  payment_method TEXT
+  reference_id INTEGER
+  balance_after DECIMAL(10,2)
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: categories
+----------------------------------------
+Rows: 183
+
+Columns:
+  id INTEGER PRIMARY KEY
+  name TEXT NOT NULL
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: chart_of_accounts
+----------------------------------------
+Rows: 19
+
+Columns:
+  id INTEGER PRIMARY KEY
+  account_code TEXT NOT NULL
+  account_name TEXT NOT NULL
+  account_type TEXT NOT NULL
+  parent_account_id INTEGER
+  is_active BOOLEAN DEFAULT TRUE
+  description TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: customers
+----------------------------------------
+Rows: 68
+
+Columns:
+  id INTEGER PRIMARY KEY
+  name TEXT NOT NULL
+  phone TEXT
+  email TEXT
+  address TEXT
+  store TEXT DEFAULT 'FrahaPharmacy'
+  loyalty_points INTEGER DEFAULT 0
+  total_spent DECIMAL(10,2) DEFAULT 0.00
+  total_orders INTEGER DEFAULT 0
+  last_order_date DATETIME
+  average_order_value DECIMAL(10,2) DEFAULT 0.00
+  favorite_category TEXT
+  segment TEXT DEFAULT 'new'
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: customers_backup
+----------------------------------------
+Rows: 59
+
+Columns:
+  id TEXT
+  name TEXT
+  phone TEXT
+  email TEXT
+  address TEXT
+  store TEXT
+  loyalty_points INT
+  total_spent NUM
+  total_orders INT
+  customer_type TEXT
+  created_at NUM
+  updated_at NUM
+  last_order_date NUM
+  average_order_value NUM
+  favorite_category TEXT
+  segment TEXT
+
+========================================
+
+TABLE: employees
+----------------------------------------
+Rows: 7
+
+Columns:
+  id INTEGER PRIMARY KEY
+  name TEXT NOT NULL
+  position TEXT NOT NULL
+  department TEXT NOT NULL
+  email TEXT
+  phone TEXT
+  hire_date DATETIME NOT NULL
+  monthly_salary DECIMAL(10,2) NOT NULL
+  bank_account TEXT
+  bank_name TEXT
+  nssf_number TEXT
+  tin_number TEXT
+  status TEXT DEFAULT 'active'
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: expenses
+----------------------------------------
+Rows: 38
+
+Columns:
+  id INTEGER PRIMARY KEY
+  expense_date DATETIME NOT NULL
+  description TEXT NOT NULL
+  amount DECIMAL(10,2) NOT NULL
+  category TEXT NOT NULL
+  subcategory TEXT
+  payment_method TEXT NOT NULL
+  vendor_name TEXT
+  reference_number TEXT
+  receipt_image TEXT
+  status TEXT DEFAULT 'paid'
+  due_date DATETIME
+  recurring BOOLEAN DEFAULT FALSE
+  recurring_frequency TEXT
+  created_by INTEGER
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: payroll_items
+----------------------------------------
+Rows: 7
+
+Columns:
+  id INTEGER PRIMARY KEY
+  payroll_run_id INTEGER
+  employee_id INTEGER
+  employee_name TEXT NOT NULL
+  position TEXT NOT NULL
+  department TEXT NOT NULL
+  basic_salary DECIMAL(10,2) NOT NULL
+  allowances DECIMAL(10,2) DEFAULT 0.00
+  deductions DECIMAL(10,2) DEFAULT 0.00
+  net_pay DECIMAL(10,2) NOT NULL
+  bank_name TEXT
+  bank_account TEXT
+  status TEXT DEFAULT 'paid'
+  expense_id INTEGER
+  accounting_entry_id INTEGER
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+Foreign Keys:
+  employee_id → employees.id
+  payroll_run_id → payroll_runs.id
+
+========================================
+
+TABLE: payroll_runs
+----------------------------------------
+Rows: 1
+
+Columns:
+  id INTEGER PRIMARY KEY
+  run_date DATETIME NOT NULL
+  period_start DATE NOT NULL
+  period_end DATE NOT NULL
+  total_amount DECIMAL(10,2) NOT NULL
+  employee_count INTEGER NOT NULL
+  status TEXT DEFAULT 'completed'
+  processed_by INTEGER
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: products
+----------------------------------------
+Rows: 7877
+
+Columns:
+  id INTEGER PRIMARY KEY
+  name TEXT NOT NULL
+  barcode TEXT
+  price DECIMAL(10,2)
+  cost_price DECIMAL(10,2)
+  category TEXT
+  quantity INTEGER DEFAULT 0
+  min_stock INTEGER DEFAULT 0
+  stock INTEGER DEFAULT 1
+  expiration_date TEXT
+  img TEXT
+  description TEXT
+  prescription_required INTEGER DEFAULT 0
+  is_controlled_substance INTEGER DEFAULT 0
+  side_effects TEXT
+  supplier TEXT
+  last_restocked DATETIME
+  manufacturer TEXT
+  storage_conditions TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  supplier_id INTEGER
+  sales_count INTEGER DEFAULT 0
+  reorder_level INTEGER DEFAULT 0
+
+========================================
+
+TABLE: profit_loss_summaries
+----------------------------------------
+Rows: 342
+
+Columns:
+  id INTEGER PRIMARY KEY
+  period TEXT NOT NULL
+  total_revenue DECIMAL(10,2) DEFAULT 0.00
+  total_cogs DECIMAL(10,2) DEFAULT 0.00
+  gross_profit DECIMAL(10,2) DEFAULT 0.00
+  operating_expenses DECIMAL(10,2) DEFAULT 0.00
+  net_profit DECIMAL(10,2) DEFAULT 0.00
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: restock_history
+----------------------------------------
+Rows: 64
+
+Columns:
+  id INTEGER PRIMARY KEY
+  product_id INTEGER
+  product_name TEXT
+  supplier_id INTEGER
+  supplier_name TEXT
+  cost_price DECIMAL(10,2)
+  quantity INTEGER
+  restock_date DATETIME
+  batch_number TEXT
+  previous_quantity INTEGER
+  new_quantity INTEGER
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: settings
+----------------------------------------
+Rows: 1
+
+Columns:
+  id INTEGER PRIMARY KEY
+  store_name TEXT DEFAULT 'Fraha Pharmacy'
+  address_one TEXT DEFAULT 'Old Kampala, Uganda'
+  address_two TEXT DEFAULT 'Kampala, Uganda'
+  contact TEXT DEFAULT '0751360385'
+  tax_rate DECIMAL(5,2) DEFAULT 10.00
+  currency_symbol TEXT DEFAULT 'UGX'
+  charge_tax INTEGER DEFAULT 0
+  footer_text TEXT DEFAULT 'Fraha Pharmacy 2025'
+  logo_path TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  network_settings TEXT
+
+========================================
+
+TABLE: suppliers
+----------------------------------------
+Rows: 161
+
+Columns:
+  id INTEGER PRIMARY KEY
+  name TEXT NOT NULL
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  seeded INTEGER DEFAULT 0
+
+========================================
+
+TABLE: tax_records
+----------------------------------------
+Rows: 0
+
+Columns:
+  id INTEGER PRIMARY KEY
+  period TEXT NOT NULL
+  tax_type TEXT NOT NULL
+  taxable_amount DECIMAL(10,2) NOT NULL
+  tax_rate DECIMAL(5,2) NOT NULL
+  tax_amount DECIMAL(10,2) NOT NULL
+  due_date DATETIME NOT NULL
+  status TEXT DEFAULT 'pending'
+  payment_date DATETIME
+  reference_number TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: transaction_items
+----------------------------------------
+Rows: 423
+
+Columns:
+  id INTEGER PRIMARY KEY
+  transaction_id TEXT
+  product_id INTEGER
+  product_name TEXT
+  price DECIMAL(10,2)
+  quantity INTEGER
+  category TEXT
+
+========================================
+
+TABLE: transactions
+----------------------------------------
+Rows: 292
+
+Columns:
+  id TEXT PRIMARY KEY
+  order_number INTEGER
+  ref_number TEXT
+  discount DECIMAL(10,2) DEFAULT 0.00
+  customer_id TEXT
+  customer_name TEXT DEFAULT 'walkin_customer'
+  status INTEGER DEFAULT 1
+  subtotal DECIMAL(10,2)
+  tax DECIMAL(10,2)
+  order_type INTEGER DEFAULT 1
+  total DECIMAL(10,2)
+  paid DECIMAL(10,2)
+  change_amount DECIMAL(10,2)
+  payment_type TEXT
+  payment_info TEXT
+  till INTEGER DEFAULT 1
+  user_id INTEGER
+  user_name TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+========================================
+
+TABLE: users
+----------------------------------------
+Rows: 8
+
+Columns:
+  id INTEGER PRIMARY KEY
+  username TEXT NOT NULL
+  fullname TEXT NOT NULL
+  password TEXT NOT NULL
+  perm_products INTEGER DEFAULT 0
+  perm_categories INTEGER DEFAULT 0
+  perm_transactions INTEGER DEFAULT 0
+  perm_users INTEGER DEFAULT 0
+  perm_settings INTEGER DEFAULT 0
+  status TEXT
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  last_login DATETIME
+  session_token TEXT
+  session_expiry DATETIME
+  is_logged_in BOOLEAN DEFAULT FALSE
+
+========================================
+

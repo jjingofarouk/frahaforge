@@ -53,7 +53,7 @@ const ProductsModal: React.FC<ProductsModalProps> = ({ isOpen, onClose, onEditPr
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://192.168.1.3:3000/api/inventory/products');
+      const response = await axios.get('http://192.168.1.3:3001/api/inventory/products');
       setProducts(response.data);
     } catch (err) {
       console.error('Failed to fetch products:', err);
@@ -65,7 +65,7 @@ const ProductsModal: React.FC<ProductsModalProps> = ({ isOpen, onClose, onEditPr
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://192.168.1.3:3000/api/categories/all');
+      const response = await axios.get('http://192.168.1.3:3001/api/categories/all');
       setCategories(response.data);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -93,7 +93,7 @@ const ProductsModal: React.FC<ProductsModalProps> = ({ isOpen, onClose, onEditPr
 
     try {
       setLoading(true);
-      await axios.delete(`http://192.168.1.3:3000/api/inventory/product/${productId}`);
+      await axios.delete(`http://192.168.1.3:3001/api/inventory/product/${productId}`);
       
       // Update local state
       setProducts(prev => prev.filter(product => product.id !== productId));

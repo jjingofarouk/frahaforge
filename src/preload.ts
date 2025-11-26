@@ -72,7 +72,7 @@ const backendAPI = {
   fetch: async (endpoint: string, options: RequestInit = {}) => {
     try {
       // FIXED: Direct URL - no store lookup
-      const backendUrl = 'http://192.168.1.3:3000';
+      const backendUrl = 'http://192.168.1.3:3001';
       
       const response = await fetch(`${backendUrl}${endpoint}`, {
         headers: {
@@ -103,7 +103,7 @@ const backendAPI = {
     backendAPI.fetch(endpoint, { method: 'DELETE' }),
     
   // FIXED: Simple URL getter
-  getBackendUrl: () => 'http://192.168.1.3:3000'
+  getBackendUrl: () => 'http://192.168.1.3:3001'
 };
 
 // Expose to renderer

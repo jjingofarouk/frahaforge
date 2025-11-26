@@ -28,7 +28,7 @@ const NewCategory: React.FC<NewCategoryProps> = ({ isOpen, onClose, onCategoryAd
     setError(null);
 
     try {
-      await axios.post('http://192.168.1.3:3000/api/categories/category', {
+      await axios.post('http://192.168.1.3:3001/api/categories/category', {
         name: categoryName.trim()
       });
 

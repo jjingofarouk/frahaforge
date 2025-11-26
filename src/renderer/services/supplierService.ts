@@ -1,7 +1,7 @@
-// src/renderer/src/services/suppliersService.ts
+// src/renderer/src/services/supplierService.ts
 import { withErrorHandling } from './api';
 
-// Updated interfaces matching the fixed API
+// Interfaces matching the database schema and new features
 export interface Supplier {
   id: number;
   name: string;
@@ -9,6 +9,93 @@ export interface Supplier {
   total_products?: number;
   unique_products_restocked?: number;
   last_restock_date?: string;
+}
+
+export interface SupplierDashboard {
+  top_suppliers: TopSupplier[];
+  supplier_activity: SupplierActivity[];
+  recent_restocks: RecentRestock[];
+}
+
+export interface TopSupplier {
+  id: number;
+  name: string;
+  unique_products_supplied: number;
+  total_restocks: number;
+  total_units_supplied: number;
+  total_value_supplied: number;
+  average_cost_price: number;
+  last_restock_date: string;
+  current_products: number;
+  current_inventory_value: number;
+}
+
+export interface SupplierActivity {
+  month: string;
+  active_suppliers: number;
+  total_restocks: number;
+  total_units: number;
+  total_value: number;
+}
+
+export interface RecentRestock {
+  supplier_name: string;
+  product_name: string;
+  quantity: number;
+  cost_price: number;
+  restock_date: string;
+  total_cost: number;
+}
+
+export interface SupplierContactInfo {
+  supplier_id: number;
+  supplier_name: string;
+  extracted_phones: string[];
+  suggested_actions: {
+    call: string | null;
+    whatsapp: string | null;
+    email: string | null;
+  };
+  recent_products: Array<{
+    product_name: string;
+    restock_date: string;
+    last_cost: number;
+  }>;
+}
+
+export interface PriceTrend {
+  product_id: number;
+  product_name: string;
+  price_history: Array<{
+    date: string;
+    cost_price: number;
+    price_change_percent: number;
+  }>;
+  current_price: number;
+  current_profit_margin: number;
+  average_price: number;
+  price_volatility: number;
+  trend: 'increasing' | 'decreasing' | 'stable';
+}
+
+export interface SupplierReliability {
+  supplier_id: number;
+  supplier_name: string;
+  reliability_score: number;
+  score_breakdown: {
+    recency: number;
+    volume: number;
+    variety: number;
+    price_consistency: number;
+  };
+  key_metrics: {
+    total_restocks: number;
+    unique_products: number;
+    total_units: number;
+    days_since_last_order: number;
+    current_products: number;
+  };
+  recommendation: string;
 }
 
 export interface ProductSupplierComparison {
@@ -22,66 +109,35 @@ export interface ProductSupplierComparison {
     current_supplier: string;
     current_supplier_id: number;
   };
-  supplier_comparison: Array<{
-    supplier_id: number;
-    supplier_name: string;
-    cost_price: number;
-    quantity: number;
-    restock_date: string;
-    batch_number: string;
-    total_cost: number;
-    total_restocks: number;
-    average_cost_price: number;
-    total_quantity_supplied: number;
-    best_price: number;
-    worst_price: number;
-    last_supply_date: string;
-  }>;
-  current_supplier_performance: any;
+  supplier_comparison: SupplierComparison[];
+  current_supplier_performance: SupplierComparison | null;
   summary: {
     total_suppliers: number;
     price_range: number;
-    best_supplier: any;
-    most_reliable_supplier: any;
+    best_supplier: SupplierComparison | null;
+    most_reliable_supplier: SupplierComparison | null;
   };
 }
 
-export interface RecentRestock {
-  product_id: number;
-  product_name: string;
+export interface SupplierComparison {
   supplier_id: number;
   supplier_name: string;
   cost_price: number;
   quantity: number;
   restock_date: string;
-  current_cost_price: number;
-  current_supplier_id: number;
-  current_supplier_name: string;
+  batch_number: string;
   total_cost: number;
-  price_difference: number;
-  batch_number?: string;
+  total_restocks: number;
+  average_cost_price: number;
+  total_quantity_supplied: number;
+  best_price: number;
+  worst_price: number;
+  last_supply_date: string;
 }
 
 export interface SupplierProductPortfolio {
   supplier: Supplier;
-  products: Array<{
-    id: number;
-    name: string;
-    barcode: string;
-    category: string;
-    quantity: number;
-    current_cost: number;
-    selling_price: number;
-    profit_margin: number;
-    last_restocked: string;
-    times_supplied: number;
-    average_historical_cost: number;
-    best_price_from_supplier: number;
-    worst_price_from_supplier: number;
-    supplier_relationship: 'current' | 'historical';
-    current_supplier_id: number;
-    current_supplier_name: string;
-  }>;
+  products: SupplierProduct[];
   performance: {
     unique_products_supplied: number;
     total_units_supplied: number;
@@ -94,6 +150,25 @@ export interface SupplierProductPortfolio {
   };
 }
 
+export interface SupplierProduct {
+  id: number;
+  name: string;
+  barcode: string;
+  category: string;
+  quantity: number;
+  current_cost: number;
+  selling_price: number;
+  profit_margin: number;
+  last_restocked: string;
+  current_supplier_id: number;
+  current_supplier_name: string;
+  times_supplied: number;
+  average_historical_cost: number;
+  best_price_from_supplier: number;
+  worst_price_from_supplier: number;
+  supplier_relationship: 'current' | 'historical';
+}
+
 export interface BulkRestockItem {
   productId: number;
   quantity: number;
@@ -101,132 +176,43 @@ export interface BulkRestockItem {
   batchNumber?: string;
 }
 
-export interface BulkRestockResult {
-  success: boolean;
-  results: Array<{
-    productId: number;
-    success: boolean;
-    error?: string;
-  }>;
-  message: string;
+export interface CreateSupplierRequest {
+  name: string;
 }
 
-class SuppliersService {
+class SupplierService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://192.168.1.3:3000/api/suppliers';
-    console.log('🚀 SuppliersService using:', this.baseURL);
+    this.baseURL = 'http://192.168.1.3:3001/api';
+    console.log('🚀 SupplierService using:', this.baseURL);
   }
 
-  // ===== DASHBOARD FEATURES =====
-
-  /**
-   * Get recently restocked products (Dashboard default view)
-   */
-  async getRecentRestocks(limit: number = 5): Promise<RecentRestock[]> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/recent-restocks?limit=${limit}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }, 'Failed to fetch recent restocks');
-  }
-
-  // ===== PRODUCT SEARCH & COMPARISON =====
-
-  /**
-   * Search products with supplier history
-   */
-  async searchProducts(query: string, limit: number = 10): Promise<any[]> {
-    return withErrorHandling(async () => {
-      const response = await fetch(
-        `${this.baseURL}/products/search?q=${encodeURIComponent(query)}&limit=${limit}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }, 'Failed to search products');
-  }
-
-  /**
-   * Get product supplier comparison
-   */
-  async getProductSupplierComparison(productId: number): Promise<ProductSupplierComparison> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/products/${productId}/suppliers`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }, 'Failed to fetch product supplier comparison');
-  }
-
-  // ===== SUPPLIER SEARCH & ANALYSIS =====
-
-  /**
-   * Search suppliers
-   */
-  async searchSuppliers(query: string, limit: number = 10): Promise<Supplier[]> {
-    return withErrorHandling(async () => {
-      const response = await fetch(
-        `${this.baseURL}/search?q=${encodeURIComponent(query)}&limit=${limit}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }, 'Failed to search suppliers');
-  }
-
-  /**
-   * Get supplier product portfolio
-   */
-  async getSupplierPortfolio(supplierId: number): Promise<SupplierProductPortfolio> {
-    return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/${supplierId}/products`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }, 'Failed to fetch supplier portfolio');
-  }
-
-  // ===== BASIC SUPPLIER OPERATIONS =====
+  // ===== CORE SUPPLIER OPERATIONS =====
 
   /**
    * Get all suppliers
    */
-  async getSuppliers(search?: string): Promise<Supplier[]> {
+  async getSuppliers(params?: { search?: string }): Promise<Supplier[]> {
     return withErrorHandling(async () => {
-      const url = search 
-        ? `${this.baseURL}?search=${encodeURIComponent(search)}`
-        : this.baseURL;
+      const queryParams = new URLSearchParams();
+      if (params?.search) {
+        queryParams.append('search', params.search);
+      }
 
-      const response = await fetch(url);
+      const response = await fetch(`${this.baseURL}/suppliers?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log(`✅ SupplierService - Found ${data.length} suppliers`);
       return data;
     }, 'Failed to fetch suppliers');
   }
@@ -234,33 +220,189 @@ class SuppliersService {
   /**
    * Create a new supplier
    */
-  async createSupplier(name: string): Promise<{ success: boolean; supplierId: number; message: string }> {
+  async createSupplier(supplierData: CreateSupplierRequest) {
     return withErrorHandling(async () => {
-      const response = await fetch(this.baseURL, {
+      if (!supplierData.name || supplierData.name.trim().length === 0) {
+        throw new Error('Supplier name is required');
+      }
+
+      console.log(`🔄 Creating new supplier: ${supplierData.name}`);
+
+      const response = await fetch(`${this.baseURL}/suppliers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify(supplierData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Supplier created successfully:', result);
+      return result;
+    }, 'Failed to create supplier');
+  }
+
+  // ===== NEW FEATURE: SUPPLIER DASHBOARD =====
+
+  /**
+   * Get supplier dashboard data
+   */
+  async getSupplierDashboard(): Promise<SupplierDashboard> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/dashboard`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-      return result;
-    }, 'Failed to create supplier');
+      const data = await response.json();
+      console.log('✅ Supplier dashboard data loaded');
+      return data;
+    }, 'Failed to fetch supplier dashboard');
   }
 
-  // ===== RESTOCK OPERATIONS =====
+  // ===== NEW FEATURE: SUPPLIER CONTACT INTEGRATION =====
 
   /**
-   * Process bulk restock from supplier
+   * Get supplier contact information with phone extraction
    */
-  async bulkRestock(supplierId: number, restockItems: BulkRestockItem[]): Promise<BulkRestockResult> {
+  async getSupplierContactInfo(supplierId: number): Promise<SupplierContactInfo> {
     return withErrorHandling(async () => {
-      const response = await fetch(`${this.baseURL}/${supplierId}/bulk-restock`, {
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}/contact-info`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Contact info for supplier ${supplierId} with ${data.extracted_phones.length} phone numbers`);
+      return data;
+    }, 'Failed to fetch supplier contact info');
+  }
+
+  // ===== NEW FEATURE: PRICE TREND ANALYSIS =====
+
+  /**
+   * Get supplier price trends
+   */
+  async getSupplierPriceTrends(supplierId: number): Promise<PriceTrend[]> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}/price-trends`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Price trends for supplier ${supplierId} with ${data.length} products`);
+      return data;
+    }, 'Failed to fetch supplier price trends');
+  }
+
+  // ===== NEW FEATURE: SUPPLIER RELIABILITY SCORING =====
+
+  /**
+   * Get supplier reliability score
+   */
+  async getSupplierReliability(supplierId: number): Promise<SupplierReliability> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}/reliability`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Reliability score for supplier ${supplierId}: ${data.reliability_score}`);
+      return data;
+    }, 'Failed to fetch supplier reliability');
+  }
+
+  // ===== PRODUCT-SUPPLIER RELATIONSHIP ANALYSIS =====
+
+  /**
+   * Get product supplier comparison
+   */
+  async getProductSupplierComparison(productId: number): Promise<ProductSupplierComparison> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/products/${productId}/suppliers`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Supplier comparison for product ${productId} with ${data.supplier_comparison.length} suppliers`);
+      return data;
+    }, 'Failed to fetch product supplier comparison');
+  }
+
+  /**
+   * Get supplier product portfolio
+   */
+  async getSupplierProductPortfolio(supplierId: number): Promise<SupplierProductPortfolio> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}/products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Product portfolio for supplier ${supplierId} with ${data.products.length} products`);
+      return data;
+    }, 'Failed to fetch supplier product portfolio');
+  }
+
+  // ===== BULK OPERATIONS =====
+
+  /**
+   * Bulk restock from supplier
+   */
+  async bulkRestockFromSupplier(supplierId: number, restockItems: BulkRestockItem[]) {
+    return withErrorHandling(async () => {
+      if (!Array.isArray(restockItems) || restockItems.length === 0) {
+        throw new Error('Restock items are required');
+      }
+
+      console.log(`🔄 Bulk restocking ${restockItems.length} items from supplier ${supplierId}`);
+
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}/bulk-restock`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,123 +411,174 @@ class SuppliersService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('✅ Bulk restock completed:', result);
       return result;
     }, 'Failed to process bulk restock');
+  }
+
+  // ===== SEARCH AND FILTERING =====
+
+  /**
+   * Search suppliers
+   */
+  async searchSuppliers(query: string, limit: number = 10): Promise<Supplier[]> {
+    return withErrorHandling(async () => {
+      if (!query || typeof query !== 'string') {
+        throw new Error('Search query is required');
+      }
+
+      const response = await fetch(`${this.baseURL}/suppliers/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Supplier search found ${data.length} results for "${query}"`);
+      return data;
+    }, 'Failed to search suppliers');
+  }
+
+  /**
+   * Search products with supplier context
+   */
+  async searchProductsWithSuppliers(query: string, limit: number = 10): Promise<any[]> {
+    return withErrorHandling(async () => {
+      if (!query || typeof query !== 'string') {
+        throw new Error('Search query is required');
+      }
+
+      const response = await fetch(`${this.baseURL}/suppliers/products/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ Product search with suppliers found ${data.length} results for "${query}"`);
+      return data;
+    }, 'Failed to search products with suppliers');
   }
 
   // ===== UTILITY METHODS =====
 
   /**
-   * Get best supplier for a product based on historical data
+   * Get recently restocked products
    */
-  getBestSupplier(comparison: ProductSupplierComparison): any {
-    return comparison.summary.best_supplier;
-  }
+  async getRecentRestocks(limit: number = 5): Promise<any[]> {
+    return withErrorHandling(async () => {
+      const response = await fetch(`${this.baseURL}/suppliers/recent-restocks?limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-  /**
-   * Get most reliable supplier for a product
-   */
-  getMostReliableSupplier(comparison: ProductSupplierComparison): any {
-    return comparison.summary.most_reliable_supplier;
-  }
-
-  /**
-   * Calculate potential savings from switching suppliers
-   */
-  calculatePotentialSavings(comparison: ProductSupplierComparison, monthlyUsage: number = 1): number {
-    const currentSupplier = comparison.current_supplier_performance;
-    const bestSupplier = comparison.summary.best_supplier;
-
-    if (!currentSupplier || !bestSupplier) return 0;
-
-    const currentMonthlyCost = currentSupplier.average_cost_price * monthlyUsage;
-    const bestMonthlyCost = bestSupplier.average_cost_price * monthlyUsage;
-    
-    return currentMonthlyCost - bestMonthlyCost;
-  }
-
-  /**
-   * Format price for display
-   */
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('en-UG', {
-      style: 'currency',
-      currency: 'UGX'
-    }).format(price);
-  }
-
-  /**
-   * Get supplier performance rating
-   */
-  getSupplierPerformanceRating(portfolio: SupplierProductPortfolio): number {
-    const performance = portfolio.performance;
-    
-    let rating = 5; // Start with perfect score
-    
-    // Deduct points for high price variability
-    if (performance.price_variability > performance.average_cost_across_products * 0.2) {
-      rating -= 1;
-    }
-    
-    // Deduct points for low restock frequency
-    if (performance.total_restock_events === 0) {
-      rating -= 2;
-    } else if (performance.total_restock_events < 3) {
-      rating -= 1;
-    }
-    
-    // Deduct points if last restock was more than 30 days ago
-    if (performance.last_restock_date) {
-      const lastRestock = new Date(performance.last_restock_date);
-      const daysSinceLastRestock = (Date.now() - lastRestock.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceLastRestock > 30) {
-        rating -= 1;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }
-    
-    return Math.max(1, rating); // Minimum 1 star
+
+      const data = await response.json();
+      console.log(`✅ Retrieved ${data.length} recent restocks`);
+      return data;
+    }, 'Failed to fetch recent restocks');
   }
 
   /**
-   * Generate quick supplier comparison summary
+   * Validate supplier data
    */
-  generateComparisonSummary(comparison: ProductSupplierComparison): string {
-    const { total_suppliers, price_range, best_supplier } = comparison.summary;
-    
-    const currentCost = comparison.product.current_cost_price;
-    const bestCost = best_supplier?.average_cost_price || currentCost;
-    const savings = currentCost - bestCost;
-    const savingsPercent = ((savings / currentCost) * 100);
+  validateSupplier(data: CreateSupplierRequest): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
 
-    return `
-      Product: ${comparison.product.name}
-      Suppliers Used: ${total_suppliers}
-      Price Range: ${this.formatPrice(price_range)}
-      Current Cost: ${this.formatPrice(currentCost)}
-      Best Available: ${this.formatPrice(bestCost)}
-      ${savings > 0 ? `Potential Savings: ${this.formatPrice(savings)} (${savingsPercent.toFixed(1)}%)` : 'No better prices available'}
-    `.trim();
+    if (!data.name || data.name.trim().length === 0) {
+      errors.push('Supplier name is required');
+    }
+
+    if (data.name.trim().length < 2) {
+      errors.push('Supplier name must be at least 2 characters long');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   }
 
   /**
-   * Get supplier relationship type for display
+   * Extract phone numbers from supplier name (Ugandan format)
    */
-  getSupplierRelationshipDisplay(relationship: 'current' | 'historical'): { label: string; color: string; icon: string } {
-    switch (relationship) {
-      case 'current':
-        return { label: 'Current Supplier', color: 'success', icon: 'check-circle' };
-      case 'historical':
-        return { label: 'Historical Supplier', color: 'blue', icon: 'clock' };
-      default:
-        return { label: 'Unknown', color: 'gray', icon: 'help-circle' };
-    }
+  extractPhoneNumbers(supplierName: string): string[] {
+    const phoneRegex = /(\+?256|0)(7[0-9]|20)[0-9]{7}/g;
+    return supplierName.match(phoneRegex) || [];
+  }
+
+  /**
+   * Generate WhatsApp link from phone number
+   */
+  generateWhatsAppLink(phoneNumber: string): string {
+    const cleanNumber = phoneNumber.replace('+', '').replace('0', '256');
+    return `https://wa.me/${cleanNumber}`;
+  }
+
+  /**
+   * Generate call link from phone number
+   */
+  generateCallLink(phoneNumber: string): string {
+    return `tel:${phoneNumber}`;
+  }
+
+  /**
+   * Calculate supplier performance metrics
+   */
+  calculateSupplierPerformance(suppliers: any[]) {
+    const stats = {
+      totalSuppliers: suppliers.length,
+      activeSuppliers: suppliers.filter(s => s.last_restock_date).length,
+      totalProducts: suppliers.reduce((sum, s) => sum + (s.total_products || 0), 0),
+      totalInventoryValue: suppliers.reduce((sum, s) => sum + (s.current_inventory_value || 0), 0),
+      averageProductsPerSupplier: 0
+    };
+
+    stats.averageProductsPerSupplier = stats.totalSuppliers > 0 ? stats.totalProducts / stats.totalSuppliers : 0;
+
+    return stats;
+  }
+
+  /**
+   * Format supplier reliability recommendation
+   */
+  formatReliabilityRecommendation(score: number): string {
+    if (score >= 80) return 'Highly Recommended';
+    if (score >= 60) return 'Recommended';
+    if (score >= 40) return 'Moderate';
+    return 'Consider Alternatives';
+  }
+
+  /**
+   * Get supplier performance color
+   */
+  getPerformanceColor(score: number): string {
+    if (score >= 80) return 'success';
+    if (score >= 60) return 'warning';
+    return 'error';
   }
 }
 
 // Create and export singleton instance
-export const suppliersService = new SuppliersService();
-export default suppliersService;
+export const supplierService = new SupplierService();
+export default supplierService;

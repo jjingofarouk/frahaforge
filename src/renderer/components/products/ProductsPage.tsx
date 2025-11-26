@@ -1,292 +1,358 @@
-// src/renderer/src/pages/ProductsPage.tsx (Updated)
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box } from '@chakra-ui/react';
-import { ModernChakraProvider } from './ChakraProvider';
-import { ProductsTable } from './index';
-import { ProductsSearch } from './index';
-import { StockOverview } from './index';
-import { LowStockModal } from './index';
-import { ExpiryModal } from './index';
-import { ProductModal } from './index';
-import NewProduct from '../modals/NewProduct';
-import { stockService, StockProduct, StockStats } from '../../services/stockService';
+// src/renderer/src/components/products/ProductsPage.tsx
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { inventoryService, Product } from '../../services/inventoryService';
+import ProductsTable from './ProductsTable';
+import StockAlertsPanel from './StockAlertsPanel';
+import RestockManager from './RestockManager';
+import ProductAnalytics from './ProductAnalytics';
+import { Package, AlertTriangle, Calendar, TrendingUp, RefreshCw } from 'lucide-react';
 import './ProductsPage.css';
 
 const ProductsPage: React.FC = () => {
-  const [products, setProducts] = useState<StockProduct[]>([]);
-  const [stats, setStats] = useState<StockStats | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-  const [isLowStockModalOpen, setIsLowStockModalOpen] = useState(false);
-  const [isExpiryModalOpen, setIsExpiryModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<StockProduct | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  
-  // ADD THIS: State for New Product modal
-  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
-  
-  // Modal state for specific product types
-  const [lowStockModalProducts, setLowStockModalProducts] = useState<StockProduct[]>([]);
-  const [lowStockModalType, setLowStockModalType] = useState<'low-stock' | 'out-of-stock'>('low-stock');
-  const [expiryModalProducts, setExpiryModalProducts] = useState<StockProduct[]>([]);
-  const [expiryModalType, setExpiryModalType] = useState<'expiring-soon' | 'expired'>('expiring-soon');
+  const [activeTab, setActiveTab] = useState<'products' | 'alerts' | 'restock' | 'analytics'>('products');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Simple data loading
-  const loadStockData = useCallback(async (forceRefresh = false) => {
-    setLoading(true);
-    try {
-      const [stockProducts, stockStats] = await Promise.all([
-        stockService.getStockProducts(forceRefresh),
-        stockService.getStockStats(forceRefresh)
-      ]);
+  // Calculate stats from products data
+  const stats = useMemo(() => {
+    const totalProducts = products.length;
+    const totalValue = products.reduce((sum, product) => 
+      sum + (product.quantity * (product.cost_price as number)), 0
+    );
+
+    // Calculate low stock count
+    const lowStockCount = products.filter(product => {
+      const quantity = product.quantity || 0;
+      const minStock = product.min_stock || 0;
+      const reorderLevel = product.reorder_level || minStock * 2;
+      return quantity > 0 && quantity <= reorderLevel;
+    }).length;
+
+    // Calculate expiring products count (within 90 days)
+    const expiringCount = products.filter(product => {
+      if (!product.expiration_date) return false;
       
-      setProducts(stockProducts);
-      setStats(stockStats);
-      setLastRefresh(new Date()); // Set refresh timestamp
-    } catch (error) {
-      console.error('Failed to load stock data:', error);
+      const expiryDate = new Date(product.expiration_date);
+      const today = new Date();
+      const daysUntilExpiry = Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return daysUntilExpiry >= 0 && daysUntilExpiry <= 90 && (product.quantity || 0) > 0;
+    }).length;
+
+    return {
+      totalProducts,
+      lowStockCount,
+      expiringCount,
+      totalValue
+    };
+  }, [products]);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await inventoryService.getProducts();
+      setProducts(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, []);
+  };
 
-  // Load on mount
-  useEffect(() => {
-    loadStockData();
-  }, [loadStockData]);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadProducts();
+  };
 
-  // Auto-refresh
-  useEffect(() => {
-    if (!autoRefreshEnabled) return;
+  const handleProductUpdate = () => {
+    loadProducts();
+  };
 
-    const interval = setInterval(() => {
-      console.log('🔄 Auto-refreshing stock data...');
-      loadStockData(true);
-    }, 30000);
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'products':
+        return (
+          <ProductsTable 
+            products={products} 
+            loading={loading}
+            onProductUpdate={handleProductUpdate}
+          />
+        );
+      case 'alerts':
+        return <StockAlertsPanel onProductUpdate={handleProductUpdate} />;
+      case 'restock':
+        return <RestockManager onRestockComplete={handleProductUpdate} />;
+      case 'analytics':
+        return <ProductAnalytics />;
+      default:
+        return null;
+    }
+  };
 
-    return () => clearInterval(interval);
-  }, [autoRefreshEnabled, loadStockData]);
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1]
+      }
+    }
+  };
 
-  // Simple search - client side for instant results
-  const searchedProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
-    
-    const query = searchQuery.toLowerCase();
-    return products.filter(product => 
-      product.name.toLowerCase().includes(query) ||
-      (product.barcode?.toString().toLowerCase().includes(query)) ||
-      (product.category?.toLowerCase().includes(query))
+  const statCardVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.08,
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1]
+      }
+    })
+  };
+
+  const tabVariants: Variants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1]
+      }
+    }
+  };
+
+  if (error) {
+    return (
+      <motion.div 
+        className="products-page"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="error-state">
+          <div className="error-icon">
+            <AlertTriangle size={48} />
+          </div>
+          <h2>Unable to Load Products</h2>
+          <p>{error}</p>
+          <button className="btn-retry" onClick={loadProducts}>
+            Try Again
+          </button>
+        </div>
+      </motion.div>
     );
-  }, [products, searchQuery]);
-
-  // Calculate expiring and expired products
-  const { expiringSoonProducts, expiredProducts } = useMemo(() => {
-    const today = new Date();
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
-
-    const expiringSoon = products.filter(product => {
-      if (!product.expiration_date) return false;
-      const expDate = new Date(product.expiration_date);
-      return expDate > today && expDate <= thirtyDaysFromNow;
-    });
-
-    const expired = products.filter(product => {
-      if (!product.expiration_date) return false;
-      const expDate = new Date(product.expiration_date);
-      return expDate < today;
-    });
-
-    return { expiringSoonProducts: expiringSoon, expiredProducts: expired };
-  }, [products]);
-
-  // Calculate low stock products
-  const { lowStockProducts, outOfStockProducts } = useMemo(() => {
-    const lowStock = products.filter(product => {
-      const minStock = parseInt(product.min_stock || '0') || 5;
-      return product.quantity <= minStock && product.quantity > 0;
-    });
-    
-    const outOfStock = products.filter(product => product.quantity === 0);
-
-    return { lowStockProducts: lowStock, outOfStockProducts: outOfStock };
-  }, [products]);
-
-  // Modal handlers
-  const handleOpenLowStockModal = useCallback((modalProducts: StockProduct[], stockType: 'low-stock' | 'out-of-stock') => {
-    console.log(`Opening ${stockType} modal with ${modalProducts.length} products`);
-    setLowStockModalProducts(modalProducts);
-    setLowStockModalType(stockType);
-    setIsLowStockModalOpen(true);
-  }, []);
-
-  const handleCloseLowStockModal = useCallback(() => {
-    setIsLowStockModalOpen(false);
-    setLowStockModalProducts([]);
-  }, []);
-
-  const handleOpenExpiryModal = useCallback((modalProducts: StockProduct[], expiryType: 'expiring-soon' | 'expired') => {
-    console.log(`Opening ${expiryType} modal with ${modalProducts.length} products`);
-    setExpiryModalProducts(modalProducts);
-    setExpiryModalType(expiryType);
-    setIsExpiryModalOpen(true);
-  }, []);
-
-  const handleCloseExpiryModal = useCallback(() => {
-    setIsExpiryModalOpen(false);
-    setExpiryModalProducts([]);
-  }, []);
-
-  // ADD THIS: New Product modal handlers
-  const handleOpenNewProductModal = useCallback(() => {
-    setIsNewProductModalOpen(true);
-  }, []);
-
-  const handleCloseNewProductModal = useCallback(() => {
-    setIsNewProductModalOpen(false);
-  }, []);
-
-  const handleProductAdded = useCallback(() => {
-    // Refresh the products list when a new product is added
-    loadStockData(true);
-  }, [loadStockData]);
-
-  // Product action handlers
-  const handleRefresh = () => loadStockData(true);
-  
-  // UPDATE THIS: Replace the alert with actual modal opening
-  const handleAddProduct = () => {
-    handleOpenNewProductModal();
-  };
-
-  const handleEditProduct = (product: StockProduct) => {
-    console.log('Edit product:', product.name);
-    setSelectedProduct(product);
-  };
-
-  const handleViewProduct = (product: StockProduct) => {
-    console.log('View product:', product.name);
-    setSelectedProduct(product);
-  };
-
-  const handleDeleteProduct = async (productId: string) => {
-    try {
-      await stockService.deleteProduct(parseInt(productId));
-      await loadStockData(true); // Refresh after delete
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-    }
-  };
-
-  const handleSelectProduct = (product: StockProduct) => {
-    setSelectedProduct(product);
-  };
-
-  const handleAutoRefreshToggle = (enabled: boolean) => {
-    setAutoRefreshEnabled(enabled);
-  };
-
-  const handleSaveProduct = async (product: StockProduct) => {
-    try {
-      // Implement product save logic here
-      console.log('Saving product:', product);
-      // For now, just refresh the data
-      await loadStockData(true);
-    } catch (error) {
-      console.error('Failed to save product:', error);
-      throw error;
-    }
-  };
-
-  const handleRestockProduct = async (restockData: {
-    productId: number;
-    quantity: number;
-    costPrice: string;
-    supplierId: number;
-    batchNumber?: string;
-  }) => {
-    try {
-      // Implement restock logic here
-      console.log('Restocking product:', restockData);
-      // For now, just refresh the data
-      await loadStockData(true);
-    } catch (error) {
-      console.error('Failed to restock product:', error);
-      throw error;
-    }
-  };
+  }
 
   return (
-    <ModernChakraProvider>
-      <div className="products-container">
-        {/* Stock Overview with ALL required props including auto-refresh */}
-        <StockOverview
-          products={searchedProducts}
-          stats={stats}
-          onRefresh={handleRefresh}
-          onAddProduct={handleAddProduct} // This now opens the modal
-          loading={loading}
-          onOpenLowStockModal={handleOpenLowStockModal}
-          onOpenExpiryModal={handleOpenExpiryModal}
-          expiringSoonProducts={expiringSoonProducts}
-          expiredProducts={expiredProducts}
-          autoRefreshEnabled={autoRefreshEnabled}
-          onAutoRefreshToggle={handleAutoRefreshToggle}
-          lastRefresh={lastRefresh}
-        />
-
-        {/* Search */}
-        <ProductsSearch
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
-        {/* Products Table with ALL required props */}
-        <ProductsTable
-          products={searchedProducts}
-          onEditProduct={handleEditProduct}
-          onViewProduct={handleViewProduct}
-          onDeleteProduct={handleDeleteProduct}
-          loading={loading && products.length === 0}
-        />
-
-        {/* Modals */}
-        <LowStockModal
-          isOpen={isLowStockModalOpen}
-          onClose={handleCloseLowStockModal}
-          products={lowStockModalProducts}
-          stockType={lowStockModalType}
-          onSelectProduct={handleSelectProduct}
-        />
-
-        <ExpiryModal
-          isOpen={isExpiryModalOpen}
-          onClose={handleCloseExpiryModal}
-          products={expiryModalProducts}
-          expiryType={expiryModalType}
-          onSelectProduct={handleSelectProduct}
-        />
-
-        <ProductModal
-          isOpen={!!selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          product={selectedProduct}
-          onSave={handleSaveProduct}
-          onRestock={handleRestockProduct}
-          mode={selectedProduct ? 'edit' : 'view'}
-          loading={loading}
-        />
-
-        {/* ADD THIS: New Product Modal */}
-        <NewProduct
-          isOpen={isNewProductModalOpen}
-          onClose={handleCloseNewProductModal}
-          onProductAdded={handleProductAdded}
-        />
+    <motion.div 
+      className="products-page"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header Section */}
+      <div className="page-header">
+        <div className="header-content">
+          <div className="header-left">
+            <motion.h1 
+              className="page-title"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Inventory Management
+            </motion.h1>
+            <motion.p 
+              className="page-subtitle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Manage products, track stock levels, and analyze performance
+            </motion.p>
+          </div>
+          <div className="header-actions">
+            <motion.button 
+              className={`btn-refresh ${refreshing ? 'refreshing' : ''}`}
+              onClick={handleRefresh}
+              disabled={refreshing}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+            >
+              <RefreshCw size={18} className={refreshing ? 'spin' : ''} />
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </motion.button>
+          </div>
+        </div>
       </div>
-    </ModernChakraProvider>
+
+      {/* Stats Grid */}
+      <motion.div 
+        className="stats-grid"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.08
+            }
+          }
+        }}
+      >
+        <motion.div 
+          className="stat-card"
+          variants={statCardVariants}
+          custom={0}
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="stat-icon-wrapper primary">
+            <Package size={22} strokeWidth={2.5} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{stats.totalProducts}</span>
+            <span className="stat-label">Total Products</span>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          className={`stat-card ${stats.lowStockCount > 0 ? 'critical' : ''}`}
+          variants={statCardVariants}
+          custom={1}
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="stat-icon-wrapper critical">
+            <AlertTriangle size={22} strokeWidth={2.5} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{stats.lowStockCount}</span>
+            <span className="stat-label">Low Stock Items</span>
+          </div>
+          {stats.lowStockCount > 0 && (
+            <motion.div 
+              className="stat-badge critical"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 500, damping: 25 }}
+            >
+              {stats.lowStockCount}
+            </motion.div>
+          )}
+        </motion.div>
+
+        <motion.div 
+          className={`stat-card ${stats.expiringCount > 0 ? 'warning' : ''}`}
+          variants={statCardVariants}
+          custom={2}
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="stat-icon-wrapper warning">
+            <Calendar size={22} strokeWidth={2.5} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">{stats.expiringCount}</span>
+            <span className="stat-label">Expiring Soon</span>
+          </div>
+          {stats.expiringCount > 0 && (
+            <motion.div 
+              className="stat-badge warning"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 500, damping: 25 }}
+            >
+              {stats.expiringCount}
+            </motion.div>
+          )}
+        </motion.div>
+
+        <motion.div 
+          className="stat-card"
+          variants={statCardVariants}
+          custom={3}
+          whileHover={{ y: -4 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="stat-icon-wrapper success">
+            <TrendingUp size={22} strokeWidth={2.5} />
+          </div>
+          <div className="stat-content">
+            <span className="stat-number">UGX {stats.totalValue.toLocaleString()}</span>
+            <span className="stat-label">Total Inventory Value</span>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Navigation Tabs */}
+      <motion.div 
+        className="navigation-tabs"
+        variants={tabVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <button 
+          className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
+        >
+          <Package size={18} strokeWidth={2.5} />
+          All Products
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'alerts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('alerts')}
+        >
+          <AlertTriangle size={18} strokeWidth={2.5} />
+          Stock Alerts
+          {stats.lowStockCount > 0 && (
+            <span className="tab-badge">{stats.lowStockCount}</span>
+          )}
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'restock' ? 'active' : ''}`}
+          onClick={() => setActiveTab('restock')}
+        >
+          <RefreshCw size={18} strokeWidth={2.5} />
+          Restock
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          <TrendingUp size={18} strokeWidth={2.5} />
+          Analytics
+        </button>
+      </motion.div>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={activeTab}
+          className="tab-content-wrapper"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {renderTabContent()}
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
-export { ProductsPage };
+export default ProductsPage;

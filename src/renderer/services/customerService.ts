@@ -93,7 +93,7 @@ class CustomersService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://192.168.1.3:3000/api/customers';
+    this.baseURL = 'http://192.168.1.3:3001/api/customers';
     console.log('🚀 CustomersService using:', this.baseURL);
   }
 

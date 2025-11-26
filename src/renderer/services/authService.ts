@@ -5,7 +5,7 @@ const SESSION_KEY = 'fraha_user_session';
 
 class AuthService {
   private currentUser: User | null = null;
-private readonly apiUrl = 'http://192.168.1.3:3000/api/';
+private readonly apiUrl = 'http://192.168.1.3:3001/api/';
   private initialized = false;
 
   async initialize(): Promise<void> {

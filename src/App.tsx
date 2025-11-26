@@ -6,17 +6,14 @@ import Login from './renderer/components/Login';
 import Navigation from './renderer/components/Navigation';
 import TransactionsView from './renderer/components/transactions/TransactionsView';
 import PosView from './renderer/components/pos/PosView';
-import { ProductsPage } from './renderer/components/products';
+import ProductsPage from './renderer/components/products/ProductsPage';
 import OrdersPage from './renderer/components/orders/OrdersPage';
 import CustomersPage from './renderer/components/customers/CustomersPage';
 import AccountingPage from './renderer/components/accounting/AccountingPage';
 import UsersPage from './renderer/components/users/UsersPage';
 import AboutPage from './renderer/components/about/AboutPage';
 import PaymentModal from './renderer/components/modals/PaymentModal';
-import { ProductModal } from './renderer/components/modals/ProductModal';
 import NewCustomer from './renderer/components/modals/NewCustomer';
-import NewProduct from './renderer/components/modals/NewProduct';
-import NewCategory from './renderer/components/modals/NewCategory';
 import CategoriesModal from './renderer/components/modals/CategoriesModal';
 import UserModal from './renderer/components/modals/UserModal';
 import SettingsModal from './renderer/components/modals/SettingsModal';
@@ -25,13 +22,12 @@ import { User } from './renderer/types/user.types';
 import authService from './renderer/services/authService';
 import { cacheManager } from './renderer/src/utils/cacheManager';
 import { Product } from './renderer/types/products.types';
-import { updateProduct, getInventoryProducts } from './renderer/services/api';
-import { CartItem, PaymentData, Customer } from './renderer/src//types/pos.types';
+import { getInventoryProducts } from './renderer/services/api';
+import { CartItem, PaymentData, Customer } from './renderer/src/types/pos.types';
 import { GlobalPosDataManager } from './renderer/components/pos/GlobalPosDataManager';
 import { RefreshIndicator } from './renderer/components/pos/RefreshIndicator';
 import { canAccessModule } from './renderer/services/api';
 import SuppliersDashboard from './renderer/components/suppliers/SuppliersDashboard';
-import { suppliersService } from './renderer/services/supplierService';
 import { usePosStore } from './renderer/src/stores/posStore';
 import { Order } from './renderer/types/orders.types';
 
@@ -67,17 +63,11 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<AppView>('pos');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
-  const [isNewProductOpen, setIsNewProductOpen] = useState(false);
-  const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isHoldOrdersOpen, setIsHoldOrdersOpen] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [productModalMode, setProductModalMode] = useState<'view' | 'edit'>('view');
-  const [productModalLoading, setProductModalLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [cartData, setCartData] = useState<CartData>({
@@ -231,78 +221,8 @@ const App: React.FC = () => {
     await fetchProducts();
   };
 
-  const handleViewProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setProductModalMode('view');
-    setIsProductModalOpen(true);
-  };
-
-  const handleEditProduct = (product: Product) => {
-    if (user && !canAccessModule(user, 'products')) {
-      alert('You do not have permission to edit products');
-      return;
-    }
-    setSelectedProduct(product);
-    setProductModalMode('edit');
-    setIsProductModalOpen(true);
-  };
-
-  const handleSaveProduct = async (product: Product) => {
-    setProductModalLoading(true);
-    try {
-      await updateProduct(product);
-      await fetchProducts();
-      setIsProductModalOpen(false);
-      setSelectedProduct(null);
-    } catch (error: any) {
-      alert(`Failed to update product: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setProductModalLoading(false);
-    }
-  };
-
-  const handleRestockProduct = async (restockData: { productId: number; quantity: number; costPrice: string; supplierId: number; batchNumber?: string }) => {
-    try {
-      // Convert costPrice from string to number
-      const costPriceNumber = parseFloat(restockData.costPrice);
-      
-      // Use the directly imported suppliers service
-      await suppliersService.bulkRestock(restockData.supplierId, [{
-        productId: restockData.productId,
-        quantity: restockData.quantity,
-        costPrice: costPriceNumber,
-        batchNumber: restockData.batchNumber
-      }]);
-      
-      await fetchProducts();
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Restock failed:', error);
-      return Promise.reject(error);
-    }
-  };
-
-  const handleCloseProductModal = () => {
-    setIsProductModalOpen(false);
-    setSelectedProduct(null);
-    setProductModalLoading(false);
-  };
-
-  const handleNewProductCreated = () => {
-    setIsNewProductOpen(false);
-    fetchProducts();
-  };
-
   const handleNewCustomerCreated = () => {
     setIsNewCustomerOpen(false);
-  };
-
-  const handleOpenNewProduct = () => {
-    if (user && !canAccessModule(user, 'products')) {
-      alert('You do not have permission to create products');
-      return;
-    }
-    setIsNewProductOpen(true);
   };
 
   const handleOpenCategories = () => {
@@ -311,14 +231,6 @@ const App: React.FC = () => {
       return;
     }
     setIsCategoriesOpen(true);
-  };
-
-  const handleOpenNewCategory = () => {
-    if (user && !canAccessModule(user, 'categories')) {
-      alert('You do not have permission to create categories');
-      return;
-    }
-    setIsNewCategoryOpen(true);
   };
 
   const handleOpenUsers = () => {
@@ -450,10 +362,8 @@ const App: React.FC = () => {
                   case 'products': 
                     return (
                       <ProductsPage 
-                        onEditProduct={handleEditProduct} 
-                        onViewProduct={handleViewProduct} 
-                        onAddProduct={handleOpenNewProduct} 
-                        globalProducts={products} 
+                        // The ProductsPage now handles its own modals internally
+                        // so we don't need to pass product handlers here
                       />
                     );
                   case 'orders': 
@@ -535,31 +445,10 @@ const App: React.FC = () => {
           onPaymentComplete={handlePaymentComplete} 
         />
         
-        <ProductModal 
-          product={selectedProduct} 
-          isOpen={isProductModalOpen} 
-          onClose={handleCloseProductModal} 
-          onSave={handleSaveProduct} 
-          onRestock={handleRestockProduct} 
-          mode={productModalMode} 
-          loading={productModalLoading} 
-        />
-        
         <NewCustomer 
           isOpen={isNewCustomerOpen} 
           onClose={() => setIsNewCustomerOpen(false)} 
           onCustomerAdded={handleNewCustomerCreated} 
-        />
-        
-        <NewProduct 
-          isOpen={isNewProductOpen} 
-          onClose={() => setIsNewProductOpen(false)} 
-          onProductAdded={handleNewProductCreated} 
-        />
-        
-        <NewCategory 
-          isOpen={isNewCategoryOpen} 
-          onClose={() => setIsNewCategoryOpen(false)} 
         />
         
         <CategoriesModal 

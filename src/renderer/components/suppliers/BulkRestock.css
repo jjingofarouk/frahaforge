@@ -1,0 +1,329 @@
+/* src/renderer/src/components/suppliers/BulkRestock.css */
+
+.bulk-restock {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-gray);
+  padding: 2rem;
+  min-height: 100%;
+  border-radius: 12px;
+}
+
+.bulk-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.bulk-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.bulk-header p {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Layout */
+.bulk-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .bulk-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+  .restock-summary {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .bulk-layout {
+    grid-template-columns: 1fr;
+  }
+  .restock-summary {
+    order: -1;
+  }
+}
+
+/* Loading */
+.bulk-restock.loading {
+  text-align: center;
+  padding: 6rem 2rem;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+
+/* Supplier Selection */
+.supplier-selection h3,
+.products-selection h3,
+.restock-summary h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.suppliers-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.supplier-card {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.supplier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.supplier-card.selected {
+  border-color: var(--primary-teal);
+  background-color: rgba(13, 148, 136, 0.06);
+  box-shadow: 0 0 0 1px var(--primary-teal);
+}
+
+.supplier-card h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.supplier-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Products Grid */
+.products-grid {
+  display: grid;
+  gap: 1.25rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.product-card {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.product-card:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.product-card.selected {
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 2px var(--primary-teal);
+  background-color: rgba(13, 148, 136, 0.04);
+}
+
+.product-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--secondary-gray-dark);
+}
+
+.product-header input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-teal);
+  cursor: pointer;
+}
+
+.product-header h4 {
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.priority-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+/* Priority Colors */
+.priority-critical { border-left: 5px solid var(--danger); }
+.priority-critical .priority-badge { background-color: var(--danger); }
+
+.priority-high { border-left: 5px solid var(--warning); }
+.priority-high .priority-badge { background-color: var(--warning); }
+
+.priority-medium { border-left: 5px solid #d97706; }
+.priority-medium .priority-badge { background-color: #f59e0b; }
+
+.priority-low { border-left: 5px solid var(--primary-teal); }
+.priority-low .priority-badge { background-color: var(--primary-teal); }
+
+.product-details {
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.detail-row span:first-child {
+  color: var(--text-secondary);
+}
+
+/* Restock Controls (when selected) */
+.restock-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--secondary-gray);
+  border-top: 1px solid var(--border-color);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.control-group input {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-surface);
+  font-size: 09375rem;
+  transition: border-color 0.2s ease;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* Restock Summary */
+.restock-summary {
+  background-color: var(--bg-surface);
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 0.9375rem;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-item.total-cost {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-top: 2px solid var(--primary-teal);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.bulk-restock-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  background-color: var(--primary-teal);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.bulk-restock-btn:hover:not(:disabled) {
+  background-color: var(--primary-teal-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+}
+
+.bulk-restock-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Scrollbar Styling */
+.products-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.products-grid::-webkit-scrollbar-track {
+  background: var(--secondary-gray);
+  border-radius: 4px;
+}
+
+.products-grid::-webkit-scrollbar-thumb {
+  background: var(--primary-gray-light);
+  border-radius: 4px;
+}
+
+.products-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gray);
+}

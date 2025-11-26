@@ -76,7 +76,7 @@ export interface ExpenseAnalysis {
 
 // ======================== AccountsService Class ========================
 class AccountsService {
-  private baseURL = 'http://192.168.1.3:3000/api/accounts';
+  private baseURL = 'http://192.168.1.3:3001/api/accounts';
 
   // Real-time listeners
   private refreshListeners = new Set<() => void>();

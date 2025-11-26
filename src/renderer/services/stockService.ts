@@ -136,7 +136,7 @@ class StockService {
   };
 
   constructor() {
-    this.baseURL = 'http://192.168.1.3:3000/api/inventory';
+    this.baseURL = 'http://192.168.1.3:3001/api/inventory';
     console.log('🚀 StockService initialized with:', this.baseURL);
   }
 

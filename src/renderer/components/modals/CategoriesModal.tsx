@@ -32,7 +32,7 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({ isOpen, onClose }) =>
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://192.168.1.3:3000/api/categories/all');
+      const response = await axios.get('http://192.168.1.3:3001/api/categories/all');
       setCategories(response.data);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -52,7 +52,7 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({ isOpen, onClose }) =>
 
     try {
       setLoading(true);
-      await axios.put('http://192.168.1.3:3000/api/categories/category', {
+      await axios.put('http://192.168.1.3:3001/api/categories/category', {
         id: editingCategory.id,
         name: editName
       });
@@ -80,7 +80,7 @@ const CategoriesModal: React.FC<CategoriesModalProps> = ({ isOpen, onClose }) =>
 
     try {
       setLoading(true);
-      await axios.delete(`http://192.168.1.3:3000/api/categories/category/${categoryId}`);
+      await axios.delete(`http://192.168.1.3:3001/api/categories/category/${categoryId}`);
       
       // Update local state
       setCategories(prev => prev.filter(category => category.id !== categoryId));

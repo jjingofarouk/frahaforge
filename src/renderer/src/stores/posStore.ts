@@ -229,7 +229,7 @@ export const usePosStore = create<PosStoreState>((set, get) => ({
   fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch('http://192.168.1.3:3000/api/inventory/products');
+      const res = await fetch('http://192.168.1.3:3001/api/inventory/products');
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
       set({ products: data });
@@ -253,7 +253,7 @@ export const usePosStore = create<PosStoreState>((set, get) => ({
 
   fetchCategories: async () => {
     try {
-      const res = await fetch('http://192.168.1.3:3000/api/categories/all');
+      const res = await fetch('http://192.168.1.3:3001/api/categories/all');
       if (!res.ok) throw new Error('Failed to fetch categories');
       const data = await res.json();
       set({ categories: data });

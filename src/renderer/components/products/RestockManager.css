@@ -1,0 +1,200 @@
+/* src/renderer/src/components/products/RestockManager.css */
+/* Ultra-clean monochrome – zero ribbons, zero colored badges */
+
+.restock-manager {
+  padding: 32px;
+  background: #fafafa;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header */
+.manager-header { margin-bottom: 40px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+
+.manager-header h2 {
+  font-size: 34px;
+  font-weight: 800;
+  color: #0c0c0c;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.04em;
+}
+
+.title-icon { color: #000; }
+
+.header-actions { display: flex; gap: 12px; }
+
+.btn-bulk, .btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-bulk  { background: #000; color: white; }
+.btn-refresh { background: white; color: #333; border: 1.5px solid #ddd; }
+.btn-refresh:hover { background: #f0f0f0; border-color: #999; }
+
+/* Grid */
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
+}
+
+/* Card – no left ribbon */
+.suggestion-card {
+  background: white;
+  border-radius: 18px;
+  border: 1.5px solid #e5e5e5;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+
+/* Removed all ::before ribbons completely */
+.suggestion-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  border-color: #bbb;
+}
+
+/* Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.checkbox-wrapper { position: relative; cursor: pointer; }
+.checkbox-wrapper input { opacity: 0; width: 20px; height: 20px; cursor: pointer; }
+.checkmark {
+  position: absolute; top: 0; left: 0;
+  width: 20px; height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.checkbox-wrapper input:checked ~ .checkmark {
+  background: #000; border-color: #000;
+}
+.checkbox-wrapper input:checked ~ .checkmark::after {
+  content: '✓'; position: absolute; color: white; font-size: 14px;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+
+.card-header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0c0c0c;
+}
+
+.icon { color: #000; }
+
+/* Body */
+.card-body { padding: 20px; }
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.metric .label { font-size: 13px; color: #666; margin-bottom: 4px; }
+.metric .value { font-size: 18px; font-weight: 700; color: #0c0c0c; }
+.value.highlight { color: #000; display: flex; align-items: center; gap: 4px; }
+.value.low { color: #d00; }
+.value.price { color: #000; }
+
+.supplier-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+  background: #f8f8f8;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+/* Actions */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid #eaeaea;
+}
+
+.action {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.action.primary  { background: #000; color: white; }
+.action.secondary { background: white; color: #333; border: 1.5px solid #ddd; }
+.action.secondary:hover { background: #f8f8f8; border-color: #999; }
+
+/* States */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: #666;
+}
+
+.empty-state h3 { margin: 20px 0 8px; font-size: 24px; color: #0c0c0c; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Modal – unchanged */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-content { background: white; border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 24px 16px; border-bottom: 1px solid #eaeaea; }
+.modal-header h3 { margin: 0; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+.close-btn { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px; }
+.close-btn:hover { background: #f0f0f0; }
+.supplier-options { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.supplier-card { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: 1.5px solid #e0e0e0; border-radius: 14px; cursor: pointer; transition: all 0.25s ease; }
+.supplier-card:hover { border-color: #000; background: #fafafa; }
+.supplier-info h4 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.stats { display: flex; gap: 16px; font-size: 13px; color: #555; }
+.stats span { display: flex; align-items: center; gap: 4px; }
+.cancel-btn { width: 100%; padding: 14px; background: #f0f0f0; border: none; border-top: 1px solid #eaeaea; font-weight: 600; cursor: pointer; border-radius: 0 0 20px 20px; }
+.cancel-btn:hover { background: #e0e0e0; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .restock-manager { padding: 20px; }
+  .suggestions-grid { grid-template-columns: 1fr; }
+  .header-content { flex-direction: column; align-items: stretch; }
+  .metrics-grid { grid-template-columns: 1fr; }
+}
