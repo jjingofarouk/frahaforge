@@ -52,6 +52,20 @@ const ProductAnalytics: React.FC = () => {
     }
   };
 
+  const formatNumber = (value: number | null | undefined): string => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '0';
+    }
+    return value.toLocaleString();
+  };
+
+  const formatCurrency = (value: number | null | undefined): string => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return 'UGX 0';
+    }
+    return `UGX ${value.toLocaleString()}`;
+  };
+
   const renderStockMovement = () => {
     if (loading) return <div className="loading">Loading stock movement...</div>;
 
@@ -92,14 +106,14 @@ const ProductAnalytics: React.FC = () => {
             </div>
             {stockMovement.slice(0, 20).map(item => (
               <div key={item.product_id} className={`table-row ${getMovementTypeColor(item.movement_type)}`}>
-                <span className="product-name">{item.product_name}</span>
-                <span className="category">{item.category}</span>
+                <span className="product-name">{item.product_name || 'Unknown'}</span>
+                <span className="category">{item.category || 'Uncategorized'}</span>
                 <span className="movement-type">
-                  {getMovementTypeIcon(item.movement_type)} {item.movement_type}
+                  {getMovementTypeIcon(item.movement_type)} {item.movement_type || 'unknown'}
                 </span>
-                <span className="quantity">{item.total_quantity_sold}</span>
-                <span className="revenue">UGX {item.total_revenue.toLocaleString()}</span>
-                <span className="profit">UGX {item.total_profit.toLocaleString()}</span>
+                <span className="quantity">{formatNumber(item.total_quantity_sold)}</span>
+                <span className="revenue">{formatCurrency(item.total_revenue)}</span>
+                <span className="profit">{formatCurrency(item.total_profit)}</span>
               </div>
             ))}
           </div>
@@ -115,25 +129,27 @@ const ProductAnalytics: React.FC = () => {
       <div className="analytics-section">
         <h3>Most Profitable Categories</h3>
         <div className="categories-grid">
-          {profitableCategories.map(category => (
-            <div key={category.category} className="category-card">
-              <h4>{category.category}</h4>
+          {profitableCategories.map((category, index) => (
+            <div key={category.category || `category-${index}`} className="category-card">
+              <h4>{category.category || 'Uncategorized'}</h4>
               <div className="category-stats">
                 <div className="stat">
                   <span className="label">Total Profit</span>
-                  <span className="value profit">UGX {category.total_profit.toLocaleString()}</span>
+                  <span className="value profit">{formatCurrency(category.total_profit)}</span>
                 </div>
                 <div className="stat">
                   <span className="label">Profit Margin</span>
-                  <span className="value margin">{category.profit_margin_percent.toFixed(1)}%</span>
+                  <span className="value margin">
+                    {category.profit_margin_percent != null ? category.profit_margin_percent.toFixed(1) : '0.0'}%
+                  </span>
                 </div>
                 <div className="stat">
                   <span className="label">Products</span>
-                  <span className="value">{category.product_count}</span>
+                  <span className="value">{formatNumber(category.product_count)}</span>
                 </div>
                 <div className="stat">
                   <span className="label">Quantity Sold</span>
-                  <span className="value">{category.total_quantity_sold}</span>
+                  <span className="value">{formatNumber(category.total_quantity_sold)}</span>
                 </div>
               </div>
             </div>
@@ -150,29 +166,35 @@ const ProductAnalytics: React.FC = () => {
       <div className="analytics-section">
         <h3>Supplier Performance</h3>
         <div className="suppliers-grid">
-          {supplierPerformance.map(supplier => (
-            <div key={supplier.supplier_id} className="supplier-card">
-              <h4>{supplier.supplier_name}</h4>
+          {supplierPerformance.map((supplier, index) => (
+            <div key={supplier.supplier_id || `supplier-${index}`} className="supplier-card">
+              <h4>{supplier.supplier_name || 'Unknown Supplier'}</h4>
               <div className="supplier-stats">
                 <div className="stat">
                   <span className="label">Products Supplied</span>
-                  <span className="value">{supplier.unique_products_supplied}</span>
+                  <span className="value">{formatNumber(supplier.unique_products_supplied)}</span>
                 </div>
                 <div className="stat">
                   <span className="label">Total Restocks</span>
-                  <span className="value">{supplier.total_restocks}</span>
+                  <span className="value">{formatNumber(supplier.total_restocks)}</span>
                 </div>
                 <div className="stat">
                   <span className="label">Avg Cost Price</span>
-                  <span className="value">UGX {supplier.average_cost_price.toLocaleString()}</span>
+                  <span className="value">{formatCurrency(supplier.average_cost_price)}</span>
                 </div>
                 <div className="stat">
                   <span className="label">Current Inventory Value</span>
-                  <span className="value">UGX {supplier.current_inventory_value.toLocaleString()}</span>
+                  <span className="value">{formatCurrency(supplier.current_inventory_value)}</span>
                 </div>
               </div>
               <div className="supplier-meta">
-                <span>Last Restock: {supplier.last_restock_date ? new Date(supplier.last_restock_date).toLocaleDateString() : 'Never'}</span>
+                <span>
+                  Last Restock: {
+                    supplier.last_restock_date 
+                      ? new Date(supplier.last_restock_date).toLocaleDateString() 
+                      : 'Never'
+                  }
+                </span>
               </div>
             </div>
           ))}

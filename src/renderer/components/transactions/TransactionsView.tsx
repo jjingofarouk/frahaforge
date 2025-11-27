@@ -5,13 +5,37 @@ import { Refresh as RefreshIcon } from '@mui/icons-material';
 import ModernHeader from './components/ModernHeader/ModernHeader';
 import { ModernTransactionsTable } from './components/ModernTables';
 import { useTransactionsData } from './hooks/useTransactionsData';
-import { getTodayUgandaRange } from '../../src/utils/ugandaTime';
 import './TransactionsView.css';
 
 interface ModernTransactionsViewProps {
   user: any;
-  onViewTransaction: (transactionId: string) => void;
+  onViewTransaction: (transactionId: number) => void; // Changed from string to number
 }
+
+// Helper function to get today's Uganda date range as Date objects
+const getTodayUgandaRange = (): { start: Date; end: Date } => {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  // Create start of day in Uganda time (00:00:00 UTC+3)
+  const start = new Date(todayStr + 'T00:00:00+03:00');
+  // Create end of day in Uganda time (23:59:59 UTC+3)
+  const end = new Date(todayStr + 'T23:59:59+03:00');
+  
+  return { start, end };
+};
+
+// Helper function to get Uganda start of day for a date
+const getUgandaStartOfDay = (date: Date): Date => {
+  const dateStr = date.toISOString().split('T')[0];
+  return new Date(dateStr + 'T00:00:00+03:00');
+};
+
+// Helper function to get Uganda end of day for a date
+const getUgandaEndOfDay = (date: Date): Date => {
+  const dateStr = date.toISOString().split('T')[0];
+  return new Date(dateStr + 'T23:59:59+03:00');
+};
 
 const TransactionsView: React.FC<ModernTransactionsViewProps> = ({
   user,
@@ -183,8 +207,28 @@ const TransactionsView: React.FC<ModernTransactionsViewProps> = ({
                   label="Auto-refresh (30s)"
                 />
               </FormControl>
+
             </Box>
           </Box>
+
+          {/* Last Updated Info */}
+          {state.lastUpdated && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Last updated: {new Date(state.lastUpdated).toLocaleTimeString()}
+                {state.loading && ' (Refreshing...)'}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Error Display */}
+          {state.error && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption" color="error">
+                Error: {state.error}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Single Modern Transactions Table */}

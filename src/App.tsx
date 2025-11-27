@@ -67,7 +67,7 @@ const App: React.FC = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isHoldOrdersOpen, setIsHoldOrdersOpen] = useState(false);
-  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null); // Changed to number
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [cartData, setCartData] = useState<CartData>({
@@ -289,6 +289,13 @@ const App: React.FC = () => {
     alert(`Order #${order.order} loaded into POS. You can now make changes and process payment.`);
   };
 
+  // Handler for viewing transaction details
+  const handleViewTransaction = (transactionId: number) => {
+    setSelectedTransactionId(transactionId);
+    // You can add additional logic here like opening a transaction details modal
+    console.log('Viewing transaction:', transactionId);
+  };
+
   const renderContent = () => {
     switch (appState) {
       case 'splash':
@@ -356,7 +363,7 @@ const App: React.FC = () => {
                     return (
                       <TransactionsView 
                         user={user} 
-                        onViewTransaction={setSelectedTransactionId} 
+                        onViewTransaction={handleViewTransaction} // Use the new handler
                       />
                     );
                   case 'products': 
@@ -369,7 +376,7 @@ const App: React.FC = () => {
                   case 'orders': 
                     return (
                       <OrdersPage 
-                        onViewTransaction={setSelectedTransactionId} 
+                        onViewTransaction={handleViewTransaction} // Use the new handler
                         currentCart={cartData} 
                         onProcessOrder={handleProcessOrder}
                       />

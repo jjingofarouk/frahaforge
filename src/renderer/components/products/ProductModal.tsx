@@ -1,5 +1,11 @@
-// src/renderer/src/components/products/ProductModal.tsx
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  X, Package, DollarSign, Truck, Settings, 
+  Edit3, Save, Plus, AlertTriangle, Calendar,
+  BarChart3, Warehouse, Shield, Thermometer,
+  Tag, Barcode, FileText, Building
+} from 'lucide-react';
 import { inventoryService, Product, CreateProductRequest, UpdateProductRequest } from '../../services/inventoryService';
 import { supplierService, Supplier } from '../../services/supplierService';
 import './ProductModal.css';
@@ -33,6 +39,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
     reorder_level: 0
   });
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'pricing' | 'supplier'>('basic');
@@ -44,8 +51,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
 
   useEffect(() => {
     loadSuppliers();
+    loadCategories();
     if (product) {
-      // Convert product to form data
       setFormData({
         id: product.id,
         name: product.name || '',
@@ -77,15 +84,25 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
     }
   };
 
+// In the loadCategories function, update this line:
+const loadCategories = async (): Promise<void> => {
+  try {
+    const products = await inventoryService.getProducts();
+    const uniqueCategories = [...new Set(products.map((p: Product) => p.category).filter(Boolean))] as string[];
+    setCategories(uniqueCategories);
+  } catch (err) {
+    console.error('Failed to load categories:', err);
+  }
+};
+
   const handleInputChange = (field: string, value: any): void => {
-    if (isViewMode) return; // Prevent changes in view mode
+    if (isViewMode) return;
     
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -159,13 +176,25 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
     return 0;
   };
 
-  const getStockStatus = (): { status: string; color: string } => {
+  const getStockStatus = (): { status: string; color: string; icon: React.ReactNode } => {
     const quantity = formData.quantity || 0;
     const minStock = formData.min_stock || 0;
     
-    if (quantity <= 0) return { status: 'Out of Stock', color: '#ff4444' };
-    if (quantity <= minStock) return { status: 'Low Stock', color: '#ffaa00' };
-    return { status: 'Adequate Stock', color: '#00c851' };
+    if (quantity <= 0) return { 
+      status: 'Out of Stock', 
+      color: '#dc2626', 
+      icon: <AlertTriangle size={14} /> 
+    };
+    if (quantity <= minStock) return { 
+      status: 'Low Stock', 
+      color: '#f59e0b', 
+      icon: <AlertTriangle size={14} /> 
+    };
+    return { 
+      status: 'Adequate Stock', 
+      color: '#10b981', 
+      icon: <Package size={14} /> 
+    };
   };
 
   const renderReadOnlyField = (label: string, value: any, format?: (val: any) => string): JSX.Element => (
@@ -196,7 +225,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
   );
 
   const renderBasicInfoTab = (): JSX.Element => (
-    <div className="form-section">
+    <motion.div 
+      className="form-section"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {isViewMode ? (
         <>
           {renderReadOnlyField('Product Name', formData.name)}
@@ -206,15 +240,36 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
         </>
       ) : (
         <>
-          {renderInputField('Product Name', 'name', 'text', { required: true })}
-          {renderInputField('Barcode', 'barcode')}
-          {renderInputField('Category', 'category', 'text', { required: true, list: 'categories' })}
-          <datalist id="categories">
-            {[...new Set(suppliers.flatMap(s => s.name))].map(cat => (
-              <option key={cat} value={cat} />
-            ))}
-          </datalist>
-          <div className="form-group">
+          <div className="form-group with-icon">
+            <Tag size={18} className="input-icon" />
+            {renderInputField('Product Name', 'name', 'text', { required: true, placeholder: 'Enter product name' })}
+          </div>
+
+          <div className="form-group with-icon">
+            <Barcode size={18} className="input-icon" />
+            {renderInputField('Barcode', 'barcode', 'text', { placeholder: 'Scan or enter barcode' })}
+          </div>
+
+          <div className="form-group with-icon">
+            <Warehouse size={18} className="input-icon" />
+            <label htmlFor="category">Category *</label>
+            <select
+              id="category"
+              value={formData.category}
+              onChange={(e) => handleInputChange('category', e.target.value)}
+              className={errors.category ? 'error' : ''}
+              disabled={isViewMode}
+            >
+              <option value="">Select a category</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+            {errors.category && <span className="error-message">{errors.category}</span>}
+          </div>
+
+          <div className="form-group with-icon">
+            <FileText size={18} className="input-icon" />
             <label htmlFor="description">Description</label>
             <textarea
               id="description"
@@ -222,26 +277,34 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
               disabled={isViewMode}
+              placeholder="Enter product description..."
             />
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 
   const renderPricingTab = (): JSX.Element => {
     const stockStatus = getStockStatus();
+    const profitMargin = calculateProfitMargin();
     
     return (
-      <div className="form-section">
+      <motion.div 
+        className="form-section"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         {isViewMode ? (
           <>
             {renderReadOnlyField('Cost Price', formData.cost_price, (val) => `UGX ${val?.toLocaleString()}`)}
             {renderReadOnlyField('Selling Price', formData.price, (val) => `UGX ${val?.toLocaleString()}`)}
             <div className="profit-display">
+              <BarChart3 size={16} />
               <strong>Profit Margin: </strong>
-              <span className={`profit-margin ${calculateProfitMargin() >= 0 ? 'positive' : 'negative'}`}>
-                {calculateProfitMargin().toFixed(1)}%
+              <span className={`profit-margin ${profitMargin >= 0 ? 'positive' : 'negative'}`}>
+                {profitMargin.toFixed(1)}%
               </span>
               <span className="profit-amount">
                 (UGX {((formData.price || 0) - (formData.cost_price || 0)).toLocaleString()})
@@ -256,6 +319,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
                 className="stock-status-indicator"
                 style={{ backgroundColor: stockStatus.color }}
               >
+                {stockStatus.icon}
                 {stockStatus.status}
               </div>
             </div>
@@ -263,33 +327,67 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
         ) : (
           <>
             <div className="form-row">
-              {renderInputField('Cost Price (UGX)', 'cost_price', 'number', { required: true })}
-              {renderInputField('Selling Price (UGX)', 'price', 'number', { required: true })}
+              <div className="form-group with-icon">
+                <DollarSign size={18} className="input-icon" />
+                {renderInputField('Cost Price (UGX)', 'cost_price', 'number', { 
+                  required: true,
+                  placeholder: '0.00'
+                })}
+              </div>
+              <div className="form-group with-icon">
+                <DollarSign size={18} className="input-icon" />
+                {renderInputField('Selling Price (UGX)', 'price', 'number', { 
+                  required: true,
+                  placeholder: '0.00'
+                })}
+              </div>
             </div>
 
-            <div className="profit-display">
-              <strong>Profit Margin: </strong>
-              <span className={`profit-margin ${calculateProfitMargin() >= 0 ? 'positive' : 'negative'}`}>
-                {calculateProfitMargin().toFixed(1)}%
-              </span>
-              <span className="profit-amount">
-                (UGX {((formData.price || 0) - (formData.cost_price || 0)).toLocaleString()})
-              </span>
-            </div>
+            <motion.div 
+              className="profit-display"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <BarChart3 size={18} />
+              <div className="profit-info">
+                <span className="profit-label">Profit Margin:</span>
+                <span className={`profit-value ${profitMargin >= 0 ? 'positive' : 'negative'}`}>
+                  {profitMargin.toFixed(1)}%
+                </span>
+                <span className="profit-amount">
+                  UGX {((formData.price || 0) - (formData.cost_price || 0)).toLocaleString()}
+                </span>
+              </div>
+            </motion.div>
 
             <div className="form-row">
-              {renderInputField('Current Quantity', 'quantity', 'number')}
-              {renderInputField('Minimum Stock Level', 'min_stock', 'number')}
-              {renderInputField('Reorder Level', 'reorder_level', 'number')}
+              <div className="form-group with-icon">
+                <Package size={18} className="input-icon" />
+                {renderInputField('Current Quantity', 'quantity', 'number', { placeholder: '0' })}
+              </div>
+              <div className="form-group with-icon">
+                <AlertTriangle size={18} className="input-icon" />
+                {renderInputField('Min Stock Level', 'min_stock', 'number', { placeholder: '0' })}
+              </div>
+              <div className="form-group with-icon">
+                <Settings size={18} className="input-icon" />
+                {renderInputField('Reorder Level', 'reorder_level', 'number', { placeholder: '0' })}
+              </div>
             </div>
           </>
         )}
-      </div>
+      </motion.div>
     );
   };
 
   const renderSupplierTab = (): JSX.Element => (
-    <div className="form-section">
+    <motion.div 
+      className="form-section"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {isViewMode ? (
         <>
           {renderReadOnlyField('Supplier Name', formData.supplier)}
@@ -298,7 +396,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
         </>
       ) : (
         <>
-          <div className="form-group">
+          <div className="form-group with-icon">
+            <Truck size={18} className="input-icon" />
             <label htmlFor="supplier">Supplier Name</label>
             <input
               id="supplier"
@@ -307,6 +406,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
               onChange={(e) => handleInputChange('supplier', e.target.value)}
               list="supplier-list"
               disabled={isViewMode}
+              placeholder="Enter supplier name"
             />
             <datalist id="supplier-list">
               {suppliers.map(supplier => (
@@ -315,7 +415,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
             </datalist>
           </div>
 
-          <div className="form-group">
+          <div className="form-group with-icon">
+            <Building size={18} className="input-icon" />
             <label htmlFor="supplier_id">Select from Existing Suppliers</label>
             <select
               id="supplier_id"
@@ -337,14 +438,22 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
             </select>
           </div>
 
-          {renderInputField('Manufacturer', 'manufacturer')}
+          <div className="form-group with-icon">
+            <Building size={18} className="input-icon" />
+            {renderInputField('Manufacturer', 'manufacturer', 'text', { placeholder: 'Enter manufacturer name' })}
+          </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 
   const renderDetailsTab = (): JSX.Element => (
-    <div className="form-section">
+    <motion.div 
+      className="form-section"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {isViewMode ? (
         <>
           {renderReadOnlyField('Expiration Date', formData.expiration_date, (val) => 
@@ -356,10 +465,14 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
         </>
       ) : (
         <>
-          {renderInputField('Expiration Date', 'expiration_date', 'date')}
+          <div className="form-group with-icon">
+            <Calendar size={18} className="input-icon" />
+            {renderInputField('Expiration Date', 'expiration_date', 'date')}
+          </div>
 
           <div className="form-row">
-            <div className="form-group checkbox-group">
+            <div className="form-group checkbox-group with-icon">
+              <Shield size={18} className="input-icon" />
               <label>
                 <input
                   type="checkbox"
@@ -371,7 +484,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
               </label>
             </div>
 
-            <div className="form-group checkbox-group">
+            <div className="form-group checkbox-group with-icon">
+              <Shield size={18} className="input-icon" />
               <label>
                 <input
                   type="checkbox"
@@ -384,10 +498,21 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
             </div>
           </div>
 
-          {renderInputField('Storage Conditions', 'storage_conditions')}
+          <div className="form-group with-icon">
+            <Thermometer size={18} className="input-icon" />
+            <label htmlFor="storage_conditions">Storage Conditions</label>
+            <textarea
+              id="storage_conditions"
+              value={formData.storage_conditions}
+              onChange={(e) => handleInputChange('storage_conditions', e.target.value)}
+              rows={2}
+              disabled={isViewMode}
+              placeholder="e.g., Room temperature, Refrigerated, etc."
+            />
+          </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 
   const getModalTitle = (): string => {
@@ -399,81 +524,148 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, mode, onClose, onS
     }
   };
 
+  const tabConfig = [
+    { id: 'basic' as const, label: 'Basic Info', icon: Package },
+    { id: 'pricing' as const, label: 'Pricing & Stock', icon: DollarSign },
+    { id: 'supplier' as const, label: 'Supplier', icon: Truck },
+    { id: 'details' as const, label: 'Details', icon: Settings }
+  ];
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="product-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{getModalTitle()}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
-        </div>
-
-        <div className="modal-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
-            onClick={() => setActiveTab('basic')}
-          >
-            Basic Info
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'pricing' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pricing')}
-          >
-            Pricing & Stock
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'supplier' ? 'active' : ''}`}
-            onClick={() => setActiveTab('supplier')}
-          >
-            Supplier
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body">
-            {activeTab === 'basic' && renderBasicInfoTab()}
-            {activeTab === 'pricing' && renderPricingTab()}
-            {activeTab === 'supplier' && renderSupplierTab()}
-            {activeTab === 'details' && renderDetailsTab()}
+    <AnimatePresence>
+      <motion.div 
+        className="modal-overlay"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <motion.div
+          className="product-modal-content"
+          onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ duration: 0.3, type: "spring", damping: 25 }}
+        >
+          <div className="modal-header">
+            <div className="header-content">
+              <h2>{getModalTitle()}</h2>
+              <p className="modal-subtitle">
+                {mode === 'create' ? 'Add a new product to inventory' : 
+                 mode === 'edit' ? 'Update product information' : 
+                 'View product details'}
+              </p>
+            </div>
+            <motion.button 
+              className="close-button" 
+              onClick={onClose}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X size={20} />
+            </motion.button>
           </div>
 
-          <div className="modal-footer">
-            {isViewMode ? (
-              <>
-                <button type="button" onClick={onClose} className="btn-secondary">
-                  Close
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    // Switch to edit mode
-                    const event = new CustomEvent('switchToEditMode', { detail: product });
-                    window.dispatchEvent(event);
-                  }} 
-                  className="btn-primary"
+          <div className="modal-tabs">
+            {tabConfig.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <motion.button
+                  key={tab.id}
+                  className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  Edit Product
-                </button>
-              </>
-            ) : (
-              <>
-                <button type="button" onClick={onClose} className="btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" disabled={loading} className="btn-primary">
-                  {loading ? 'Saving...' : (isEditMode ? 'Update Product' : 'Create Product')}
-                </button>
-              </>
-            )}
+                  <Icon size={16} />
+                  {tab.label}
+                </motion.button>
+              );
+            })}
           </div>
-        </form>
-      </div>
-    </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="modal-body">
+              <AnimatePresence mode="wait">
+                {activeTab === 'basic' && renderBasicInfoTab()}
+                {activeTab === 'pricing' && renderPricingTab()}
+                {activeTab === 'supplier' && renderSupplierTab()}
+                {activeTab === 'details' && renderDetailsTab()}
+              </AnimatePresence>
+            </div>
+
+            <div className="modal-footer">
+              {isViewMode ? (
+                <>
+                  <motion.button 
+                    type="button" 
+                    onClick={onClose} 
+                    className="btn-secondary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Close
+                  </motion.button>
+                  <motion.button 
+                    type="button" 
+                    onClick={() => {
+                      const event = new CustomEvent('switchToEditMode', { detail: product });
+                      window.dispatchEvent(event);
+                    }} 
+                    className="btn-primary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Edit3 size={16} />
+                    Edit Product
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <motion.button 
+                    type="button" 
+                    onClick={onClose} 
+                    className="btn-secondary"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button 
+                    type="submit" 
+                    disabled={loading} 
+                    className="btn-primary"
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                  >
+                    {loading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Settings size={16} />
+                      </motion.div>
+                    ) : isEditMode ? (
+                      <>
+                        <Save size={16} />
+                        Update Product
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} />
+                        Create Product
+                      </>
+                    )}
+                  </motion.button>
+                </>
+              )}
+            </div>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

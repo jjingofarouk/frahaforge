@@ -1,14 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, Package, TrendingDown } from 'lucide-react';
-import { Product } from '../../types/products.types';
-import './LowStockModal.css';
+import { X, Package, AlertTriangle, TrendingUp, Zap, BatteryWarning } from 'lucide-react';
+import { Product } from '../../services/inventoryService';
+import './AlertModal.css';
 
 interface LowStockModalProps {
   isOpen: boolean;
   onClose: () => void;
   products: Product[];
-  stockType: 'low-stock' | 'out-of-stock';
   onSelectProduct: (product: Product) => void;
 }
 
@@ -16,63 +15,83 @@ export const LowStockModal: React.FC<LowStockModalProps> = ({
   isOpen,
   onClose,
   products,
-  stockType,
   onSelectProduct
 }) => {
-  const getStockStatus = (product: Product): string => {
-    if (product.quantity === 0) return 'OUT OF STOCK';
-    if (product.quantity <= 3) return 'CRITICAL';
-    if (product.quantity <= 6) return 'LOW';
-    if (product.quantity <= 9) return 'WARNING';
-    return 'HEALTHY';
+  const getStockStatus = (product: Product): { text: string; class: string; icon: React.ReactNode } => {
+    const quantity = product.quantity || 0;
+    const minStock = product.min_stock || 0;
+    
+    if (quantity === 0) return { 
+      text: 'OUT OF STOCK', 
+      class: 'status-critical', 
+      icon: <BatteryWarning size={12} /> 
+    };
+    if (quantity <= minStock) return { 
+      text: 'CRITICAL', 
+      class: 'status-critical', 
+      icon: <Zap size={12} /> 
+    };
+    if (quantity <= (minStock * 2)) return { 
+      text: 'LOW STOCK', 
+      class: 'status-warning', 
+      icon: <AlertTriangle size={12} /> 
+    };
+    return { 
+      text: 'HEALTHY', 
+      class: 'status-healthy', 
+      icon: <Package size={12} /> 
+    };
   };
 
-  const getStockClass = (product: Product): string => {
-    if (product.quantity === 0) return 'stock-out';
-    if (product.quantity <= 3) return 'stock-critical';
-    if (product.quantity <= 6) return 'stock-low';
-    if (product.quantity <= 9) return 'stock-warning';
-    return 'stock-healthy';
+  const getUrgencyCounts = () => {
+    const critical = products.filter(p => (p.quantity || 0) === 0 || (p.quantity || 0) <= (p.min_stock || 0)).length;
+    const warning = products.filter(p => {
+      const quantity = p.quantity || 0;
+      const minStock = p.min_stock || 0;
+      return quantity > minStock && quantity <= (minStock * 2);
+    }).length;
+    
+    return { critical, warning };
   };
 
-  const getStockIcon = () => {
-    return stockType === 'out-of-stock' ? Package : AlertTriangle;
-  };
-
-  const StockIcon = getStockIcon();
+  const urgencyCounts = getUrgencyCounts();
 
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
       <motion.div 
-        className="low-stock-modal-backdrop" 
+        className="alert-modal-backdrop" 
         onClick={onClose}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         <motion.div
-          className="low-stock-modal-container"
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
+          className="alert-modal-container stock-alert-modal"
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 20 }}
-          transition={{ duration: 0.3, type: "spring", damping: 25, stiffness: 300 }}
+          exit={{ opacity: 0, scale: 0.9, y: 30 }}
+          transition={{ 
+            duration: 0.4, 
+            type: "spring", 
+            damping: 25, 
+            stiffness: 300 
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="low-stock-modal-header">
+          {/* Header with gradient background */}
+          <div className="alert-modal-header critical-header">
+            <div className="header-background"></div>
             <div className="modal-title-section">
               <div className="modal-icon-wrapper">
-                <StockIcon size={20} />
+                <AlertTriangle size={24} />
               </div>
-              <div>
-                <h2>
-                  {stockType === 'low-stock' ? 'Low Stock Alert' : 'Out of Stock Items'}
-                </h2>
+              <div className="title-content">
+                <h2>Low Stock Alert</h2>
                 <p className="modal-subtitle">
-                  {products.length} {products.length === 1 ? 'product' : 'products'} requiring attention
+                  {products.length} product{products.length !== 1 ? 's' : ''} requiring immediate attention
                 </p>
               </div>
             </div>
@@ -83,64 +102,133 @@ export const LowStockModal: React.FC<LowStockModalProps> = ({
             >
               <X size={20} />
             </button>
+            
+            {/* Urgency Indicators */}
+            <div className="urgency-indicators">
+              {urgencyCounts.critical > 0 && (
+                <div className="urgency-indicator critical">
+                  <span className="urgency-count">{urgencyCounts.critical}</span>
+                  <span className="urgency-label">Critical</span>
+                </div>
+              )}
+              {urgencyCounts.warning > 0 && (
+                <div className="urgency-indicator warning">
+                  <span className="urgency-count">{urgencyCounts.warning}</span>
+                  <span className="urgency-label">Warning</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Content */}
-          <div className="low-stock-modal-content">
+          <div className="alert-modal-content">
             {products.length === 0 ? (
               <motion.div 
                 className="empty-state"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.2 }}
               >
-                <TrendingDown size={48} />
-                <p className="empty-state-title">All Clear</p>
+                <TrendingUp size={64} className="empty-icon" />
+                <p className="empty-state-title">Inventory Optimized</p>
                 <p className="empty-state-description">
-                  No {stockType === 'low-stock' ? 'low stock' : 'out of stock'} products at this time
+                  All products are well-stocked and ready for sales
                 </p>
               </motion.div>
             ) : (
               <div className="products-table-wrapper">
+                <div className="table-header-stats">
+                  <div className="stat-pill critical">
+                    <Zap size={14} />
+                    <span>{urgencyCounts.critical} Critical</span>
+                  </div>
+                  <div className="stat-pill warning">
+                    <AlertTriangle size={14} />
+                    <span>{urgencyCounts.warning} Warning</span>
+                  </div>
+                </div>
+                
                 <table className="products-table">
                   <thead>
                     <tr>
-                      <th>Product Name</th>
-                      <th>Category</th>
-                      <th className="text-center">Stock Level</th>
-                      <th className="text-center">Status</th>
+                      <th className="col-product">Product</th>
+                      <th className="col-category">Category</th>
+                      <th className="col-stock">Current</th>
+                      <th className="col-min">Minimum</th>
+                      <th className="col-status">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product, index) => (
-                      <motion.tr
-                        key={product.id}
-                        onClick={() => onSelectProduct(product)}
-                        className="product-row"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.03 }}
-                        whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.02)' }}
-                      >
-                        <td className="product-name">{product.name}</td>
-                        <td>
-                          <span className="category-tag">{product.category}</span>
-                        </td>
-                        <td className="text-center stock-quantity">
-                          {product.quantity}
-                        </td>
-                        <td className="text-center">
-                          <span className={`stock-badge ${getStockClass(product)}`}>
-                            {getStockStatus(product)}
-                          </span>
-                        </td>
-                      </motion.tr>
-                    ))}
+                    {products.map((product, index) => {
+                      const status = getStockStatus(product);
+                      return (
+                        <motion.tr
+                          key={product.id}
+                          onClick={() => onSelectProduct(product)}
+                          className="product-row"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ 
+                            duration: 0.4, 
+                            delay: index * 0.05,
+                            ease: "easeOut" 
+                          }}
+                          whileHover={{ 
+                            backgroundColor: 'rgba(239, 68, 68, 0.04)',
+                            scale: 1.002
+                          }}
+                          whileTap={{ scale: 0.995 }}
+                        >
+                          <td className="product-name">
+                            <div className="product-info">
+                              <span className="name">{product.name}</span>
+                              {product.supplier && (
+                                <span className="supplier">{product.supplier}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="category-tag">{product.category}</span>
+                          </td>
+                          <td className="stock-quantity">
+                            <span className={`quantity ${status.class}`}>
+                              {product.quantity}
+                            </span>
+                          </td>
+                          <td className="min-stock">
+                            {product.min_stock || 'N/A'}
+                          </td>
+                          <td>
+                            <span className={`status-badge ${status.class}`}>
+                              <span className="status-icon">{status.icon}</span>
+                              {status.text}
+                            </span>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
           </div>
+
+          {/* Footer Actions */}
+          {products.length > 0 && (
+            <motion.div 
+              className="modal-footer"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <button className="footer-btn primary" onClick={onClose}>
+                Review All Products
+              </button>
+              <button className="footer-btn secondary" onClick={onClose}>
+                Dismiss Alerts
+              </button>
+            </motion.div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

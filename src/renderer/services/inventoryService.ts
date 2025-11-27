@@ -247,7 +247,6 @@ class InventoryService {
         },
         body: JSON.stringify({
           ...productData,
-          id: Math.floor(Date.now() / 1000) // Generate timestamp ID like backend expects
         }),
       });
 

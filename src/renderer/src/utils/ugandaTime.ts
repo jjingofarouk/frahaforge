@@ -1,98 +1,158 @@
 // src/renderer/src/utils/ugandaTime.ts
 /**
  * Uganda Timezone Utilities (UTC+3)
- * Handles all date conversions between local browser time and Uganda time
+ * Handles all date conversions between UTC (database) and Uganda time (UI)
  */
 
 // Uganda is UTC+3 (East Africa Time)
 const UGANDA_UTC_OFFSET = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
 /**
- * Convert a local date to Uganda time start of day (00:00:00 Uganda time)
+ * Convert UTC date to Uganda time (UTC+3) for display
  */
-export const getUgandaStartOfDay = (date: Date): Date => {
-  // Create a date at 00:00:00 in Uganda time (UTC+3)
-  const ugandaMidnight = new Date(date);
-  ugandaMidnight.setHours(0, 0, 0, 0);
+export function convertUTCToUganda(utcDate: string | Date): Date {
+  const date = new Date(utcDate);
+  return new Date(date.getTime() + UGANDA_UTC_OFFSET);
+}
+
+/**
+ * Convert Uganda time to UTC for database storage
+ */
+export function convertUgandaToUTC(ugandaDate: string | Date): Date {
+  const date = new Date(ugandaDate);
+  return new Date(date.getTime() - UGANDA_UTC_OFFSET);
+}
+
+/**
+ * Format UTC date for Uganda display
+ */
+export function formatDateForUgandaDisplay(date: string | Date): string {
+  const ugandaDate = convertUTCToUganda(date);
+  return ugandaDate.toLocaleString('en-UG', {
+    timeZone: 'Africa/Kampala',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+/**
+ * Format date for API queries (UTC)
+ */
+export function formatDateForAPI(date: string | Date): string {
+  const utcDate = date instanceof Date ? date : new Date(date);
+  return utcDate.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+/**
+ * Format Uganda date for API (convert to UTC date string)
+ */
+export function formatUgandaDateForAPI(ugandaDate: string | Date): string {
+  const utcDate = convertUgandaToUTC(ugandaDate);
+  return utcDate.toISOString().split('T')[0];
+}
+
+/**
+ * Get current Uganda time
+ */
+export function getCurrentUgandaTime(): Date {
+  return new Date(Date.now() + UGANDA_UTC_OFFSET);
+}
+
+/**
+ * Get Uganda date range from date strings (for filtering)
+ */
+export function getUgandaDateRangeForAPI(startDate: string, endDate: string): { startDateUTC: string; endDateUTC: string } {
+  // Create Uganda time dates
+  const ugandaStart = new Date(startDate + 'T00:00:00+03:00');
+  const ugandaEnd = new Date(endDate + 'T23:59:59+03:00');
   
-  // Convert Uganda time to UTC by subtracting 3 hours
-  const utcStart = new Date(ugandaMidnight.getTime() - UGANDA_UTC_OFFSET);
-  return utcStart;
-};
-
-/**
- * Convert a local date to Uganda time end of day (23:59:59.999 Uganda time)
- */
-export const getUgandaEndOfDay = (date: Date): Date => {
-  // Create a date at 23:59:59.999 in Uganda time (UTC+3)
-  const ugandaEnd = new Date(date);
-  ugandaEnd.setHours(23, 59, 59, 999);
+  // Convert to UTC for API
+  const startDateUTC = formatDateForAPI(ugandaStart);
+  const endDateUTC = formatDateForAPI(ugandaEnd);
   
-  // Convert Uganda time to UTC by subtracting 3 hours
-  const utcEnd = new Date(ugandaEnd.getTime() - UGANDA_UTC_OFFSET);
-  return utcEnd;
-};
+  return { startDateUTC, endDateUTC };
+}
 
 /**
- * Format date for API (YYYY-MM-DD) in Uganda time
+ * Get today's Uganda date range for API
  */
-export const formatDateForUgandaAPI = (date: Date): string => {
-  // Convert to Uganda time for display purposes
-  const ugandaDate = new Date(date.getTime() + UGANDA_UTC_OFFSET);
-  return ugandaDate.toISOString().split('T')[0];
-};
-
-/**
- * Convert UTC date from API to Uganda time for display
- */
-export const convertUTCToUgandaTime = (utcDateString: string): Date => {
-  const utcDate = new Date(utcDateString);
-  return new Date(utcDate.getTime() + UGANDA_UTC_OFFSET);
-};
-
-/**
- * Get today's date range in Uganda time
- */
-export const getTodayUgandaRange = (): { start: Date; end: Date } => {
+export function getTodayUgandaRangeForAPI(): { startDateUTC: string; endDateUTC: string } {
   const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  return getUgandaDateRangeForAPI(todayStr, todayStr);
+}
+
+/**
+ * Format receipt date in Uganda time
+ */
+export function formatReceiptDate(utcDate: string | Date): string {
+  const ugandaDate = convertUTCToUganda(utcDate);
+  return ugandaDate.toLocaleString('en-UG', {
+    timeZone: 'Africa/Kampala',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+/**
+ * Check if a date is today in Uganda time
+ */
+export function isTodayInUganda(date: string | Date): boolean {
+  const ugandaDate = convertUTCToUganda(date);
+  const todayUganda = getCurrentUgandaTime();
+  
+  return ugandaDate.toDateString() === todayUganda.toDateString();
+}
+
+/**
+ * Get Uganda time display for transactions
+ */
+export function getUgandaTimeDisplay(utcDate: string | Date): {
+  date: string;
+  time: string;
+  full: string;
+} {
+  const ugandaDate = convertUTCToUganda(utcDate);
+  
+  const date = ugandaDate.toLocaleDateString('en-UG', {
+    timeZone: 'Africa/Kampala',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  
+  const time = ugandaDate.toLocaleTimeString('en-UG', {
+    timeZone: 'Africa/Kampala',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
   return {
-    start: getUgandaStartOfDay(today),
-    end: getUgandaEndOfDay(today)
+    date,
+    time,
+    full: `${date} ${time}`
   };
-};
+}
 
 /**
- * Create a Uganda date from YYYY-MM-DD string
+ * Format currency for display (UGX)
  */
-export const createUgandaDate = (dateString: string): Date => {
-  // Parse the date string and set it to Uganda time
-  const date = new Date(dateString + 'T00:00:00+03:00');
-  return date;
-};
-
-/**
- * Get Uganda date range from start and end date strings
- */
-export const getUgandaDateRange = (startDate: string, endDate: string): { start: Date; end: Date } => {
-  return {
-    start: getUgandaStartOfDay(createUgandaDate(startDate)),
-    end: getUgandaEndOfDay(createUgandaDate(endDate))
-  };
-};
-
-/**
- * Get Uganda date range from Date objects
- */
-export const getUgandaDateRangeFromDates = (startDate: Date, endDate: Date): { start: Date; end: Date } => {
-  return {
-    start: getUgandaStartOfDay(startDate),
-    end: getUgandaEndOfDay(endDate)
-  };
-};
-
-/**
- * Check if a UTC date falls within a Uganda date range
- */
-export const isDateInUgandaRange = (utcDate: Date, ugandaStart: Date, ugandaEnd: Date): boolean => {
-  return utcDate >= ugandaStart && utcDate <= ugandaEnd;
-};
+export function formatCurrency(amount: number | string | undefined | null): string {
+  if (!amount && amount !== 0) return 'UGX 0';
+  const numValue = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numValue)) return 'UGX 0';
+  
+  // Round to nearest 100
+  const rounded = Math.round(Number(numValue) / 100) * 100;
+  return `UGX ${rounded.toLocaleString('en-UG', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+}

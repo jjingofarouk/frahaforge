@@ -2,12 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import transactionsService, { Transaction, SalesReport, TopProduct, DailySummary } from '../../../services/transactionsService';
 import electronStoreService from '../../../services/electronStoreService';
-import { 
-  getUgandaStartOfDay, 
-  getUgandaEndOfDay, 
-  formatDateForUgandaAPI,
-  getTodayUgandaRange,
-} from '../../../src/utils/ugandaTime';
 
 interface DateRange {
   start: Date;
@@ -123,11 +117,29 @@ const CACHE_DURATION = 5 * 60 * 1000;
 // Auto-refresh interval (30 seconds)
 const AUTO_REFRESH_INTERVAL = 30 * 1000;
 
+// Helper function to get today's date range as Date objects
+const getTodayRange = (): DateRange => {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  // Create start of day (00:00:00)
+  const start = new Date(todayStr + 'T00:00:00');
+  // Create end of day (23:59:59)
+  const end = new Date(todayStr + 'T23:59:59');
+  
+  return { start, end };
+};
+
+// Helper function to format date for API (YYYY-MM-DD)
+const formatDateForAPI = (date: Date): string => {
+  return date.toISOString().split('T')[0];
+};
+
 export const useTransactionsData = () => {
   const [state, setState] = useState<TransactionsState>({
     loading: true,
     error: null,
-    dateRange: getTodayUgandaRange(),
+    dateRange: getTodayRange(),
     lastUpdated: null
   });
 
@@ -226,11 +238,11 @@ export const useTransactionsData = () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      console.log('🔄 Loading transactions for Uganda date range:', {
+      console.log('🔄 Loading transactions for date range:', {
         start: state.dateRange.start,
         end: state.dateRange.end,
-        startFormatted: formatDateForUgandaAPI(state.dateRange.start),
-        endFormatted: formatDateForUgandaAPI(state.dateRange.end)
+        startFormatted: formatDateForAPI(state.dateRange.start),
+        endFormatted: formatDateForAPI(state.dateRange.end)
       });
 
       const freshData = await fetchAllData(state.dateRange);
@@ -298,8 +310,8 @@ export const useTransactionsData = () => {
     handleExport: async (filters?: ExportFilters) => {
       try {
         const exportFilters = filters || {
-          startDate: formatDateForUgandaAPI(state.dateRange.start),
-          endDate: formatDateForUgandaAPI(state.dateRange.end)
+          startDate: formatDateForAPI(state.dateRange.start),
+          endDate: formatDateForAPI(state.dateRange.end)
         };
         
         const csv = convertToCSV(data.transactions, exportFilters);
@@ -505,10 +517,9 @@ const processCustomersDueData = (transactions: Transaction[]): CustomerDueItem[]
 // Fetch all required data from the server
 const fetchAllData = async (dateRange: DateRange): Promise<TransactionsData> => {
   try {
-    // FIXED: Use Uganda timezone formatted dates
     const transactionsResponse = await transactionsService.getTransactions({
-      start_date: formatDateForUgandaAPI(dateRange.start),
-      end_date: formatDateForUgandaAPI(dateRange.end),
+      start_date: formatDateForAPI(dateRange.start),
+      end_date: formatDateForAPI(dateRange.end),
       limit: 1000
     });
 

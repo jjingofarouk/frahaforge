@@ -59,9 +59,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setIsRefreshingData(true);
     try {
       await globalDataRefresh.refreshProductsImmediately();
-      console.log('✅ PaymentModal: Product data refreshed successfully');
+      console.log('PaymentModal: Product data refreshed successfully');
     } catch (error) {
-      console.error('❌ PaymentModal: Failed to refresh product data:', error);
+      console.error('PaymentModal: Failed to refresh product data:', error);
     } finally {
       setIsRefreshingData(false);
     }
@@ -146,7 +146,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       const result = await transactionsService.createTransaction(transactionData);
 
       if (result.success) {
-        console.log('✅ Payment transaction successful, clearing cart and refreshing data...', result);
+        console.log('Payment transaction successful, clearing cart and refreshing data...', result);
         
         // 🛒 CLEAR CART IMMEDIATELY HERE!
         console.log('🛒 Clearing cart from PaymentModal...');
@@ -154,7 +154,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         clearCart();
         
         // 🔄 REFRESH PRODUCT DATA TO UPDATE STOCK AMOUNTS
-        console.log('🔄 Refreshing product data to reflect stock changes...');
+        console.log('Refreshing product data to reflect stock changes...');
         await refreshProductData();
         
         setTransactionId(result.id);
@@ -199,7 +199,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       }
 
     } catch (error: any) {
-      console.error('❌ Payment processing failed:', error);
+      console.error('Payment processing failed:', error);
       alert(`Payment failed: ${error.message}`);
     } finally {
       setIsProcessing(false);
@@ -221,7 +221,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // ENHANCED: Simplified receipt close handler
   const handleReceiptClose = useCallback(() => {
-    console.log('✅ Closing receipt, cart cleared and data refreshed');
+    console.log(' Closing receipt, cart cleared and data refreshed');
     
     // Prepare payment data for callback
     const paymentData: PaymentData = {
@@ -257,7 +257,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   }, []);
 
   const handleClose = useCallback(() => {
-    console.log('❌ Payment modal closed without completion');
+    console.log(' Payment modal closed without completion');
     resetModal();
     onClose();
   }, [resetModal, onClose]);
@@ -330,7 +330,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <div>
                     <h3>Payment Complete</h3>
                     <p>Receipt #{receiptData.transactionId}</p>
-                    <p className="stock-updated-notice">✅ Stock levels updated</p>
+                    <p className="stock-updated-notice"> Stock levels updated</p>
                   </div>
                 </div>
                 <button className="print-receipt-btn" onClick={handlePrintReceipt}>

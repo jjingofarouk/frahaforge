@@ -6,9 +6,14 @@ export interface Supplier {
   id: number;
   name: string;
   created_at: string;
+  phone_number?: string;
+  email?: string;
+  address?: string;
+  contact_person?: string;
   total_products?: number;
   unique_products_restocked?: number;
   last_restock_date?: string;
+  reliability_score?: number;
 }
 
 export interface SupplierDashboard {
@@ -178,6 +183,10 @@ export interface BulkRestockItem {
 
 export interface CreateSupplierRequest {
   name: string;
+  phone_number?: string;
+  email?: string;
+  address?: string;
+  contact_person?: string;
 }
 
 class SupplierService {
@@ -245,6 +254,36 @@ class SupplierService {
       console.log('✅ Supplier created successfully:', result);
       return result;
     }, 'Failed to create supplier');
+  }
+
+  /**
+   * Update an existing supplier
+   */
+  async updateSupplier(supplierId: number, supplierData: CreateSupplierRequest) {
+    return withErrorHandling(async () => {
+      if (!supplierData.name || supplierData.name.trim().length === 0) {
+        throw new Error('Supplier name is required');
+      }
+
+      console.log(`🔄 Updating supplier ${supplierId}: ${supplierData.name}`);
+
+      const response = await fetch(`${this.baseURL}/suppliers/${supplierId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(supplierData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Supplier updated successfully:', result);
+      return result;
+    }, 'Failed to update supplier');
   }
 
   // ===== NEW FEATURE: SUPPLIER DASHBOARD =====
@@ -421,6 +460,35 @@ class SupplierService {
     }, 'Failed to process bulk restock');
   }
 
+  /**
+   * Switch product to a different supplier
+   */
+  async switchProductSupplier(productId: number, newSupplierId: number) {
+    return withErrorHandling(async () => {
+      console.log(`🔄 Switching product ${productId} to supplier ${newSupplierId}`);
+
+      const response = await fetch(`${this.baseURL}/suppliers/switch-product-supplier`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId,
+          newSupplierId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Product supplier switched successfully:', result);
+      return result;
+    }, 'Failed to switch product supplier');
+  }
+
   // ===== SEARCH AND FILTERING =====
 
   /**
@@ -513,10 +581,35 @@ class SupplierService {
       errors.push('Supplier name must be at least 2 characters long');
     }
 
+    // Optional: Add validation for contact fields
+    if (data.phone_number && !this.isValidPhoneNumber(data.phone_number)) {
+      errors.push('Phone number format is invalid');
+    }
+
+    if (data.email && !this.isValidEmail(data.email)) {
+      errors.push('Email format is invalid');
+    }
+
     return {
       isValid: errors.length === 0,
       errors
     };
+  }
+
+  /**
+   * Validate phone number (Ugandan format)
+   */
+  public isValidPhoneNumber(phone: string): boolean {
+    const phoneRegex = /^(\+?256|0)(7[0-9]|20)[0-9]{7}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+  }
+
+  /**
+   * Validate email format
+   */
+  public isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 
   /**

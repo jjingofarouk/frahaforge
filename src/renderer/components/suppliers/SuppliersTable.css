@@ -1,6 +1,5 @@
-/* TransactionsTable.css - Monochromatic Design with Colored Badges */
-
-.transactions-table-modern {
+/* src/renderer/src/components/suppliers/SuppliersTable.css */
+.suppliers-table-modern {
   padding: 24px;
   background: #F9FAFB;
   min-height: 100vh;
@@ -32,12 +31,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* Table Header */
@@ -60,7 +55,7 @@
   flex: 1;
 }
 
-.header-left .header-icon {
+.header-left svg {
   color: #374151;
   flex-shrink: 0;
 }
@@ -95,7 +90,7 @@
   align-items: center;
 }
 
-.search-box .search-icon {
+.search-box svg {
   position: absolute;
   left: 12px;
   color: #9CA3AF;
@@ -124,8 +119,8 @@
   color: #9CA3AF;
 }
 
-/* Export Button */
-.btn-export {
+/* Add Button */
+.btn-add {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -143,110 +138,17 @@
   white-space: nowrap;
 }
 
-.btn-export:hover {
+.btn-add:hover {
   background: #1F2937;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.btn-export:active {
+.btn-add:active {
   transform: scale(0.98);
 }
 
-.btn-export svg {
+.btn-add svg {
   flex-shrink: 0;
-}
-
-/* Summary Cards */
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.summary-card {
-  background: #FFFFFF;
-  padding: 20px 24px;
-  border-radius: 12px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.summary-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.summary-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.02em;
-}
-
-/* Table Filters */
-.table-filters {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  background: #FFFFFF;
-  padding: 16px 20px;
-  border-radius: 12px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.filter-group label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  letter-spacing: -0.01em;
-}
-
-.filter-select {
-  padding: 10px 14px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #111827;
-  background: #FFFFFF;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-  min-width: 180px;
-}
-
-.filter-select:hover {
-  border-color: #D1D5DB;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #374151;
-  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.08);
-}
-
-.filter-summary {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
-
-.filter-notice {
-  font-size: 14px;
-  color: #6B7280;
-  font-weight: 500;
 }
 
 /* Table Wrapper */
@@ -321,7 +223,6 @@
 .modern-table tbody tr {
   border-bottom: 1px solid #E5E7EB;
   transition: all 0.15s ease;
-  cursor: pointer;
 }
 
 .modern-table tbody tr:hover {
@@ -338,185 +239,115 @@
   vertical-align: middle;
 }
 
-/* Invoice Cell */
-.invoice-cell {
+/* Supplier Name Cell */
+.supplier-name-cell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 220px;
+}
+
+.supplier-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #E5E7EB;
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.invoice-icon {
+  justify-content: center;
   color: #6B7280;
   flex-shrink: 0;
+  position: relative;
 }
 
-.invoice-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.invoice-number {
+.avatar-initials {
+  position: absolute;
   font-weight: 600;
-  color: #111827;
-  font-size: 14px;
-}
-
-/* Date Cell */
-.date-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.date-icon {
-  color: #6B7280;
-  flex-shrink: 0;
-}
-
-.date-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.date-display {
-  font-size: 14px;
-  color: #111827;
-  font-weight: 500;
-}
-
-/* Customer Cell */
-.customer-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.customer-icon {
-  color: #6B7280;
-  flex-shrink: 0;
-}
-
-.customer-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.customer-name {
-  font-weight: 600;
-  color: #111827;
-  font-size: 14px;
-}
-
-.customer-id {
   font-size: 12px;
-  color: #6B7280;
-}
-
-/* Amount Cells */
-.amount-cell {
-  font-weight: 700;
-  font-size: 15px;
-  color: #111827;
-}
-
-.total-amount {
-  color: #111827;
-}
-
-.paid-amount {
   color: #374151;
+  margin-left: 4px;
 }
 
-.due-amount {
-  color: #6B7280;
+.supplier-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
 }
 
-.due-amount.has-due {
-  color: #111827;
-  font-weight: 700;
-}
-
-.due-amount.no-due {
-  color: #9CA3AF;
+.name-main {
   font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-/* Payment Cell with Colored Badge */
-.payment-cell {
+.supplier-contact {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.payment-icon {
-  color: #6B7280;
-  flex-shrink: 0;
-}
-
-.payment-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-  color: #FFFFFF;
-  white-space: nowrap;
-}
-
-.payment-badge.payment-cash {
-  background: #059669;
-}
-
-.payment-badge.payment-card {
-  background: #2563EB;
-}
-
-.payment-badge.payment-due {
-  background: #D97706;
-}
-
-.payment-badge.payment-mobile {
-  background: #7C3AED;
-}
-
-.payment-badge.payment-unknown {
-  background: #6B7280;
-}
-
-
-
-.status-badge.status-paid {
-  background: #059669;
-}
-
-.status-badge.status-partial {
-  background: #D97706;
-}
-
-.status-badge.status-unpaid {
-  background: #DC2626;
-}
-
-/* Staff Cell */
-.staff-cell {
+.contact-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  font-size: 12px;
+  color: #6B7280;
+  background: #F3F4F6;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
-.staff-icon {
+/* Contact Info */
+.contact-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.contact-info svg {
   color: #6B7280;
   flex-shrink: 0;
 }
 
-.staff-text {
-  font-size: 14px;
+.empty-field {
+  color: #9CA3AF;
+  font-style: italic;
+}
+
+/* Product Count */
+.product-count {
+  font-weight: 600;
+  font-size: 15px;
   color: #111827;
-  font-weight: 500;
+  text-align: center;
+}
+
+/* Reliability Badge */
+.reliability-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  color: white;
+  text-align: center;
+  display: inline-block;
+  min-width: 60px;
+}
+
+.reliability-badge.high { background: #059669; }
+.reliability-badge.medium { background: #D97706; }
+.reliability-badge.low { background: #DC2626; }
+
+/* Last Restock */
+.last-restock {
+  font-size: 13px;
+  color: #6B7280;
+  font-style: italic;
 }
 
 /* Action Buttons */
@@ -547,6 +378,26 @@
   background: #F9FAFB;
   border-color: #D1D5DB;
   color: #111827;
+}
+
+.action-buttons .btn-edit {
+  color: #111827;
+  border-color: #111827;
+}
+
+.action-buttons .btn-edit:hover {
+  background: #111827;
+  color: #FFFFFF;
+}
+
+.action-buttons .btn-contact {
+  color: #2563EB;
+  border-color: #93C5FD;
+}
+
+.action-buttons .btn-contact:hover {
+  background: #EFF6FF;
+  border-color: #3B82F6;
 }
 
 .action-buttons button:active {
@@ -687,10 +538,14 @@
   .modern-table td {
     padding: 12px;
   }
+
+  .supplier-name-cell {
+    min-width: 200px;
+  }
 }
 
 @media (max-width: 968px) {
-  .transactions-table-modern {
+  .suppliers-table-modern {
     padding: 16px;
   }
 
@@ -718,31 +573,8 @@
     width: 100%;
   }
 
-  .btn-export {
+  .btn-add {
     width: 100%;
-    justify-content: center;
-  }
-
-  .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .table-filters {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 16px;
-  }
-
-  .filter-group {
-    width: 100%;
-  }
-
-  .filter-select {
-    width: 100%;
-  }
-
-  .filter-summary {
-    margin-left: 0;
     justify-content: center;
   }
 
@@ -764,17 +596,18 @@
     justify-content: center;
   }
 
+  /* Make table scrollable horizontally on mobile */
   .table-container {
     overflow-x: auto;
   }
 
   .modern-table {
-    min-width: 1200px;
+    min-width: 1000px;
   }
 }
 
 @media (max-width: 640px) {
-  .transactions-table-modern {
+  .suppliers-table-modern {
     padding: 12px;
   }
 
@@ -786,17 +619,19 @@
     font-size: 18px;
   }
 
-  .header-left .header-icon {
+  .header-left svg {
     width: 24px;
     height: 24px;
   }
 
-  .summary-cards {
-    grid-template-columns: 1fr;
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .table-filters {
-    padding: 12px;
+  .action-buttons button {
+    width: 100%;
+    padding: 6px;
   }
 
   .pagination {
@@ -811,8 +646,7 @@
 
 /* Focus States for Accessibility */
 .search-box input:focus-visible,
-.filter-select:focus-visible,
-.btn-export:focus-visible,
+.btn-add:focus-visible,
 .action-buttons button:focus-visible,
 .pagination-btn:focus-visible,
 .page-size-selector select:focus-visible {
@@ -841,88 +675,4 @@
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
-}
-
-/* Smooth Transitions */
-.modern-table tbody tr,
-.action-buttons button,
-.pagination-btn,
-.btn-export {
-  will-change: transform;
-}
-
-/* Print Styles */
-@media print {
-  .transactions-table-modern {
-    background: white;
-    padding: 0;
-  }
-
-  .table-header,
-  .table-filters,
-  .pagination,
-  .action-buttons,
-  .summary-cards {
-    display: none;
-  }
-
-  .table-wrapper {
-    border: none;
-    box-shadow: none;
-  }
-
-  .modern-table tbody tr:hover {
-    background: transparent;
-  }
-}
-/* Total Column Styling */
-.column-total {
-  color: #111827 !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-}
-
-/* Ensure all amount cells have consistent styling */
-.amount-cell {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.total-amount {
-  color: #111827;
-}
-
-.paid-amount {
-  color: #111827;
-}
-
-.due-amount {
-  color: #111827;
-}
-
-.due-amount.has-due {
-  color: #DC2626;
-}
-
-.due-amount.no-due {
-  color: #059669;
-}
-/* Status Indicator Styling */
-.status-indicator {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-  color: #111827 !important;
-  background: #F3F4F6;
-  border: 1px solid #D1D5DB;
-  white-space: nowrap;
-}
-
-/* Remove old status badge styles if they exist */
-.status-badge {
-  /* This will be overridden by the new class */
 }

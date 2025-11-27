@@ -1,12 +1,19 @@
 // src/renderer/src/components/products/ProductsPage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Package, AlertTriangle, Calendar, TrendingUp, RefreshCw,
+  ShoppingCart, Archive, Plus
+} from 'lucide-react';
+
 import { inventoryService, Product } from '../../services/inventoryService';
 import ProductsTable from './ProductsTable';
 import StockAlertsPanel from './StockAlertsPanel';
-import RestockManager from './RestockManager';
 import ProductAnalytics from './ProductAnalytics';
-import { Package, AlertTriangle, Calendar, TrendingUp, RefreshCw } from 'lucide-react';
+import { LowStockModal } from './LowStockModal';
+import { ExpiryModal } from './ExpiryModal';
+import ProductModal from './ProductModal';
+
 import './ProductsPage.css';
 
 const ProductsPage: React.FC = () => {
@@ -15,53 +22,88 @@ const ProductsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [isBlinking, setIsBlinking] = useState(false);
 
-  // Calculate stats from products data
-  const stats = useMemo(() => {
-    const totalProducts = products.length;
-    const totalValue = products.reduce((sum, product) => 
-      sum + (product.quantity * (product.cost_price as number)), 0
-    );
+  // Product modal state - simplified like ProductsTable
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalMode, setModalMode] = useState<'view' | 'edit' | 'create'>('view');
+  const [showProductModal, setShowProductModal] = useState(false);
 
-    // Calculate low stock count
-    const lowStockCount = products.filter(product => {
-      const quantity = product.quantity || 0;
-      const minStock = product.min_stock || 0;
-      const reorderLevel = product.reorder_level || minStock * 2;
-      return quantity > 0 && quantity <= reorderLevel;
-    }).length;
+  // Alert modals
+  const [showLowStockModal, setShowLowStockModal] = useState(false);
+  const [showExpiringModal, setShowExpiringModal] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
 
-    // Calculate expiring products count (within 90 days)
-    const expiringCount = products.filter(product => {
-      if (!product.expiration_date) return false;
-      
-      const expiryDate = new Date(product.expiration_date);
-      const today = new Date();
-      const daysUntilExpiry = Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      return daysUntilExpiry >= 0 && daysUntilExpiry <= 90 && (product.quantity || 0) > 0;
-    }).length;
-
-    return {
-      totalProducts,
-      lowStockCount,
-      expiringCount,
-      totalValue
-    };
+  const { lowStockProducts, outOfStockProducts, expiringProducts, expiredProducts } = useMemo(() => {
+    const lowStock = products.filter(p => {
+      const qty = p.quantity || 0;
+      const reorder = p.reorder_level || (p.min_stock || 0) * 2;
+      return qty > 0 && qty <= reorder;
+    });
+    const outOfStock = products.filter(p => (p.quantity || 0) === 0);
+    const expiring = products.filter(p => {
+      if (!p.expiration_date) return false;
+      const days = Math.floor((new Date(p.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      return days >= 0 && days <= 90 && (p.quantity || 0) > 0;
+    });
+    const expired = products.filter(p => {
+      if (!p.expiration_date) return false;
+      const days = Math.floor((new Date(p.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      return days < 0 && (p.quantity || 0) > 0;
+    });
+    return { lowStockProducts: lowStock, outOfStockProducts: outOfStock, expiringProducts: expiring, expiredProducts: expired };
   }, [products]);
+
+  const stats = useMemo(() => {
+    const totalValue = products.reduce((sum, p) => sum + (p.quantity || 0) * (parseFloat(p.cost_price as any) || 0), 0);
+    return {
+      totalProducts: products.length,
+      lowStockCount: lowStockProducts.length,
+      outOfStockCount: outOfStockProducts.length,
+      expiringCount: expiringProducts.length,
+      expiredCount: expiredProducts.length,
+      totalValue: Math.round(totalValue / 100) * 100
+    };
+  }, [products, lowStockProducts, outOfStockProducts, expiringProducts, expiredProducts]);
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    if (lastRefresh) {
+      setIsBlinking(true);
+      const t = setTimeout(() => setIsBlinking(false), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [lastRefresh]);
+
+  // Listen for switch to edit mode event - like ProductsTable does
+  useEffect(() => {
+    const handleSwitchToEditMode = (event: CustomEvent) => {
+      setSelectedProduct(event.detail);
+      setModalMode('edit');
+      setShowProductModal(true);
+    };
+
+    window.addEventListener('switchToEditMode' as any, handleSwitchToEditMode as EventListener);
+    
+    return () => {
+      window.removeEventListener('switchToEditMode' as any, handleSwitchToEditMode as EventListener);
+    };
+  }, []);
+
   const loadProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await inventoryService.getProducts();
       setProducts(data);
-      setError(null);
+      setLastRefresh(new Date());
     } catch (err: any) {
-      setError(err.message);
+      setError(`Failed to load products: ${err.message}`);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -73,285 +115,221 @@ const ProductsPage: React.FC = () => {
     await loadProducts();
   };
 
+  const handleCreateProduct = () => {
+    setSelectedProduct(null);
+    setModalMode('create');
+    setShowProductModal(true);
+  };
+
   const handleProductUpdate = () => {
     loadProducts();
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'products':
-        return (
-          <ProductsTable 
-            products={products} 
-            loading={loading}
-            onProductUpdate={handleProductUpdate}
-          />
-        );
-      case 'alerts':
-        return <StockAlertsPanel onProductUpdate={handleProductUpdate} />;
-      case 'restock':
-        return <RestockManager onRestockComplete={handleProductUpdate} />;
-      case 'analytics':
-        return <ProductAnalytics />;
-      default:
-        return null;
-    }
+  const handleProductSelect = (product: Product) => {
+    setSelectedProduct(product);
+    setModalMode('view');
+    setShowProductModal(true);
+    setShowLowStockModal(false);
+    setShowExpiringModal(false);
+    setShowExpiredModal(false);
+    setShowOutOfStockModal(false);
   };
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+  // Handle edit product from alerts panel
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setModalMode('edit');
+    setShowProductModal(true);
+    setShowLowStockModal(false);
+    setShowExpiringModal(false);
+    setShowExpiredModal(false);
+    setShowOutOfStockModal(false);
   };
 
-  const statCardVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.08,
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    })
+  const handleCloseModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
+    setModalMode('view');
   };
 
-  const tabVariants: Variants = {
-    hidden: { opacity: 0, y: -10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: [0.22, 1, 0.36, 1]
-      }
-    }
+  const handleSaveProduct = () => {
+    handleProductUpdate();
+    handleCloseModal();
   };
 
-  if (error) {
+  if (error && !refreshing) {
     return (
-      <motion.div 
-        className="products-page"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="error-state">
-          <div className="error-icon">
-            <AlertTriangle size={48} />
-          </div>
-          <h2>Unable to Load Products</h2>
-          <p>{error}</p>
-          <button className="btn-retry" onClick={loadProducts}>
-            Try Again
-          </button>
+      <div className="products-container">
+        <div className="error-banner">
+          <AlertTriangle size={14} />
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>×</button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div 
-      className="products-page"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Header Section */}
-      <div className="page-header">
-        <div className="header-content">
-          <div className="header-left">
-            <motion.h1 
-              className="page-title"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Inventory Management
-            </motion.h1>
-            <motion.p 
-              className="page-subtitle"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Manage products, track stock levels, and analyze performance
-            </motion.p>
+    <div className="products-container">
+      {/* Header */}
+      <div className="products-header">
+        <div className="products-header__content">
+          <div className="products-header__title">
+            <h1>Inventory Management</h1>
+            {lastRefresh && (
+              <div className="last-refresh-container">
+                <span className={`last-refresh ${isBlinking ? 'blinking' : ''}`}>
+                  Last updated: {lastRefresh.toLocaleTimeString()}
+                </span>
+                <span className="realtime-indicator">• Live</span>
+              </div>
+            )}
           </div>
-          <div className="header-actions">
-            <motion.button 
-              className={`btn-refresh ${refreshing ? 'refreshing' : ''}`}
+          <div className="products-header__actions">
+            <button
+              className="products-refresh-btn"
               onClick={handleRefresh}
               disabled={refreshing}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.15 }}
             >
-              <RefreshCw size={18} className={refreshing ? 'spin' : ''} />
+              <RefreshCw size={14} className={refreshing ? 'spinning' : ''} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
-            </motion.button>
+            </button>
+            <button
+              className="products-add-btn"
+              onClick={handleCreateProduct}
+            >
+              <Plus size={14} />
+              Add Product
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <motion.div 
-        className="stats-grid"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          visible: {
-            transition: {
-              staggerChildren: 0.08
-            }
-          }
-        }}
-      >
-        <motion.div 
-          className="stat-card"
-          variants={statCardVariants}
-          custom={0}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="stat-icon-wrapper primary">
-            <Package size={22} strokeWidth={2.5} />
-          </div>
-          <div className="stat-content">
-            <span className="stat-number">{stats.totalProducts}</span>
-            <span className="stat-label">Total Products</span>
-          </div>
-        </motion.div>
+      {/* Error Banner */}
+      {error && (
+        <div className="error-banner">
+          <AlertTriangle size={14} />
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>×</button>
+        </div>
+      )}
 
-        <motion.div 
-          className={`stat-card ${stats.lowStockCount > 0 ? 'critical' : ''}`}
-          variants={statCardVariants}
-          custom={1}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="stat-icon-wrapper critical">
-            <AlertTriangle size={22} strokeWidth={2.5} />
-          </div>
+      {/* Stats Grid - Compact Cards */}
+      <div className="stats-grid">
+        <div className="stat-card total-products">
+          <Package size={18} />
           <div className="stat-content">
-            <span className="stat-number">{stats.lowStockCount}</span>
-            <span className="stat-label">Low Stock Items</span>
+            <div className="stat-number">{stats.totalProducts}</div>
+            <div className="stat-label">Total Products</div>
           </div>
-          {stats.lowStockCount > 0 && (
-            <motion.div 
-              className="stat-badge critical"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 500, damping: 25 }}
-            >
-              {stats.lowStockCount}
-            </motion.div>
-          )}
-        </motion.div>
+        </div>
 
-        <motion.div 
-          className={`stat-card ${stats.expiringCount > 0 ? 'warning' : ''}`}
-          variants={statCardVariants}
-          custom={2}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="stat-icon-wrapper warning">
-            <Calendar size={22} strokeWidth={2.5} />
-          </div>
+        <div className="stat-card low-stock clickable" onClick={() => stats.lowStockCount > 0 && setShowLowStockModal(true)}>
+          <AlertTriangle size={18} />
           <div className="stat-content">
-            <span className="stat-number">{stats.expiringCount}</span>
-            <span className="stat-label">Expiring Soon</span>
+            <div className="stat-number">{stats.lowStockCount}</div>
+            <div className="stat-label">Low Stock</div>
           </div>
-          {stats.expiringCount > 0 && (
-            <motion.div 
-              className="stat-badge warning"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 500, damping: 25 }}
-            >
-              {stats.expiringCount}
-            </motion.div>
-          )}
-        </motion.div>
+          {stats.lowStockCount > 0 && <span className="stat-badge">{stats.lowStockCount}</span>}
+        </div>
 
-        <motion.div 
-          className="stat-card"
-          variants={statCardVariants}
-          custom={3}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="stat-icon-wrapper success">
-            <TrendingUp size={22} strokeWidth={2.5} />
-          </div>
+        <div className="stat-card out-of-stock clickable" onClick={() => stats.outOfStockCount > 0 && setShowOutOfStockModal(true)}>
+          <ShoppingCart size={18} />
           <div className="stat-content">
-            <span className="stat-number">UGX {stats.totalValue.toLocaleString()}</span>
-            <span className="stat-label">Total Inventory Value</span>
+            <div className="stat-number">{stats.outOfStockCount}</div>
+            <div className="stat-label">Out of Stock</div>
           </div>
-        </motion.div>
-      </motion.div>
+          {stats.outOfStockCount > 0 && <span className="stat-badge">{stats.outOfStockCount}</span>}
+        </div>
 
-      {/* Navigation Tabs */}
-      <motion.div 
-        className="navigation-tabs"
-        variants={tabVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <button 
-          className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          <Package size={18} strokeWidth={2.5} />
-          All Products
+        <div className="stat-card expiring clickable" onClick={() => stats.expiringCount > 0 && setShowExpiringModal(true)}>
+          <Calendar size={18} />
+          <div className="stat-content">
+            <div className="stat-number">{stats.expiringCount}</div>
+            <div className="stat-label">Expiring Soon</div>
+          </div>
+          {stats.expiringCount > 0 && <span className="stat-badge">{stats.expiringCount}</span>}
+        </div>
+
+        <div className="stat-card expired clickable" onClick={() => stats.expiredCount > 0 && setShowExpiredModal(true)}>
+          <Archive size={18} />
+          <div className="stat-content">
+            <div className="stat-number">{stats.expiredCount}</div>
+            <div className="stat-label">Expired</div>
+          </div>
+          {stats.expiredCount > 0 && <span className="stat-badge">{stats.expiredCount}</span>}
+        </div>
+
+        <div className="stat-card value">
+          <TrendingUp size={18} />
+          <div className="stat-content">
+            <div className="stat-number">UGX {(stats.totalValue / 1000).toFixed(0)}K</div>
+            <div className="stat-label">Inventory Value</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="products-tabs">
+        <button className={activeTab === 'products' ? 'active' : ''} onClick={() => setActiveTab('products')}>
+          <Package size={14} /> All Products
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'alerts' ? 'active' : ''}`}
-          onClick={() => setActiveTab('alerts')}
-        >
-          <AlertTriangle size={18} strokeWidth={2.5} />
-          Stock Alerts
-          {stats.lowStockCount > 0 && (
-            <span className="tab-badge">{stats.lowStockCount}</span>
+        <button className={activeTab === 'alerts' ? 'active' : ''} onClick={() => setActiveTab('alerts')}>
+          <AlertTriangle size={14} /> Alerts
+          {(stats.lowStockCount + stats.outOfStockCount + stats.expiringCount + stats.expiredCount > 0) && (
+            <span className="tab-badge">
+              {stats.lowStockCount + stats.outOfStockCount + stats.expiringCount + stats.expiredCount}
+            </span>
           )}
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'restock' ? 'active' : ''}`}
-          onClick={() => setActiveTab('restock')}
-        >
-          <RefreshCw size={18} strokeWidth={2.5} />
-          Restock
+        <button className={activeTab === 'analytics' ? 'active' : ''} onClick={() => setActiveTab('analytics')}>
+          <TrendingUp size={14} /> Analytics
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          <TrendingUp size={18} strokeWidth={2.5} />
-          Analytics
-        </button>
-      </motion.div>
+      </div>
 
-      {/* Tab Content */}
-      <AnimatePresence mode="wait">
-        <motion.div 
-          key={activeTab}
-          className="tab-content-wrapper"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {renderTabContent()}
-        </motion.div>
-      </AnimatePresence>
-    </motion.div>
+      {/* Main Content */}
+      <div className="products-content">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'products' && <ProductsTable products={products} loading={loading} onProductUpdate={handleProductUpdate} />}
+            {activeTab === 'alerts' && (
+              <StockAlertsPanel 
+                lowStockProducts={lowStockProducts}
+                outOfStockProducts={outOfStockProducts}
+                expiringProducts={expiringProducts}
+                expiredProducts={expiredProducts}
+                onProductUpdate={handleProductUpdate}
+                onViewProduct={handleProductSelect}
+                onEditProduct={handleEditProduct}
+              />
+            )}
+            {activeTab === 'analytics' && <ProductAnalytics />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Modals */}
+      <LowStockModal isOpen={showLowStockModal} onClose={() => setShowLowStockModal(false)} products={lowStockProducts} onSelectProduct={handleProductSelect} />
+      <LowStockModal isOpen={showOutOfStockModal} onClose={() => setShowOutOfStockModal(false)} products={outOfStockProducts} onSelectProduct={handleProductSelect} />
+      <ExpiryModal isOpen={showExpiringModal} onClose={() => setShowExpiringModal(false)} products={expiringProducts} expiryType="expiring-soon" onSelectProduct={handleProductSelect} />
+      <ExpiryModal isOpen={showExpiredModal} onClose={() => setShowExpiredModal(false)} products={expiredProducts} expiryType="expired" onSelectProduct={handleProductSelect} />
+
+      {/* Product Modal - Like ProductsTable */}
+      {showProductModal && (
+        <ProductModal
+          product={modalMode === 'create' ? null : selectedProduct}
+          mode={modalMode}
+          onClose={handleCloseModal}
+          onSave={handleSaveProduct}
+        />
+      )}
+    </div>
   );
 };
 

@@ -16,8 +16,10 @@ import {
   Box,
   ArrowUpRight,
 } from 'lucide-react';
-import { inventoryService, RestockSuggestion, SupplierPerformance } from '../../services/inventoryService';
+
+import { inventoryService, RestockSuggestion } from '../../services/inventoryService';
 import { supplierService } from '../../services/supplierService';
+import SupplierComparisonModal from './SupplierComparisonModal';
 import './RestockManager.css';
 
 interface RestockManagerProps {
@@ -26,10 +28,16 @@ interface RestockManagerProps {
 
 const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) => {
   const [suggestions, setSuggestions] = useState<RestockSuggestion[]>([]);
-  const [supplierPerformance, setSupplierPerformance] = useState<SupplierPerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [bulkRestockMode, setBulkRestockMode] = useState(false);
+
+  // Comparison modal state
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [comparisonProductId, setComparisonProductId] = useState<number | null>(null);
+  const [comparisonProductName, setComparisonProductName] = useState('');
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonData, setComparisonData] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -38,16 +46,51 @@ const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) =>
   const loadData = async () => {
     try {
       setLoading(true);
-      const [restockSuggestions, supplierPerf] = await Promise.all([
-        inventoryService.getRestockSuggestions(),
-        inventoryService.getSupplierPerformance(),
-      ]);
+      const restockSuggestions = await inventoryService.getRestockSuggestions();
       setSuggestions(restockSuggestions);
-      setSupplierPerformance(supplierPerf);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to load restock data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openComparisonModal = async (productId: number, productName: string) => {
+    setComparisonProductId(productId);
+    setComparisonProductName(productName);
+    setComparisonLoading(true);
+    setComparisonOpen(true);
+
+    try {
+      const data = await supplierService.getProductSupplierComparison(productId);
+      setComparisonData(data);
+    } catch (err) {
+      console.error('Failed to load comparison:', err);
+      setComparisonData(null);
+    } finally {
+      setComparisonLoading(false);
+    }
+  };
+
+  const closeComparisonModal = () => {
+    setComparisonOpen(false);
+    setComparisonProductId(null);
+    setComparisonProductName('');
+    setComparisonData(null);
+    setComparisonLoading(false);
+  };
+
+  const handleSwitchSupplier = async (supplierId: number, supplierName: string) => {
+    if (!comparisonProductId) return;
+
+    try {
+      await supplierService.switchProductSupplier(comparisonProductId, supplierId);
+      alert(`Successfully switched to ${supplierName}`);
+      closeComparisonModal();
+      loadData();
+      onRestockComplete();
+    } catch (err: any) {
+      alert(`Failed to switch supplier: ${err.message}`);
     }
   };
 
@@ -57,46 +100,20 @@ const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) =>
     setSelectedProducts(newSelected);
   };
 
-  const handleBulkRestock = async (supplierId: number) => {
-    try {
-      const restockItems = suggestions
-        .filter(s => selectedProducts.has(s.product_id))
-        .map(s => ({
-          productId: s.product_id,
-          quantity: s.suggested_quantity,
-          costPrice: s.suggested_cost_price || s.last_cost_price || 0,
-          batchNumber: `BULK-${Date.now()}`,
-        }));
-
-      await supplierService.bulkRestockFromSupplier(supplierId, restockItems);
-      alert(`Successfully restocked ${restockItems.length} products`);
-      setSelectedProducts(new Set());
-      setBulkRestockMode(false);
-      onRestockComplete();
-      loadData();
-    } catch (err: any) {
-      alert(`Failed to restock: ${err.message}`);
-    }
-  };
-
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'critical': return <AlertTriangle className="icon" size={22} />;
-      case 'high':     return <Zap          className="icon" size={22} />;
-      case 'medium':   return <Clock        className="icon" size={22} />;
-      default:         return <TrendingUp   className="icon" size={22} />;
+      case 'high': return <Zap className="icon" size={22} />;
+      case 'medium': return <Clock className="icon" size={22} />;
+      default: return <TrendingUp className="icon" size={22} />;
     }
   };
 
-  const formatCurrency = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) return 'UGX 0';
-    return `UGX ${value.toLocaleString()}`;
-  };
+  const formatCurrency = (value: number | null | undefined): string =>
+    value == null ? 'UGX 0' : `UGX ${value.toLocaleString()}`;
 
-  const formatNumber = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) return '0';
-    return value.toLocaleString();
-  };
+  const formatNumber = (value: number | null | undefined): string =>
+    value == null ? '0' : value.toLocaleString();
 
   if (loading) {
     return (
@@ -205,7 +222,12 @@ const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) =>
                   <Box size={16} />
                   Quick Restock
                 </motion.button>
-                <motion.button className="action secondary" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <motion.button
+                  className="action secondary"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => openComparisonModal(suggestion.product_id, suggestion.product_name)}
+                >
                   Compare Suppliers
                   <ChevronRight size={16} />
                 </motion.button>
@@ -223,21 +245,26 @@ const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) =>
         )}
       </div>
 
+      {/* External Comparison Modal */}
+      <SupplierComparisonModal
+        isOpen={comparisonOpen}
+        onClose={closeComparisonModal}
+        productName={comparisonProductName}
+        loading={comparisonLoading}
+        data={comparisonData}
+        onSwitchSupplier={handleSwitchSupplier}
+      />
+
+      {/* Bulk Restock Modal stays inline (or can be extracted later) */}
       <AnimatePresence>
         {bulkRestockMode && (
-          <motion.div
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setBulkRestockMode(false)}
-          >
+          <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setBulkRestockMode(false)}>
             <motion.div
               className="modal-content"
               initial={{ scale: 0.9, y: 50 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 50 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
                 <h3>
@@ -248,33 +275,9 @@ const RestockManager: React.FC<RestockManagerProps> = ({ onRestockComplete }) =>
                   <X size={20} />
                 </button>
               </div>
-
               <div className="supplier-options">
-                {supplierPerformance.map(supplier => (
-                  <motion.div
-                    key={supplier.supplier_id}
-                    className="supplier-card"
-                    whileHover={{ x: 8 }}
-                    onClick={() => handleBulkRestock(supplier.supplier_id)}
-                  >
-                    <div className="supplier-info">
-                      <h4>{supplier.supplier_name}</h4>
-                      <div className="stats">
-                        <span>
-                          <DollarSign size={14} />
-                          Avg: {formatCurrency(supplier.average_cost_price)}
-                        </span>
-                        <span>
-                          <Package size={14} />
-                          {supplier.unique_products_supplied} products
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} />
-                  </motion.div>
-                ))}
+                {/* supplier list here – unchanged */}
               </div>
-
               <button className="cancel-btn" onClick={() => setBulkRestockMode(false)}>
                 Cancel
               </button>

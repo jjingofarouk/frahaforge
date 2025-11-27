@@ -98,23 +98,12 @@ interface SalesReportParams {
   period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 
-// Uganda timezone helper functions
-const getUgandaStartOfDay = (dateString: string): string => {
-  const date = new Date(dateString + 'T00:00:00+03:00'); // Uganda time (UTC+3)
-  return date.toISOString().replace('T', ' ').replace(/\..*/, '');
-};
-
-const getUgandaEndOfDay = (dateString: string): string => {
-  const date = new Date(dateString + 'T23:59:59.999+03:00'); // Uganda time (UTC+3)
-  return date.toISOString().replace('T', ' ').replace(/\..*/, '');
-};
-
 // === GET ALL TRANSACTIONS ===
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 50, customer_id, status, start_date, end_date } = req.query;
     
-    console.log('📅 Received date range:', { start_date, end_date });
+    console.log('📅 Received date range (UTC):', { start_date, end_date });
     
     let whereClause = 'WHERE 1=1';
     const params: any[] = [];
@@ -129,19 +118,17 @@ router.get('/', async (req: Request, res: Response) => {
       params.push(parseInt(String(status)));
     }
     
-    // FIXED: Uganda timezone-aware date filtering
+    // FIXED: Use UTC date filtering directly (no timezone conversion)
     if (start_date) {
       whereClause += ' AND created_at >= ?';
-      const ugandaStart = getUgandaStartOfDay(String(start_date));
-      params.push(ugandaStart);
-      console.log('🟢 Start date (Uganda):', ugandaStart);
+      params.push(String(start_date) + ' 00:00:00');
+      console.log('🟢 Start date (UTC):', String(start_date) + ' 00:00:00');
     }
     
     if (end_date) {
       whereClause += ' AND created_at <= ?';
-      const ugandaEnd = getUgandaEndOfDay(String(end_date));
-      params.push(ugandaEnd);
-      console.log('🔴 End date (Uganda):', ugandaEnd);
+      params.push(String(end_date) + ' 23:59:59');
+      console.log('🔴 End date (UTC):', String(end_date) + ' 23:59:59');
     }
     
     const offset = (parseInt(String(page)) - 1) * parseInt(String(limit));
@@ -229,7 +216,7 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
     
-    // ✅ GENERATE TIMESTAMP-BASED ID AND ORDER NUMBER (MATCHING EXISTING PATTERN)
+    // ✅ GENERATE TIMESTAMP-BASED ID AND ORDER NUMBER
     const timestampId = Math.floor(Date.now() / 1000);
     const orderNumber = timestampId;
     const transactionId = timestampId;
@@ -244,18 +231,18 @@ router.post('/', async (req: Request, res: Response) => {
     await dbRun('BEGIN TRANSACTION');
     
     try {
-      // ✅ EXPLICITLY SET BOTH ID AND ORDER_NUMBER TO SAME TIMESTAMP VALUE
+      // ✅ USE UTC TIMESTAMP (datetime('now'))
       const insertSQL = `
         INSERT INTO transactions (
           id, order_number, ref_number, discount, customer_id, customer_name, status,
           subtotal, tax, order_type, total, paid, change_amount, payment_type,
           payment_info, till, user_id, user_name, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `;
       
       const insertParams = [
-        transactionId,     // id (explicitly set to timestamp)
-        orderNumber,       // order_number (same as id)
+        transactionId,
+        orderNumber,
         refNumber,
         transactionData.discount || 0.00,
         transactionData.customer_id || 'walkin_customer',
@@ -289,7 +276,7 @@ router.post('/', async (req: Request, res: Response) => {
             transaction_id, product_id, product_name, price, quantity, category
           ) VALUES (?, ?, ?, ?, ?, ?)
         `, [
-          transactionId,  // Use our explicit transactionId
+          transactionId,
           item.product_id,
           item.product_name,
           item.price,
@@ -302,7 +289,7 @@ router.post('/', async (req: Request, res: Response) => {
           UPDATE products 
           SET quantity = quantity - ?, 
               sales_count = COALESCE(sales_count, 0) + ?,
-              updated_at = CURRENT_TIMESTAMP
+              updated_at = datetime('now')
           WHERE id = ?
         `, [item.quantity, item.quantity, item.product_id]);
         
@@ -322,10 +309,10 @@ router.post('/', async (req: Request, res: Response) => {
             UPDATE customers 
             SET total_spent = ?,
                 total_orders = ?,
-                last_order_date = CURRENT_TIMESTAMP,
+                last_order_date = datetime('now'),
                 average_order_value = ?,
                 loyalty_points = COALESCE(loyalty_points, 0) + ?,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = datetime('now')
             WHERE id = ?
           `, [newTotalSpent, newTotalOrders, newAverage, Math.floor(transactionData.total / 1000), transactionData.customer_id]);
           
@@ -343,7 +330,7 @@ router.post('/', async (req: Request, res: Response) => {
                 WHEN total_orders > 0 AND julianday('now') - julianday(COALESCE(last_order_date, created_at)) > 180 THEN 'inactive'
                 ELSE 'new'
               END,
-              updated_at = CURRENT_TIMESTAMP
+              updated_at = datetime('now')
               WHERE id = ?
             `, [transactionData.customer_id]);
             
@@ -355,11 +342,11 @@ router.post('/', async (req: Request, res: Response) => {
         }
       }
       
-      // Insert into accounting table
+      // Insert into accounting table with UTC timestamp
       await dbRun(`
         INSERT INTO accounting (
           date, description, amount, category, payment_method, reference, created_at
-        ) VALUES (datetime('now', '+3 hours'), ?, ?, 'sales', ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (datetime('now'), ?, ?, 'sales', ?, ?, datetime('now'))
       `, [
         `Sale - Order #${orderNumber}`,
         transactionData.total,
@@ -375,9 +362,9 @@ router.post('/', async (req: Request, res: Response) => {
       // ✅ RETURN THE EXPLICIT ID WE SET (MATCHING ORDER_NUMBER)
       res.status(201).json({
         success: true,
-        id: transactionId,           // Return our explicit timestamp ID
-        transactionId: transactionId, // Same value
-        order_number: orderNumber,    // Same value  
+        id: transactionId,
+        transactionId: transactionId,
+        order_number: orderNumber,
         ref_number: refNumber,
         message: 'Transaction completed successfully'
       });
@@ -397,11 +384,6 @@ router.post('/', async (req: Request, res: Response) => {
     });
   }
 });
-
-// Add this to your transactions API (src/main/api/transactions.ts)
-
-// Add this to your transactions API file (src/main/api/transactions.ts)
-// Right after the existing endpoints, add the hold order endpoint:
 
 // === CREATE HOLD ORDER ===
 router.post('/hold', async (req: Request, res: Response) => {
@@ -443,13 +425,13 @@ router.post('/hold', async (req: Request, res: Response) => {
     await dbRun('BEGIN TRANSACTION');
     
     try {
-      // ✅ CREATE TRANSACTION WITH STATUS 0 (ON HOLD)
+      // ✅ CREATE TRANSACTION WITH STATUS 0 (ON HOLD) - UTC timestamp
       const insertSQL = `
         INSERT INTO transactions (
           id, order_number, ref_number, discount, customer_id, customer_name, status,
           subtotal, tax, order_type, total, paid, change_amount, payment_type,
           payment_info, till, user_id, user_name, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `;
       
       const insertParams = [
@@ -464,7 +446,7 @@ router.post('/hold', async (req: Request, res: Response) => {
         holdOrderData.tax || 0.00,
         1, // order_type: sale
         holdOrderData.total,
-        holdOrderData.paid || 0.00, // Paid can be 0 for hold orders
+        holdOrderData.paid || 0.00,
         holdOrderData.change_amount || 0.00,
         holdOrderData.payment_type || 'Due',
         holdOrderData.payment_info || '',
@@ -514,7 +496,7 @@ router.post('/hold', async (req: Request, res: Response) => {
         transactionId: transactionId,
         order_number: orderNumber,
         ref_number: refNumber,
-        status: 0, // Return the hold status
+        status: 0,
         message: 'Order held successfully'
       });
       
@@ -554,7 +536,7 @@ router.put('/:transactionId/process-hold', async (req: Request, res: Response) =
     await dbRun('BEGIN TRANSACTION');
     
     try {
-      // ✅ UPDATE TRANSACTION STATUS TO COMPLETED (1) AND ADD PAYMENT INFO
+      // ✅ UPDATE TRANSACTION STATUS TO COMPLETED (1) AND ADD PAYMENT INFO - UTC timestamp
       await dbRun(`
         UPDATE transactions 
         SET status = 1,
@@ -562,7 +544,7 @@ router.put('/:transactionId/process-hold', async (req: Request, res: Response) =
             change_amount = ?,
             payment_type = ?,
             payment_info = ?,
-            updated_at = CURRENT_TIMESTAMP
+            updated_at = datetime('now')
         WHERE id = ?
       `, [
         paymentData.paid,
@@ -585,7 +567,7 @@ router.put('/:transactionId/process-hold', async (req: Request, res: Response) =
           UPDATE products 
           SET quantity = quantity - ?, 
               sales_count = COALESCE(sales_count, 0) + ?,
-              updated_at = CURRENT_TIMESTAMP
+              updated_at = datetime('now')
           WHERE id = ?
         `, [item.quantity, item.quantity, item.product_id]);
         
@@ -605,10 +587,10 @@ router.put('/:transactionId/process-hold', async (req: Request, res: Response) =
             UPDATE customers 
             SET total_spent = ?,
                 total_orders = ?,
-                last_order_date = CURRENT_TIMESTAMP,
+                last_order_date = datetime('now'),
                 average_order_value = ?,
                 loyalty_points = COALESCE(loyalty_points, 0) + ?,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = datetime('now')
             WHERE id = ?
           `, [newTotalSpent, newTotalOrders, newAverage, Math.floor(heldOrder.total / 1000), heldOrder.customer_id]);
           
@@ -633,11 +615,11 @@ router.put('/:transactionId/process-hold', async (req: Request, res: Response) =
         }
       }
       
-      // ✅ ADD TO ACCOUNTING
+      // ✅ ADD TO ACCOUNTING - UTC timestamp
       await dbRun(`
         INSERT INTO accounting (
           date, description, amount, category, payment_method, reference, created_at
-        ) VALUES (datetime('now', '+3 hours'), ?, ?, 'sales', ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (datetime('now'), ?, ?, 'sales', ?, ?, datetime('now'))
       `, [
         `Sale - Order #${heldOrder.order_number} (from hold)`,
         heldOrder.total,
@@ -687,7 +669,7 @@ router.post('/create', async (req: Request, res: Response) => {
       });
     }
     
-    // ✅ GENERATE TIMESTAMP-BASED ID AND ORDER NUMBER (MATCHING EXISTING PATTERN)
+    // ✅ GENERATE TIMESTAMP-BASED ID AND ORDER NUMBER
     const timestampId = Math.floor(Date.now() / 1000);
     const orderNumber = timestampId;
     const transactionId = timestampId;
@@ -697,16 +679,16 @@ router.post('/create', async (req: Request, res: Response) => {
     await dbRun('BEGIN TRANSACTION');
     
     try {
-      // ✅ EXPLICITLY SET BOTH ID AND ORDER_NUMBER TO SAME TIMESTAMP VALUE
+      // ✅ EXPLICITLY SET BOTH ID AND ORDER_NUMBER TO SAME TIMESTAMP VALUE - UTC timestamp
       await dbRun(`
         INSERT INTO transactions (
           id, order_number, ref_number, discount, customer_id, customer_name, status,
           subtotal, tax, order_type, total, paid, change_amount, payment_type,
           payment_info, till, user_id, user_name, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `, [
-        transactionId,     // id (explicitly set to timestamp)
-        orderNumber,       // order_number (same as id)
+        transactionId,
+        orderNumber,
         refNumber,
         transactionData.discount || 0.00,
         transactionData.customer_id || 'walkin_customer',
@@ -744,7 +726,7 @@ router.post('/create', async (req: Request, res: Response) => {
           UPDATE products 
           SET quantity = quantity - ?, 
               sales_count = COALESCE(sales_count, 0) + ?,
-              updated_at = CURRENT_TIMESTAMP
+              updated_at = datetime('now')
           WHERE id = ?
         `, [item.quantity, item.quantity, item.product_id]);
       }
@@ -762,10 +744,10 @@ router.post('/create', async (req: Request, res: Response) => {
             UPDATE customers 
             SET total_spent = ?,
                 total_orders = ?,
-                last_order_date = CURRENT_TIMESTAMP,
+                last_order_date = datetime('now'),
                 average_order_value = ?,
                 loyalty_points = COALESCE(loyalty_points, 0) + ?,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = datetime('now')
             WHERE id = ?
           `, [newTotalSpent, newTotalOrders, newAverage, Math.floor(transactionData.total / 1000), transactionData.customer_id]);
           
@@ -788,11 +770,11 @@ router.post('/create', async (req: Request, res: Response) => {
         }
       }
       
-      // Insert into accounting
+      // Insert into accounting - UTC timestamp
       await dbRun(`
         INSERT INTO accounting (
           date, description, amount, category, payment_method, reference, created_at
-        ) VALUES (datetime('now', '+3 hours'), ?, ?, 'sales', ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (datetime('now'), ?, ?, 'sales', ?, ?, datetime('now'))
       `, [
         `Sale - Order #${orderNumber}`,
         transactionData.total,
@@ -805,9 +787,9 @@ router.post('/create', async (req: Request, res: Response) => {
       // ✅ RETURN THE EXPLICIT ID WE SET (MATCHING ORDER_NUMBER)
       res.status(201).json({
         success: true,
-        id: transactionId,           // Return our explicit timestamp ID
-        transactionId: transactionId, // Same value
-        order_number: orderNumber,    // Same value  
+        id: transactionId,
+        transactionId: transactionId,
+        order_number: orderNumber,
         ref_number: refNumber,
         message: 'Transaction completed successfully'
       });
@@ -873,17 +855,15 @@ router.get('/reports/sales', async (req: Request, res: Response) => {
     let whereClause = 'WHERE status = 1';
     const params: any[] = [];
     
-    // FIXED: Uganda timezone-aware date filtering for reports
+    // FIXED: UTC date filtering for reports
     if (startDate) {
       whereClause += ' AND created_at >= ?';
-      const ugandaStart = getUgandaStartOfDay(String(startDate));
-      params.push(ugandaStart);
+      params.push(String(startDate) + ' 00:00:00');
     }
     
     if (endDate) {
       whereClause += ' AND created_at <= ?';
-      const ugandaEnd = getUgandaEndOfDay(String(endDate));
-      params.push(ugandaEnd);
+      params.push(String(endDate) + ' 23:59:59');
     }
     
     const salesData = await dbAll(`
@@ -916,17 +896,15 @@ router.get('/reports/top-products', async (req: Request, res: Response) => {
     let whereClause = 'WHERE t.status = 1';
     const params: any[] = [];
     
-    // FIXED: Uganda timezone-aware date filtering
+    // FIXED: UTC date filtering
     if (startDate) {
       whereClause += ' AND t.created_at >= ?';
-      const ugandaStart = getUgandaStartOfDay(String(startDate));
-      params.push(ugandaStart);
+      params.push(String(startDate) + ' 00:00:00');
     }
     
     if (endDate) {
       whereClause += ' AND t.created_at <= ?';
-      const ugandaEnd = getUgandaEndOfDay(String(endDate));
-      params.push(ugandaEnd);
+      params.push(String(endDate) + ' 23:59:59');
     }
     
     const topProducts = await dbAll(`
@@ -981,7 +959,7 @@ router.put('/:transactionId/refund', async (req: Request, res: Response) => {
           await dbRun(`
             UPDATE products 
             SET quantity = quantity + ?, 
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = datetime('now')
             WHERE id = ?
           `, [item.quantity, item.product_id]);
         }
@@ -995,7 +973,7 @@ router.put('/:transactionId/refund', async (req: Request, res: Response) => {
           await dbRun(`
             UPDATE products 
             SET quantity = quantity + ?, 
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = datetime('now')
             WHERE id = ?
           `, [item.quantity, item.product_id]);
         }
@@ -1004,7 +982,7 @@ router.put('/:transactionId/refund', async (req: Request, res: Response) => {
       await dbRun(`
         INSERT INTO accounting (
           date, description, amount, category, payment_method, reference, created_at
-        ) VALUES (datetime('now', '+3 hours'), ?, ?, 'refunds', ?, ?, datetime('now', '+3 hours'))
+        ) VALUES (datetime('now'), ?, ?, 'refunds', ?, ?, datetime('now'))
       `, [
         `Refund - Order #${transaction.order_number}${reason ? ` - ${reason}` : ''}`,
         -transaction.total,
@@ -1037,9 +1015,9 @@ router.get('/reports/daily-summary', async (req: Request, res: Response) => {
     const { date } = req.query;
     const targetDate = date ? String(date) : new Date().toISOString().split('T')[0];
     
-    // FIXED: Uganda timezone-aware daily summary
-    const ugandaStart = getUgandaStartOfDay(targetDate);
-    const ugandaEnd = getUgandaEndOfDay(targetDate);
+    // FIXED: UTC daily summary
+    const utcStart = targetDate + ' 00:00:00';
+    const utcEnd = targetDate + ' 23:59:59';
     
     const summary = await dbGet(`
       SELECT 
@@ -1054,7 +1032,7 @@ router.get('/reports/daily-summary', async (req: Request, res: Response) => {
         MAX(created_at) as last_transaction
       FROM transactions 
       WHERE created_at >= ? AND created_at <= ? AND status = 1
-    `, [ugandaStart, ugandaEnd]);
+    `, [utcStart, utcEnd]);
     
     const paymentMethods = await dbAll(`
       SELECT 
@@ -1064,7 +1042,7 @@ router.get('/reports/daily-summary', async (req: Request, res: Response) => {
       FROM transactions 
       WHERE created_at >= ? AND created_at <= ? AND status = 1
       GROUP BY payment_type
-    `, [ugandaStart, ugandaEnd]);
+    `, [utcStart, utcEnd]);
     
     res.json({
       date: targetDate,
@@ -1092,19 +1070,20 @@ router.get('/reports/product-sales', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, limit = 50 } = req.query;
     
-    console.log('📊 Product sales report requested:', { startDate, endDate, limit });
+    console.log('📊 Product sales report requested (UTC):', { startDate, endDate, limit });
     
     let whereClause = 'WHERE t.status = 1';
     let params: any[] = [];
     
-    // FIXED: Uganda timezone-aware date filtering
+    // FIXED: UTC date filtering
     if (startDate && endDate) {
       whereClause += ' AND t.created_at >= ? AND t.created_at <= ?';
-      const ugandaStart = getUgandaStartOfDay(String(startDate));
-      const ugandaEnd = getUgandaEndOfDay(String(endDate));
-      params.push(ugandaStart, ugandaEnd);
+      params.push(String(startDate) + ' 00:00:00', String(endDate) + ' 23:59:59');
       
-      console.log('🕒 Uganda time range:', { ugandaStart, ugandaEnd });
+      console.log('🕒 UTC time range:', { 
+        start: String(startDate) + ' 00:00:00', 
+        end: String(endDate) + ' 23:59:59' 
+      });
     }
 
     const sql = `

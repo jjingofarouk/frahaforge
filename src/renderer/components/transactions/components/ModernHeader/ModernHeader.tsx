@@ -16,13 +16,6 @@ import {
   parseISO 
 } from 'date-fns';
 import { Download, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, X, RefreshCw, BarChart3 } from 'lucide-react';
-import { 
-  getUgandaStartOfDay, 
-  getUgandaEndOfDay, 
-  formatDateForUgandaAPI,
-  getTodayUgandaRange,
-  getUgandaDateRange
-} from '../../../../src/utils/ugandaTime';
 import './ModernHeader.css';
 
 interface ModernHeaderProps {
@@ -88,48 +81,46 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     return () => clearTimeout(timer);
   }, [localSearchQuery, filters, onFilterChange]);
 
-  // FIXED: Uganda timezone date formatting for input fields
+  // Format date for input fields (YYYY-MM-DD)
   const formatDateForInput = (date: Date): string => {
-    return formatDateForUgandaAPI(date);
+    return format(date, 'yyyy-MM-dd');
   };
 
-  // FIXED: Handle date input changes with Uganda timezone
+  // Handle date input changes
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return;
     
-    // Get the Uganda date range for the selected date
-    const ugandaRange = getUgandaDateRange(e.target.value, e.target.value);
-    const newStart = ugandaRange.start;
-    const newEnd = isSameDay(dateRange.start, dateRange.end) 
-      ? ugandaRange.end
+    const selectedDate = new Date(e.target.value);
+    const start = startOfDay(selectedDate);
+    const end = isSameDay(dateRange.start, dateRange.end) 
+      ? endOfDay(selectedDate)
       : dateRange.end;
     
     console.log('🟢 Start date changed:', {
       selected: e.target.value,
-      ugandaStart: newStart,
-      ugandaEnd: newEnd
+      start,
+      end
     });
     
-    onDateRangeChange({ start: newStart, end: newEnd });
+    onDateRangeChange({ start, end });
   };
 
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return;
     
-    // Get the Uganda date range for the selected date
-    const ugandaRange = getUgandaDateRange(e.target.value, e.target.value);
-    const newEnd = ugandaRange.end;
-    const newStart = isSameDay(dateRange.start, dateRange.end)
-      ? ugandaRange.start
+    const selectedDate = new Date(e.target.value);
+    const end = endOfDay(selectedDate);
+    const start = isSameDay(dateRange.start, dateRange.end)
+      ? startOfDay(selectedDate)
       : dateRange.start;
     
     console.log('🔴 End date changed:', {
       selected: e.target.value,
-      ugandaStart: newStart,
-      ugandaEnd: newEnd
+      start,
+      end
     });
     
-    onDateRangeChange({ start: newStart, end: newEnd });
+    onDateRangeChange({ start, end });
   };
 
   // Handle filter changes
@@ -149,36 +140,37 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     onFilterChange({});
   };
 
-  // FIXED: Uganda timezone date range functions
+  // Date range functions
   const getTodayRange = (): { start: Date; end: Date } => {
-    return getTodayUgandaRange();
+    const today = new Date();
+    return {
+      start: startOfDay(today),
+      end: endOfDay(today)
+    };
   };
 
   const getThisWeekRange = (): { start: Date; end: Date } => {
     const now = new Date();
-    const ugandaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
     return {
-      start: getUgandaStartOfDay(startOfWeek(ugandaNow, { weekStartsOn: 1 })),
-      end: getUgandaEndOfDay(endOfWeek(ugandaNow, { weekStartsOn: 1 }))
+      start: startOfDay(startOfWeek(now, { weekStartsOn: 1 })),
+      end: endOfDay(endOfWeek(now, { weekStartsOn: 1 }))
     };
   };
 
   const getThisMonthRange = (): { start: Date; end: Date } => {
     const now = new Date();
-    const ugandaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
     return {
-      start: getUgandaStartOfDay(startOfMonth(ugandaNow)),
-      end: getUgandaEndOfDay(endOfMonth(ugandaNow))
+      start: startOfDay(startOfMonth(now)),
+      end: endOfDay(endOfMonth(now))
     };
   };
 
   const getLastThreeMonthsRange = (): { start: Date; end: Date } => {
     const now = new Date();
-    const ugandaNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-    const threeMonthsAgo = subMonths(ugandaNow, 2);
+    const threeMonthsAgo = subMonths(now, 2);
     return {
-      start: getUgandaStartOfDay(startOfMonth(threeMonthsAgo)),
-      end: getUgandaEndOfDay(endOfMonth(ugandaNow))
+      start: startOfDay(startOfMonth(threeMonthsAgo)),
+      end: endOfDay(endOfMonth(now))
     };
   };
 
@@ -187,9 +179,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     const todayRange = getTodayRange();
     console.log('📅 Applying today range:', {
       start: todayRange.start,
-      end: todayRange.end,
-      startFormatted: formatDateForUgandaAPI(todayRange.start),
-      endFormatted: formatDateForUgandaAPI(todayRange.end)
+      end: todayRange.end
     });
     onDateRangeChange(todayRange);
     setLastRefresh(new Date());
@@ -199,9 +189,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     const weekRange = getThisWeekRange();
     console.log('📅 Applying this week range:', {
       start: weekRange.start,
-      end: weekRange.end,
-      startFormatted: formatDateForUgandaAPI(weekRange.start),
-      endFormatted: formatDateForUgandaAPI(weekRange.end)
+      end: weekRange.end
     });
     onDateRangeChange(weekRange);
     setLastRefresh(new Date());
@@ -211,9 +199,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     const monthRange = getThisMonthRange();
     console.log('📅 Applying this month range:', {
       start: monthRange.start,
-      end: monthRange.end,
-      startFormatted: formatDateForUgandaAPI(monthRange.start),
-      endFormatted: formatDateForUgandaAPI(monthRange.end)
+      end: monthRange.end
     });
     onDateRangeChange(monthRange);
     setLastRefresh(new Date());
@@ -223,26 +209,20 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
     const threeMonthsRange = getLastThreeMonthsRange();
     console.log('📅 Applying last 3 months range:', {
       start: threeMonthsRange.start,
-      end: threeMonthsRange.end,
-      startFormatted: formatDateForUgandaAPI(threeMonthsRange.start),
-      endFormatted: formatDateForUgandaAPI(threeMonthsRange.end)
+      end: threeMonthsRange.end
     });
     onDateRangeChange(threeMonthsRange);
     setLastRefresh(new Date());
   };
 
-  // Format date for display - FIXED: Show Uganda timezone dates
+  // Format date for display
   const formatDisplayDate = (): string => {
     const isSameDayRange = isSameDay(dateRange.start, dateRange.end);
     
-    // Convert UTC dates back to Uganda time for display
-    const ugandaStart = new Date(dateRange.start.getTime() + (3 * 60 * 60 * 1000));
-    const ugandaEnd = new Date(dateRange.end.getTime() + (3 * 60 * 60 * 1000));
-    
     if (isSameDayRange) {
-      return format(ugandaStart, 'MMM dd, yyyy');
+      return format(dateRange.start, 'MMM dd, yyyy');
     } else {
-      return `${format(ugandaStart, 'MMM dd')} - ${format(ugandaEnd, 'MMM dd, yyyy')}`;
+      return `${format(dateRange.start, 'MMM dd')} - ${format(dateRange.end, 'MMM dd, yyyy')}`;
     }
   };
 
@@ -267,8 +247,8 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
   // Handle export with current filters
   const handleExport = () => {
     const exportFilters: ExportFilters = {
-      startDate: formatDateForUgandaAPI(dateRange.start),
-      endDate: formatDateForUgandaAPI(dateRange.end),
+      startDate: formatDateForInput(dateRange.start),
+      endDate: formatDateForInput(dateRange.end),
       status: filters.status,
       paymentMethod: filters.paymentMethod,
       searchQuery: filters.searchQuery
@@ -288,7 +268,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
   // Check if any filters are active
   const hasActiveFilters = filters.status || filters.paymentMethod || filters.searchQuery;
 
-  // FIXED: Proper date range comparison using Uganda timezone
+  // Date range comparison
   const isTodayActive = () => {
     const todayRange = getTodayRange();
     return isSameDay(dateRange.start, todayRange.start) && 
@@ -377,7 +357,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
       <div className="modern-filters-section">
         <div className="modern-filters-main">
           <div className="modern-filters-row">
-            {/* Date Range - FIXED: Show single date label when it's the same day */}
+            {/* Date Range */}
             <div className="modern-filter-group">
               <label className="modern-filter-label">
                 {isSingleDay ? 'Date' : 'Date Range'}
@@ -418,6 +398,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                 <option value="cash">Cash</option>
                 <option value="card">Card</option>
                 <option value="due">Credit</option>
+                <option value="mobile">Mobile</option>
               </select>
             </div>
           </div>
@@ -433,12 +414,11 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
             >
-              <option value="created_at">Date & Time</option>
+              <option value="created_at">Date</option>
               <option value="order_number">Invoice Number</option>
               <option value="total">Total Amount</option>
               <option value="customer_name">Customer</option>
               <option value="payment_type">Payment Method</option>
-              <option value="status">Status</option>
               <option value="user_name">Cashier</option>
             </select>
             
@@ -527,7 +507,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
         )}
       </div>
 
-      {/* Transaction Count - FIXED: Show proper date display */}
+      {/* Transaction Count */}
       <div className="modern-transaction-count">
         <BarChart3 size={16} />
         <span>

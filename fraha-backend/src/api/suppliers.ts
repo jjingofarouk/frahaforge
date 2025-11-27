@@ -98,7 +98,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
   }
 });
 
-// === NEW FEATURE: SUPPLIER CONTACT INTEGRATION ===
+// === NEW FEATURE: SUPPLIER CONTACT INTEGRATION (Updated) ===
 router.get('/:supplierId/contact-info', async (req: Request, res: Response) => {
   try {
     const supplierId = parseInt(req.params.supplierId);
@@ -112,18 +112,27 @@ router.get('/:supplierId/contact-info', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Supplier not found' });
     }
 
-    // Extract phone numbers from supplier name (common pattern in Ugandan business)
+    // Use stored phone number if available, otherwise extract from name
+    const storedPhone = supplier.phone_number;
     const phoneRegex = /(\+?256|0)(7[0-9]|20)[0-9]{7}/g;
-    const phoneMatches = supplier.name.match(phoneRegex);
+    const extractedPhones = supplier.name.match(phoneRegex) || [];
+    
+    // Combine stored phone with extracted ones, remove duplicates
+    const allPhones = [...new Set([storedPhone, ...extractedPhones].filter(Boolean))];
     
     const contactInfo = {
       supplier_id: supplier.id,
       supplier_name: supplier.name,
-      extracted_phones: phoneMatches || [],
+      phone_number: storedPhone,
+      email: supplier.email,
+      address: supplier.address,
+      contact_person: supplier.contact_person,
+      extracted_phones: extractedPhones,
+      all_phones: allPhones,
       suggested_actions: {
-        call: phoneMatches && phoneMatches.length > 0 ? `tel:${phoneMatches[0]}` : null,
-        whatsapp: phoneMatches && phoneMatches.length > 0 ? `https://wa.me/${phoneMatches[0].replace('+', '').replace('0', '256')}` : null,
-        email: null // Could be enhanced if email patterns are found in names
+        call: allPhones.length > 0 ? `tel:${allPhones[0]}` : null,
+        whatsapp: allPhones.length > 0 ? `https://wa.me/${allPhones[0].replace('+', '').replace('0', '256')}` : null,
+        email: supplier.email ? `mailto:${supplier.email}` : null
       },
       recent_products: await dbAll(`
         SELECT DISTINCT 
@@ -529,7 +538,7 @@ router.get('/products/:productId/suppliers', async (req: Request, res: Response)
   }
 });
 
-// === SEARCH SUPPLIERS AND THEIR PRODUCTS ===
+// === SEARCH SUPPLIERS AND THEIR PRODUCTS (Updated) ===
 router.get('/search', async (req: Request, res: Response) => {
   try {
     const { q, limit = '10' } = req.query;
@@ -542,6 +551,10 @@ router.get('/search', async (req: Request, res: Response) => {
       SELECT
         s.id,
         s.name,
+        s.phone_number,
+        s.email,
+        s.address,
+        s.contact_person,
         s.created_at,
         COUNT(DISTINCT p.id) as total_products,
         COUNT(DISTINCT rh.product_id) as unique_products_restocked,
@@ -558,12 +571,12 @@ router.get('/search', async (req: Request, res: Response) => {
       FROM suppliers s
       LEFT JOIN products p ON s.id = p.supplier_id
       LEFT JOIN restock_history rh ON s.id = rh.supplier_id
-      WHERE s.name LIKE ?
+      WHERE s.name LIKE ? OR s.contact_person LIKE ? OR s.phone_number LIKE ?
       GROUP BY s.id
       ORDER BY total_products DESC, last_restock_date DESC
       LIMIT ?
     `,
-      [`%${q}%`, parseInt(limit as string)]
+      [`%${q}%`, `%${q}%`, `%${q}%`, parseInt(limit as string)]
     );
     res.json(suppliers);
   } catch (err: any) {
@@ -679,7 +692,7 @@ router.get('/:supplierId/products', async (req: Request, res: Response) => {
   }
 });
 
-// === GET ALL SUPPLIERS (Simplified) ===
+// === GET ALL SUPPLIERS (Updated) ===
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
@@ -695,8 +708,8 @@ router.get('/', async (req: Request, res: Response) => {
     `;
     const params: any[] = [];
     if (search && typeof search === 'string') {
-      sql += ` WHERE s.name LIKE ?`;
-      params.push(`%${search}%`);
+      sql += ` WHERE s.name LIKE ? OR s.contact_person LIKE ? OR s.phone_number LIKE ?`;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
     sql += ` GROUP BY s.id ORDER BY s.name`;
     const suppliers = await dbAll(sql, params);
@@ -710,17 +723,18 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// === CREATE NEW SUPPLIER ===
+// === CREATE NEW SUPPLIER (Updated) ===
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, phone_number, email, address, contact_person } = req.body;
+    
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ error: 'Supplier name is required' });
     }
 
     const result = await dbRun(
-      'INSERT INTO suppliers (name, created_at) VALUES (?, datetime("now"))',
-      [name.trim()]
+      'INSERT INTO suppliers (name, phone_number, email, address, contact_person, created_at) VALUES (?, ?, ?, ?, ?, datetime("now"))',
+      [name.trim(), phone_number || null, email || null, address || null, contact_person || null]
     );
 
     res.json({
@@ -732,6 +746,44 @@ router.post('/', async (req: Request, res: Response) => {
     console.error('POST /suppliers error:', err.message);
     res.status(500).json({
       error: 'Failed to create supplier',
+      message: err.message
+    });
+  }
+});
+
+// === UPDATE SUPPLIER ===
+router.put('/:supplierId', async (req: Request, res: Response) => {
+  try {
+    const supplierId = parseInt(req.params.supplierId);
+    const { name, phone_number, email, address, contact_person } = req.body;
+    
+    if (isNaN(supplierId)) {
+      return res.status(400).json({ error: 'Invalid supplier ID' });
+    }
+
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ error: 'Supplier name is required' });
+    }
+
+    const supplier = await dbGet('SELECT * FROM suppliers WHERE id = ?', [supplierId]);
+    if (!supplier) {
+      return res.status(404).json({ error: 'Supplier not found' });
+    }
+
+    await dbRun(
+      'UPDATE suppliers SET name = ?, phone_number = ?, email = ?, address = ?, contact_person = ? WHERE id = ?',
+      [name.trim(), phone_number || null, email || null, address || null, contact_person || null, supplierId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Supplier updated successfully',
+      supplierId
+    });
+  } catch (err: any) {
+    console.error('PUT /suppliers/:supplierId error:', err.message);
+    res.status(500).json({
+      error: 'Failed to update supplier',
       message: err.message
     });
   }
@@ -804,6 +856,78 @@ router.post('/:supplierId/bulk-restock', async (req: Request, res: Response) => 
     res.status(500).json({
       error: 'Failed to process bulk restock',
       message: err.message
+    });
+  }
+});
+
+// === SWITCH PRODUCT SUPPLIER ===
+router.post('/switch-product-supplier', async (req: Request, res: Response) => {
+  try {
+    const { productId, newSupplierId } = req.body;
+    
+    if (!productId || !newSupplierId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Product ID and new supplier ID are required' 
+      });
+    }
+
+    // Get product and new supplier details
+    const product = await dbGet('SELECT * FROM products WHERE id = ?', [productId]);
+    const newSupplier = await dbGet('SELECT * FROM suppliers WHERE id = ?', [newSupplierId]);
+    
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Product not found' 
+      });
+    }
+    
+    if (!newSupplier) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Supplier not found' 
+      });
+    }
+    
+    // Get old supplier name for the log
+    const oldSupplier = await dbGet('SELECT * FROM suppliers WHERE id = ?', [product.supplier_id]);
+    
+    // Update the product's current supplier
+    await dbRun(
+      'UPDATE products SET supplier_id = ?, supplier = ? WHERE id = ?',
+      [newSupplierId, newSupplier.name, productId]
+    );
+    
+    // Optional: Add an entry to restock history to track the supplier change
+    await dbRun(
+      `INSERT INTO restock_history (
+        product_id, product_name, supplier_id, supplier_name, 
+        quantity, cost_price, restock_date, batch_number, notes
+      ) VALUES (?, ?, ?, ?, 0, 0, datetime("now"), 'SUPPLIER_SWITCH', ?)`,
+      [
+        productId, 
+        product.name, 
+        newSupplierId, 
+        newSupplier.name,
+        `Supplier changed from "${oldSupplier?.name || 'Unknown'}" to "${newSupplier.name}"`
+      ]
+    );
+    
+    res.json({ 
+      success: true, 
+      message: 'Supplier switched successfully',
+      productId,
+      newSupplierId,
+      newSupplierName: newSupplier.name,
+      oldSupplierName: oldSupplier?.name
+    });
+  } catch (error: any) {
+    console.error('POST /suppliers/switch-product-supplier error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to switch supplier',
+      error: error.message 
     });
   }
 });

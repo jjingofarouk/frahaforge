@@ -113,7 +113,7 @@ export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ transactionData }) => {
             />
           </div>
           <h1 className="receipt-title">Fraha Pharmacy</h1>
-          <p className="receipt-subtitle">New Taxi Park Exit</p>
+          <p className="receipt-subtitle">New Taxi Park</p>
           <p className="receipt-subtitle">Kampala, Uganda</p>
           <p className="receipt-subtitle text-bold">Tel: +256752047212</p>
         </div>

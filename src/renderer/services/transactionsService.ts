@@ -1,7 +1,6 @@
 // src/renderer/src/services/transactionsService.ts
 import { withErrorHandling } from './api';
 import { customersService } from './customerService';
-import { formatDateForUgandaAPI } from '../src/utils/ugandaTime';
 
 // Interfaces matching the database schema
 export interface Transaction {
@@ -124,19 +123,18 @@ class TransactionsService {
   // ===== CORE TRANSACTION OPERATIONS =====
 
   /**
-   * Get all transactions with pagination and filtering
-   * FIXED: Proper Uganda timezone handling
+   * Get all transactions (UTC dates)
    */
   async getTransactions(params?: {
     page?: number;
     limit?: number;
     customer_id?: number;
     status?: number;
-    start_date?: string;
-    end_date?: string;
+    start_date?: string;  // UTC date (YYYY-MM-DD)
+    end_date?: string;    // UTC date (YYYY-MM-DD)
   }) {
     return withErrorHandling(async () => {
-      console.log('📅 TransactionsService - Date params:', {
+      console.log('📅 TransactionsService - UTC date params:', {
         start_date: params?.start_date,
         end_date: params?.end_date
       });
@@ -159,7 +157,7 @@ class TransactionsService {
   }
 
   /**
-   * Get a single transaction by ID with its items
+   * Get a single transaction by ID
    */
   async getTransaction(transactionId: number) {
     return withErrorHandling(async () => {
@@ -259,79 +257,75 @@ class TransactionsService {
     }, 'Failed to fetch transaction items');
   }
 
-  // In src/renderer/src/services/transactionsService.ts, add this method:
-
-/**
- * Create a hold order (status = 0)
- */
-async createHoldOrder(holdOrderData: CreateTransactionRequest) {
-  return withErrorHandling(async () => {
-    // Validate cart items have required fields
-    if (!holdOrderData.items || holdOrderData.items.length === 0) {
-      throw new Error('Cart is empty');
-    }
-
-    // Validate each item has required fields
-    holdOrderData.items.forEach((item, index) => {
-      if (!item.product_id || !item.product_name) {
-        throw new Error(`Item ${index + 1} is missing required product data`);
+  /**
+   * Create a hold order (status = 0)
+   */
+  async createHoldOrder(holdOrderData: CreateTransactionRequest) {
+    return withErrorHandling(async () => {
+      // Validate cart items have required fields
+      if (!holdOrderData.items || holdOrderData.items.length === 0) {
+        throw new Error('Cart is empty');
       }
-    });
 
-    console.log(`🔄 Sending POST request to: ${this.baseURL}/transactions/hold`);
+      // Validate each item has required fields
+      holdOrderData.items.forEach((item, index) => {
+        if (!item.product_id || !item.product_name) {
+          throw new Error(`Item ${index + 1} is missing required product data`);
+        }
+      });
 
-    const response = await fetch(`${this.baseURL}/transactions/hold`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(holdOrderData),
-    });
+      console.log(`🔄 Sending POST request to: ${this.baseURL}/transactions/hold`);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
+      const response = await fetch(`${this.baseURL}/transactions/hold`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(holdOrderData),
+      });
 
-    const result = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
 
-    console.log('✅ Hold order created successfully:', {
-      id: result.id,
-      order_number: result.order_number,
-      status: result.status
-    });
+      const result = await response.json();
 
-    return result;
-  }, 'Failed to create hold order');
-}
+      console.log('✅ Hold order created successfully:', {
+        id: result.id,
+        order_number: result.order_number,
+        status: result.status
+      });
 
-// Add this method to the transactions service:
+      return result;
+    }, 'Failed to create hold order');
+  }
 
-/**
- * Process a held order (convert from status 0 to status 1)
- */
-async processHeldOrder(transactionId: number, paymentData: any) {
-  return withErrorHandling(async () => {
-    console.log(`🔄 Processing held order ${transactionId} with payment data:`, paymentData);
+  /**
+   * Process a held order (convert from status 0 to status 1)
+   */
+  async processHeldOrder(transactionId: number, paymentData: any) {
+    return withErrorHandling(async () => {
+      console.log(`🔄 Processing held order ${transactionId} with payment data:`, paymentData);
 
-    const response = await fetch(`${this.baseURL}/transactions/${transactionId}/process-hold`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(paymentData),
-    });
+      const response = await fetch(`${this.baseURL}/transactions/${transactionId}/process-hold`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
 
-    const result = await response.json();
-    console.log('✅ Held order processed successfully:', result);
-    return result;
-  }, 'Failed to process held order');
-}
+      const result = await response.json();
+      console.log('✅ Held order processed successfully:', result);
+      return result;
+    }, 'Failed to process held order');
+  }
 
   // ===== REFUND OPERATIONS =====
 
@@ -377,11 +371,11 @@ async processHeldOrder(transactionId: number, paymentData: any) {
   // ===== REPORTS & ANALYTICS =====
 
   /**
-   * Get sales reports with various time periods
+   * Get sales reports (UTC dates)
    */
   async getSalesReport(params?: {
-    startDate?: string;
-    endDate?: string;
+    startDate?: string;  // UTC date
+    endDate?: string;    // UTC date
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
   }) {
     return withErrorHandling(async () => {
@@ -402,12 +396,12 @@ async processHeldOrder(transactionId: number, paymentData: any) {
   }
 
   /**
-   * Get top selling products
+   * Get top selling products (UTC dates)
    */
   async getTopProducts(params?: {
     limit?: number;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string;  // UTC date
+    endDate?: string;    // UTC date
   }) {
     return withErrorHandling(async () => {
       const response = await fetch(`${this.baseURL}/transactions/reports/top-products?${new URLSearchParams(params as any)}`, {
@@ -427,12 +421,15 @@ async processHeldOrder(transactionId: number, paymentData: any) {
   }
 
   /**
-   * Get daily summary report
+   * Get daily summary report (UTC dates)
    */
   async getDailySummary(date?: string) {
     return withErrorHandling(async () => {
       const params: any = {};
-      if (date) params.date = date;
+      
+      if (date) {
+        params.date = date;
+      }
 
       const response = await fetch(`${this.baseURL}/transactions/reports/daily-summary?${new URLSearchParams(params)}`, {
         method: 'GET',
@@ -468,11 +465,11 @@ async processHeldOrder(transactionId: number, paymentData: any) {
   }
 
   /**
-   * Get product sales performance report
+   * Get product sales performance report (UTC dates)
    */
   async getProductSalesPerformance(params?: {
-    startDate?: string;
-    endDate?: string;
+    startDate?: string;  // UTC date
+    endDate?: string;    // UTC date
     limit?: number;
   }): Promise<any[]> {
     return withErrorHandling(async () => {
@@ -495,14 +492,16 @@ async processHeldOrder(transactionId: number, paymentData: any) {
   // ===== UTILITY METHODS =====
 
   /**
-   * Generate a receipt for a transaction
+   * Generate a receipt for a transaction (UTC dates)
    */
   generateReceipt(transaction: Transaction & { items?: TransactionItem[] }): string {
+    const receiptDate = new Date(transaction.created_at).toLocaleString('en-UG');
+    
     const receipt = `
 FRAHA PHARMACY
 Old Kampala, Uganda
 0751360385
-${new Date(transaction.created_at).toLocaleString()}
+${receiptDate}
 
 Receipt #: ${transaction.order_number}
 Cashier: ${transaction.user_name}
@@ -511,20 +510,20 @@ ${transaction.customer_name !== 'walkin_customer' ? `Customer: ${transaction.cus
 ITEMS:
 ${transaction.items?.map(item => 
   `${item.product_name} x${item.quantity}
-  ${(item.price * item.quantity).toFixed(2)}`
+  UGX ${(item.price * item.quantity).toFixed(2)}`
 ).join('\n') || 'No items'}
 
-Subtotal: ${transaction.subtotal.toFixed(2)}
-Tax: ${transaction.tax.toFixed(2)}
-Discount: ${transaction.discount.toFixed(2)}
-Total: ${transaction.total.toFixed(2)}
+Subtotal: UGX ${transaction.subtotal.toFixed(2)}
+Tax: UGX ${transaction.tax.toFixed(2)}
+Discount: UGX ${transaction.discount.toFixed(2)}
+Total: UGX ${transaction.total.toFixed(2)}
 
-Paid: ${transaction.paid.toFixed(2)}
-Change: ${transaction.change_amount.toFixed(2)}
+Paid: UGX ${transaction.paid.toFixed(2)}
+Change: UGX ${transaction.change_amount.toFixed(2)}
 Payment: ${transaction.payment_type}
 
 Thank you for your business!
-Fraha Pharmacy 2025
+Fraha Pharmacy
     `.trim();
 
     return receipt;
@@ -591,6 +590,17 @@ Fraha Pharmacy 2025
       isValid: errors.length === 0,
       errors
     };
+  }
+
+  /**
+   * Get today's transactions (UTC dates)
+   */
+  async getTodayTransactions() {
+    const today = new Date().toISOString().split('T')[0];
+    return this.getTransactions({
+      start_date: today,
+      end_date: today
+    });
   }
 }
 

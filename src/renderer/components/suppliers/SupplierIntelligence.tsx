@@ -1,6 +1,7 @@
 // src/renderer/src/components/suppliers/SupplierIntelligence.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supplierService, SupplierReliability, SupplierContactInfo, PriceTrend } from '../../services/supplierService';
+import { Search } from 'lucide-react';
 import './SupplierIntelligence.css';
 
 interface SupplierIntelligenceProps {
@@ -14,6 +15,7 @@ const SupplierIntelligence: React.FC<SupplierIntelligenceProps> = ({ onSupplierU
   const [priceTrends, setPriceTrends] = useState<Map<number, PriceTrend[]>>(new Map());
   const [loading, setLoading] = useState(true);
   const [selectedSupplier, setSelectedSupplier] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadIntelligenceData();
@@ -26,11 +28,11 @@ const SupplierIntelligence: React.FC<SupplierIntelligenceProps> = ({ onSupplierU
       setSuppliers(supplierList);
 
       // Load reliability data for all suppliers
-            const reliabilityPromises = supplierList.map(supplier => 
-              supplierService.getSupplierReliability(supplier.id).catch((): SupplierReliability | null => null)
-            );
-            
-            const reliabilityResults = await Promise.all(reliabilityPromises);
+      const reliabilityPromises = supplierList.map(supplier => 
+        supplierService.getSupplierReliability(supplier.id).catch((): SupplierReliability | null => null)
+      );
+      
+      const reliabilityResults = await Promise.all(reliabilityPromises);
       const reliabilityMap = new Map();
       reliabilityResults.forEach((result, index) => {
         if (result) {
@@ -80,6 +82,24 @@ const SupplierIntelligence: React.FC<SupplierIntelligenceProps> = ({ onSupplierU
     if (score >= 40) return '⚠️';
     return '❌';
   };
+
+  // Filter suppliers based on search query
+  const filteredSuppliers = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return suppliers;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return suppliers.filter(supplier => {
+      const reliability = reliabilityData.get(supplier.id);
+      return (
+        supplier.name?.toLowerCase().includes(query) ||
+        supplier.email?.toLowerCase().includes(query) ||
+        supplier.phone?.toLowerCase().includes(query) ||
+        reliability?.recommendation?.toLowerCase().includes(query)
+      );
+    });
+  }, [suppliers, searchQuery, reliabilityData]);
 
   const renderSupplierCard = (supplier: any) => {
     const reliability = reliabilityData.get(supplier.id);
@@ -276,9 +296,32 @@ const SupplierIntelligence: React.FC<SupplierIntelligenceProps> = ({ onSupplierU
 
       <div className="intelligence-content">
         <div className="suppliers-list">
-          <h3>Suppliers by Reliability</h3>
+          <div className="suppliers-list-header">
+            <h3>Suppliers by Reliability</h3>
+            <div className="supplier-search">
+              <input
+                type="text"
+                className="supplier-search-input"
+                placeholder="Search suppliers by name, contact, or reliability..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="supplier-search-icon" size={18} />
+            </div>
+            {searchQuery && (
+              <span className="search-results-count">
+                {filteredSuppliers.length} {filteredSuppliers.length === 1 ? 'supplier' : 'suppliers'} found
+              </span>
+            )}
+          </div>
           <div className="suppliers-grid">
-            {suppliers.map(renderSupplierCard)}
+            {filteredSuppliers.length > 0 ? (
+              filteredSuppliers.map(renderSupplierCard)
+            ) : (
+              <div className="no-results">
+                <p>No suppliers found matching "{searchQuery}"</p>
+              </div>
+            )}
           </div>
         </div>
 

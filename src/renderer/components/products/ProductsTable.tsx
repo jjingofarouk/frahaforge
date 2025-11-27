@@ -63,24 +63,50 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, loading, onProd
     return [...new Set(products.map(p => p.category).filter(Boolean))];
   }, [products]);
 
-  // Image URL generator
-  const getProductImageUrl = (product: Product): string => {
-    const id = product.id?.toString();
-    if (!id) return '';
+  // Helper: Get product ID
+  const getProductId = (product: Product): string => {
+    const id = product.id;
+    if (!id) {
+      console.warn('Product missing ID:', product);
+      return 'unknown';
+    }
+    return id.toString();
+  };
+
+  // Helper: Local image path - Same as ProductCard
+  const getLocalImagePath = (product: Product): string => {
+    const productId = getProductId(product);
+    if (productId === 'unknown') {
+      const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3001';
+      return `${backendUrl}/assets/product-images/default-product.jpg`;
+    }
+
     const sanitizedName = product.name
       .replace(/[^a-zA-Z0-9\s\-_]/g, '')
       .replace(/\s+/g, '_')
       .substring(0, 50);
+
     const backendUrl = window.electron?.backend?.getBackendUrl?.() || 'http://192.168.1.3:3001';
-    return `${backendUrl}/assets/product-images/${id}_${sanitizedName}.jpg`;
+    return `${backendUrl}/assets/product-images/${productId}_${sanitizedName}.jpg`;
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>): void => {
+  // Helper: Has image - Same as ProductCard
+  const hasProductImage = (product: Product): boolean => {
+    const id = getProductId(product);
+    return !!(id && id !== 'unknown' && product.name && product.name !== 'Unknown Product');
+  };
+
+  // Helper: Image error fallback - Same as ProductCard
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>, product: Product) => {
     const img = e.target as HTMLImageElement;
-    img.style.display = 'none';
-    const placeholder = img.nextElementSibling as HTMLElement;
-    if (placeholder?.classList.contains('img-placeholder')) {
-      placeholder.style.display = 'flex';
+    if (product.img && product.img.startsWith('http')) {
+      img.src = product.img;
+    } else {
+      img.style.display = 'none';
+      const placeholder = img.nextElementSibling as HTMLElement;
+      if (placeholder?.classList.contains('img-placeholder')) {
+        placeholder.style.display = 'flex';
+      }
     }
   };
 
@@ -170,15 +196,20 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, loading, onProd
         size: 300,
         cell: info => {
           const product = info.row.original;
-          const imageUrl = getProductImageUrl(product);
-          const hasImage = !!product.id;
+          const localImagePath = getLocalImagePath(product);
+          const hasImage = hasProductImage(product);
 
           return (
             <div className="product-name-cell">
               <div className="product-image-wrapper">
                 {hasImage ? (
                   <>
-                    <img src={imageUrl} alt={product.name} onError={handleImageError} loading="lazy" />
+                    <img 
+                      src={localImagePath} 
+                      alt={product.name} 
+                      onError={(e) => handleImageError(e, product)} 
+                      loading="lazy" 
+                    />
                     <div className="img-placeholder">
                       <Package size={20} />
                     </div>
@@ -259,7 +290,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, loading, onProd
         size: 130,
         cell: info => {
           const date = info.getValue();
-          if (!date) return <span className="expiry-none">No expiry</span>;
+          if (!date) return <span className="expiry-none">No Date Set</span>;
           
           const expiryDate = new Date(date as string);
           const today = new Date();

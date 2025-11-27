@@ -1,150 +1,228 @@
 // src/renderer/src/components/products/StockAlertsPanel.tsx
-import React, { useState, useEffect } from 'react';
-import { inventoryService, LowStockAlert, ExpiringProduct } from '../../services/inventoryService';
+import React, { useState } from 'react';
+import { Product } from '../../services/inventoryService';
+import { AlertTriangle, XCircle, Calendar, Archive, ShoppingCart, Clock, Trash2 } from 'lucide-react';
 import './StockAlertsPanel.css';
 
 interface StockAlertsPanelProps {
+  lowStockProducts: Product[];
+  outOfStockProducts: Product[];
+  expiringProducts: Product[];
+  expiredProducts: Product[];
   onProductUpdate: () => void;
+  onViewProduct: (product: Product) => void;
+  onEditProduct: (product: Product) => void;
 }
 
-const StockAlertsPanel: React.FC<StockAlertsPanelProps> = ({ onProductUpdate }) => {
-  const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
-  const [expiringProducts, setExpiringProducts] = useState<ExpiringProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeAlertType, setActiveAlertType] = useState<'low-stock' | 'expiring'>('low-stock');
+type AlertTab = 'low-stock' | 'out-of-stock' | 'expiring' | 'expired';
 
-  useEffect(() => {
-    loadAlerts();
-  }, []);
+const StockAlertsPanel: React.FC<StockAlertsPanelProps> = ({ 
+  lowStockProducts,
+  outOfStockProducts, 
+  expiringProducts, 
+  expiredProducts,
+  onProductUpdate,
+  onViewProduct,
+  onEditProduct
+}) => {
+  const [activeTab, setActiveTab] = useState<AlertTab>('low-stock');
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
 
-  const loadAlerts = async (): Promise<void> => {
+  const getDaysUntilExpiry = (dateString?: string) => {
+    if (!dateString) return 0;
+    const expiryDate = new Date(dateString);
+    const today = new Date();
+    return Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const handleDeleteExpiredProduct = async (product: Product) => {
+    if (!confirm(`Are you sure you want to permanently delete "${product.name}" and remove all its stock from the database? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingProductId(product.id);
     try {
-      setLoading(true);
-      const [lowStock, expiring] = await Promise.all([
-        inventoryService.getLowStockAlerts(),
-        inventoryService.getExpiringProducts({ days: 90 })
-      ]);
-      setLowStockAlerts(lowStock);
-      setExpiringProducts(expiring);
-    } catch (err: any) {
-      console.error('Failed to load alerts:', err);
+      // Import the inventory service
+      const { inventoryService } = await import('../../services/inventoryService');
+      await inventoryService.deleteProduct(product.id);
+      onProductUpdate(); // Refresh the product list
+    } catch (error: any) {
+      alert(`Failed to delete product: ${error.message}`);
     } finally {
-      setLoading(false);
+      setDeletingProductId(null);
     }
   };
 
-  const getUrgencyColor = (urgency: string): string => {
-    switch (urgency) {
-      case 'critical': return 'urgency-critical';
-      case 'high': return 'urgency-high';
-      case 'medium': return 'urgency-medium';
-      default: return 'urgency-low';
-    }
-  };
+  const renderProductCard = (product: Product, type: AlertTab) => {
+    let cardClass = '';
+    let icon = null;
+    let badgeText = '';
+    let primaryActionText = '';
+    let primaryActionClass = '';
+    let primaryActionHandler: (() => void) | null = null;
 
-  const getUrgencyIcon = (urgency: string): string => {
-    switch (urgency) {
-      case 'critical': return '🔴';
-      case 'high': return '🟠';
-      case 'medium': return '🟡';
-      default: return '🟢';
+    switch (type) {
+      case 'out-of-stock':
+        cardClass = 'urgency-critical';
+        icon = <XCircle size={20} />;
+        badgeText = 'Out of Stock';
+        primaryActionText = 'Restock Now';
+        primaryActionClass = 'btn-primary';
+        primaryActionHandler = () => onEditProduct(product);
+        break;
+      case 'expired':
+        cardClass = 'urgency-critical';
+        icon = <Archive size={20} />;
+        badgeText = 'Expired';
+        primaryActionText = 'Delete Product';
+        primaryActionClass = 'btn-danger';
+        primaryActionHandler = () => handleDeleteExpiredProduct(product);
+        break;
+      case 'low-stock':
+        cardClass = 'urgency-high';
+        icon = <AlertTriangle size={20} />;
+        badgeText = 'Low Stock';
+        primaryActionText = 'Restock';
+        primaryActionClass = 'btn-primary';
+        primaryActionHandler = () => onEditProduct(product);
+        break;
+      case 'expiring':
+        const days = getDaysUntilExpiry(product.expiration_date);
+        cardClass = days < 30 ? 'urgency-high' : 'urgency-medium';
+        icon = <Clock size={20} />;
+        badgeText = `Expires in ${days} days`;
+        primaryActionText = 'Push Sales';
+        primaryActionClass = 'btn-warning';
+        primaryActionHandler = null; // No action for Push Sales
+        break;
     }
-  };
 
-  const renderLowStockAlerts = (): JSX.Element => {
-    if (loading) return <div className="loading">Loading alerts...</div>;
-    
-    if (lowStockAlerts.length === 0) {
-      return <div className="no-alerts">No low stock alerts</div>;
-    }
+    const handlePrimaryAction = () => {
+      if (primaryActionHandler) {
+        primaryActionHandler();
+      }
+      // If primaryActionHandler is null (Push Sales), do nothing
+    };
+
+    const handleViewDetails = () => {
+      onViewProduct(product);
+    };
 
     return (
-      <div className="alerts-grid">
-        {lowStockAlerts.map(alert => (
-          <div key={alert.product_id} className={`alert-card ${getUrgencyColor(alert.urgency)}`}>
-            <div className="alert-header">
-              <span className="urgency-icon">{getUrgencyIcon(alert.urgency)}</span>
-              <h3>{alert.product_name}</h3>
-              <span className="urgency-badge">{alert.urgency}</span>
+      <div key={product.id} className={`alert-card ${cardClass}`}>
+        <div className="alert-header">
+          <span className="urgency-icon">{icon}</span>
+          <div className="header-text">
+            <h3>{product.name}</h3>
+            <span className="product-category">{product.category}</span>
+          </div>
+          <span className="urgency-badge">{badgeText}</span>
+        </div>
+        
+        <div className="alert-details">
+          <div className="detail-grid">
+            <div className="detail-item">
+              <span className="label">Current Stock</span>
+              <span className={`value ${product.quantity === 0 ? 'text-danger' : ''}`}>
+                {product.quantity}
+              </span>
             </div>
-            <div className="alert-details">
-              <div className="detail-row">
-                <span>Current Stock:</span>
-                <span className="stock-quantity">{alert.current_quantity}</span>
+            
+            {(type === 'low-stock' || type === 'out-of-stock') && (
+              <div className="detail-item">
+                <span className="label">Min Stock</span>
+                <span className="value">{product.min_stock}</span>
               </div>
-              <div className="detail-row">
-                <span>Minimum Stock:</span>
-                <span>{alert.min_stock}</span>
-              </div>
-              <div className="detail-row">
-                <span>Category:</span>
-                <span>{alert.category}</span>
-              </div>
-              <div className="detail-row">
-                <span>Supplier:</span>
-                <span>{alert.supplier_name}</span>
-              </div>
-              {alert.last_sold_date && (
-                <div className="detail-row">
-                  <span>Last Sold:</span>
-                  <span>{new Date(alert.last_sold_date).toLocaleDateString()}</span>
-                </div>
-              )}
-            </div>
-            <div className="alert-actions">
-              <button className="btn-primary">Restock Now</button>
-              <button className="btn-secondary">View Product</button>
+            )}
+
+            {(type === 'expiring' || type === 'expired') && (
+               <div className="detail-item">
+               <span className="label">Expiry Date</span>
+               <span className="value">
+                 {product.expiration_date ? new Date(product.expiration_date).toLocaleDateString() : 'N/A'}
+               </span>
+             </div>
+            )}
+
+            <div className="detail-item">
+              <span className="label">Supplier</span>
+              <span className="value">{product.supplier || 'N/A'}</span>
             </div>
           </div>
-        ))}
+        </div>
+
+        <div className="alert-actions">
+          <button 
+            className={primaryActionClass}
+            onClick={handlePrimaryAction}
+            disabled={deletingProductId === product.id}
+          >
+            {deletingProductId === product.id ? (
+              <>
+                <div className="spinner"></div>
+                Deleting...
+              </>
+            ) : (
+              <>
+                {type === 'expired' && <Trash2 size={16} />}
+                {primaryActionText}
+              </>
+            )}
+          </button>
+          <button 
+            className="btn-secondary"
+            onClick={handleViewDetails}
+          >
+            View Details
+          </button>
+        </div>
       </div>
     );
   };
 
-  const renderExpiringProducts = (): JSX.Element => {
-    if (loading) return <div className="loading">Loading expiring products...</div>;
-    
-    if (expiringProducts.length === 0) {
-      return <div className="no-alerts">No products expiring soon</div>;
+  const renderContent = () => {
+    let currentList: Product[] = [];
+    let emptyMessage = '';
+    let EmptyIcon = AlertTriangle;
+
+    switch (activeTab) {
+      case 'low-stock':
+        currentList = lowStockProducts;
+        emptyMessage = 'No low stock alerts. Inventory levels are healthy.';
+        EmptyIcon = ShoppingCart;
+        break;
+      case 'out-of-stock':
+        currentList = outOfStockProducts;
+        emptyMessage = 'No products are currently out of stock.';
+        EmptyIcon = ShoppingCart;
+        break;
+      case 'expiring':
+        currentList = expiringProducts;
+        emptyMessage = 'No products expiring within the next 90 days.';
+        EmptyIcon = Calendar;
+        break;
+      case 'expired':
+        currentList = expiredProducts;
+        emptyMessage = 'No expired products found in inventory.';
+        EmptyIcon = Archive;
+        break;
+    }
+
+    if (currentList.length === 0) {
+      return (
+        <div className="no-alerts-state">
+          <div className="empty-icon-wrapper">
+            <EmptyIcon size={48} />
+          </div>
+          <h3>All Clear</h3>
+          <p>{emptyMessage}</p>
+        </div>
+      );
     }
 
     return (
       <div className="alerts-grid">
-        {expiringProducts.map(product => (
-          <div key={product.product_id} className={`alert-card ${getUrgencyColor(product.urgency)}`}>
-            <div className="alert-header">
-              <span className="urgency-icon">{getUrgencyIcon(product.urgency)}</span>
-              <h3>{product.product_name}</h3>
-              <span className="urgency-badge">{product.urgency}</span>
-            </div>
-            <div className="alert-details">
-              <div className="detail-row">
-                <span>Expires:</span>
-                <span className="expiry-date">{new Date(product.expiration_date).toLocaleDateString()}</span>
-              </div>
-              <div className="detail-row">
-                <span>Days Left:</span>
-                <span className="days-left">{Math.floor(product.days_until_expiry)} days</span>
-              </div>
-              <div className="detail-row">
-                <span>Current Stock:</span>
-                <span>{product.current_quantity}</span>
-              </div>
-              <div className="detail-row">
-                <span>Category:</span>
-                <span>{product.category}</span>
-              </div>
-              <div className="detail-row">
-                <span>Cost Price:</span>
-                <span>UGX {Number(product.cost_price).toLocaleString()}</span>
-              </div>
-            </div>
-            <div className="alert-actions">
-              <button className="btn-warning">Push Sales</button>
-              <button className="btn-secondary">View Details</button>
-            </div>
-          </div>
-        ))}
+        {currentList.map(product => renderProductCard(product, activeTab))}
       </div>
     );
   };
@@ -152,25 +230,48 @@ const StockAlertsPanel: React.FC<StockAlertsPanelProps> = ({ onProductUpdate }) 
   return (
     <div className="stock-alerts-panel">
       <div className="alerts-header">
-        <h2>Stock Alerts & Monitoring</h2>
+        <div className="header-title">
+          <h2>Stock Alerts & Monitoring</h2>
+          <p>Action items requiring attention</p>
+        </div>
+        
         <div className="alert-type-tabs">
           <button 
-            className={`type-tab ${activeAlertType === 'low-stock' ? 'active' : ''}`}
-            onClick={() => setActiveAlertType('low-stock')}
+            className={`type-tab ${activeTab === 'low-stock' ? 'active' : ''}`}
+            onClick={() => setActiveTab('low-stock')}
           >
-            Low Stock ({lowStockAlerts.length})
+            Low Stock
+            {lowStockProducts.length > 0 && <span className="tab-count warning">{lowStockProducts.length}</span>}
           </button>
+          
           <button 
-            className={`type-tab ${activeAlertType === 'expiring' ? 'active' : ''}`}
-            onClick={() => setActiveAlertType('expiring')}
+            className={`type-tab ${activeTab === 'out-of-stock' ? 'active' : ''}`}
+            onClick={() => setActiveTab('out-of-stock')}
           >
-            Expiring Soon ({expiringProducts.length})
+            Out of Stock
+            {outOfStockProducts.length > 0 && <span className="tab-count danger">{outOfStockProducts.length}</span>}
+          </button>
+
+          <button 
+            className={`type-tab ${activeTab === 'expiring' ? 'active' : ''}`}
+            onClick={() => setActiveTab('expiring')}
+          >
+            Expiring Soon
+            {expiringProducts.length > 0 && <span className="tab-count warning">{expiringProducts.length}</span>}
+          </button>
+
+          <button 
+            className={`type-tab ${activeTab === 'expired' ? 'active' : ''}`}
+            onClick={() => setActiveTab('expired')}
+          >
+            Expired
+            {expiredProducts.length > 0 && <span className="tab-count danger">{expiredProducts.length}</span>}
           </button>
         </div>
       </div>
 
       <div className="alerts-content">
-        {activeAlertType === 'low-stock' ? renderLowStockAlerts() : renderExpiringProducts()}
+        {renderContent()}
       </div>
     </div>
   );

@@ -1,89 +1,78 @@
-// quick-db-mapper.js
+// add-supplier-columns.js
 const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs-extra');
 
-async function quickMapDatabase() {
-  const dbPath = '/Users/mac/Library/Application Support/FrahaPharmacy/server/databases/pharmacy.db';
-  
-  if (!fs.existsSync(dbPath)) {
-    console.error('❌ Database file not found');
+const dbPath = '/Users/mac/Library/Application Support/FrahaPharmacy/server/databases/pharmacy.db';
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('❌ Error connecting to database:', err.message);
     return;
   }
+  console.log('✅ Connected to the pharmacy database');
+});
 
-  const db = new sqlite3.Database(dbPath);
-  
+async function addSupplierColumns() {
   try {
-    // Get all tables
-    const tables = await new Promise((resolve, reject) => {
-      db.all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name", (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    console.log('\n🔧 Starting safe database migration...\n');
 
-    let output = `PHARMACY DATABASE STRUCTURE\n`;
-    output += `Generated: ${new Date().toISOString()}\n`;
-    output += `Database: ${dbPath}\n\n`;
-    output += `========================================\n\n`;
+    // Begin transaction for safety
+    await runQuery('BEGIN TRANSACTION');
 
-    for (const table of tables) {
-      output += `TABLE: ${table.name}\n`;
-      output += `----------------------------------------\n`;
+    // Add new columns with DEFAULT NULL to avoid breaking existing data
+    const columnsToAdd = [
+      'phone_number TEXT DEFAULT NULL',
+      'email TEXT DEFAULT NULL', 
+      'address TEXT DEFAULT NULL',
+      'contact_person TEXT DEFAULT NULL'
+    ];
 
-      // Get table structure
-      const columns = await new Promise((resolve, reject) => {
-        db.all(`PRAGMA table_info("${table.name}")`, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      // Get foreign keys
-      const foreignKeys = await new Promise((resolve, reject) => {
-        db.all(`PRAGMA foreign_key_list("${table.name}")`, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      // Get row count
-      const count = await new Promise((resolve, reject) => {
-        db.get(`SELECT COUNT(*) as count FROM "${table.name}"`, (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-
-      output += `Rows: ${count.count}\n\n`;
+    for (const columnDef of columnsToAdd) {
+      const columnName = columnDef.split(' ')[0];
       
-      // Columns
-      output += `Columns:\n`;
-      columns.forEach(col => {
-        const pk = col.pk ? ' PRIMARY KEY' : '';
-        const notnull = col.notnull ? ' NOT NULL' : '';
-        const defaultValue = col.dflt_value ? ` DEFAULT ${col.dflt_value}` : '';
-        output += `  ${col.name} ${col.type}${pk}${notnull}${defaultValue}\n`;
-      });
-
-      // Foreign Keys
-      if (foreignKeys.length > 0) {
-        output += `\nForeign Keys:\n`;
-        foreignKeys.forEach(fk => {
-          output += `  ${fk.from} → ${fk.table}.${fk.to}\n`;
-        });
+      // Check if column already exists (safety check)
+      const existingColumns = await runQuery("PRAGMA table_info(suppliers)");
+      const columnExists = existingColumns.some(col => col.name === columnName);
+      
+      if (columnExists) {
+        console.log(`⚠️  Column '${columnName}' already exists, skipping...`);
+        continue;
       }
 
-      output += `\n========================================\n\n`;
+      console.log(`➕ Adding column: ${columnDef}`);
+      await runQuery(`ALTER TABLE suppliers ADD COLUMN ${columnDef}`);
     }
 
-    await fs.writeFile('str.txt', output);
-    console.log('✅ Database structure saved to str.txt');
+    // Commit the transaction
+    await runQuery('COMMIT');
+    
+    console.log('\n✅ Migration completed successfully!');
+    console.log('\n📋 Updated supplier table structure:');
+    
+    // Show the new structure
+    const columns = await runQuery("PRAGMA table_info(suppliers)");
+    columns.forEach(col => {
+      console.log(`  ${col.name} | ${col.type} ${col.notnull ? 'NOT NULL' : ''} ${col.pk ? 'PRIMARY KEY' : ''} ${col.dflt_value ? `DEFAULT ${col.dflt_value}` : ''}`);
+    });
 
   } catch (error) {
-    console.error('❌ Error:', error);
+    // Rollback on error
+    await runQuery('ROLLBACK');
+    console.error('❌ Migration failed:', error.message);
+    throw error;
   } finally {
     db.close();
+    console.log('\n✅ Database connection closed');
   }
 }
 
-quickMapDatabase();
+function runQuery(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+}
+
+// Run the migration
+addSupplierColumns().catch(console.error);
