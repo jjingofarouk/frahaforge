@@ -1,31 +1,90 @@
-name: Build/release
+# .github/workflows/build.yml
+name: Build Electron App
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Manual trigger
 
 jobs:
   build:
     strategy:
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.platform }}
-
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
     steps:
-      - name: Check out Git repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'npm'
-
+      
       - name: Install dependencies
         run: npm ci
+      
+      - name: Rebuild native modules
+        run: npm run rebuild
+        continue-on-error: true
+      
+      - name: Build application
+        run: npm run make
+        env:
+          NODE_ENV: production
+      
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            out/make/squirrel.windows/**/*.exe
+            out/make/zip/win32/**/*.zip
+          retention-days: 30
+      
+      - name: Upload macOS artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: |
+            out/make/*.dmg
+            out/make/zip/darwin/**/*.zip
+          retention-days: 30
+      
+      - name: Upload Linux artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            out/make/**/*.deb
+            out/make/**/*.rpm
+          retention-days: 30
 
-      - name: Publish/release
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            windows-installer/**/*
+            macos-app/**/*
+            linux-packages/**/*
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish   # or npm run make if you just want artifacts
